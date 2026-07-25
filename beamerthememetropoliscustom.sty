@@ -1,0 +1,87 @@
+% ======================================================================
+%  beamerthememetropoliscustom
+%  A maroon / indigo restyling of the metropolis beamer theme.
+%
+%  Usage in your document preamble:
+%      \usetheme{metropoliscustom}
+%
+%  Keep this file together with:
+%      beamercolorthememetropoliscustom.sty
+%      beamerouterthememetropoliscustom.sty
+%      beamerinnerthememetropoliscustom.sty
+%  in the same folder as your main .tex (or in your local texmf tree).
+%
+%  Requires the `metropolis` theme (TeX Live / MiKTeX package
+%  `beamertheme-metropolis`).  Fira Sans is the metropolis default font;
+%  compile with xelatex or lualatex for the intended look.
+% ======================================================================
+\ProvidesPackage{beamerthememetropoliscustom}[2026/07/21 Custom metropolis theme]
+
+% ---- Base theme ------------------------------------------------------
+% progressbar=none keeps content slides clean (no rule under the title);
+% numbering=none because we draw our own footer bar.
+\usetheme[progressbar=none, numbering=none, block=fill]{metropolis}
+
+% ---- Load the customised sub-themes ---------------------------------
+\usecolortheme{metropoliscustom}
+\useoutertheme{metropoliscustom}
+\useinnertheme{metropoliscustom}
+
+% ---- Fira fonts, loaded from the bundled files -----------------------
+% metropolis looks for Fira Sans *by name*; some TeX installations
+% (including Overleaf) do not expose it that way, so it silently falls
+% back to the default font.  We load the .ttf files shipped in fonts/
+% directly, which guarantees the intended Fira Sans look everywhere.
+% (Compile with XeLaTeX or LuaLaTeX; fonts/ is resolved from the project
+%  root, which is Overleaf's compile directory.)
+\usepackage{iftex}
+\iftutex
+  \setsansfont{FiraSans}[
+    Path            = fonts/,
+    Extension       = .ttf,
+    UprightFont     = *-Light,
+    ItalicFont      = *-LightItalic,
+    BoldFont        = *-Regular,
+    BoldItalicFont  = *-Italic,
+  ]
+  \setmonofont{FiraMono}[
+    Path            = fonts/,
+    Extension       = .ttf,
+    UprightFont     = *-Regular,
+    BoldFont        = *-Bold,
+  ]
+\fi
+
+
+% ---- Typography ------------------------------------------------------
+% Font FAMILY is metropolis's Fira Sans throughout.  Body text, bullets
+% and blocks keep metropolis's native sizes.  We only enlarge the two
+% "hero" elements — the title slide and the frame (content-slide) title —
+% to the big, bold treatment matching the reference deck.
+
+% Frame (content-slide) titles: big, bold, maroon on white.
+\setbeamerfont{frametitle}{size=\LARGE, series=\bfseries}
+\setbeamertemplate{frametitle}{%
+  \nointerlineskip%
+  \begin{beamercolorbox}[wd=\paperwidth,leftskip=1.2em,rightskip=1.2em,%
+      sep=0pt,ignorebg,dp=0.5ex]{frametitle}%
+    \vskip0.85em%
+    \usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle%
+    \vskip0.35em%
+  \end{beamercolorbox}%
+}
+
+% Title-slide fonts: big and bold.
+\setbeamerfont{title}{size=\fontsize{30}{34}\selectfont, series=\bfseries}
+\setbeamerfont{subtitle}{size=\large, series=\mdseries}
+\setbeamerfont{author}{size=\Large, series=\bfseries}
+\setbeamerfont{institute}{size=\normalsize}
+\setbeamerfont{date}{size=\normalsize}
+
+% Section pages: large, bold.
+\setbeamerfont{section title}{size=\fontsize{34}{38}\selectfont, series=\bfseries}
+
+% Footer text: very small, to suit the compact footer bar.
+\setbeamerfont{footline}{size=\fontsize{5}{6}\selectfont}
+
+\endinput

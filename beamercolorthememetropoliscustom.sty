@@ -1,0 +1,67 @@
+% ======================================================================
+%  beamercolorthememetropoliscustom
+%  Maroon / indigo colour scheme layered on top of the metropolis theme.
+%  Palette sampled from the reference deck (BDBio 2026).
+% ======================================================================
+\ProvidesPackage{beamercolorthememetropoliscustom}[2026/07/21 Custom metropolis colours]
+
+% ---- Palette ---------------------------------------------------------
+\definecolor{mcPrimary}{HTML}{800000}   % maroon  – titles, accents, bullets
+\definecolor{mcFooter}{HTML}{7F0000}    % footer bar
+\definecolor{mcGradTop}{HTML}{341651}   % indigo  – title gradient (top-left)
+\definecolor{mcGradBot}{HTML}{730013}   % deep red – title gradient (bottom-right)
+\definecolor{mcMuted}{HTML}{7F7F7F}     % grey    – subtitles / secondary text
+\definecolor{mcRule}{HTML}{2B2B2B}      % near-black vertical rules / body ink
+\definecolor{mcLight}{HTML}{F2ECEC}     % faint tint for block backgrounds
+\definecolor{mcProgress}{HTML}{F5C518}  % yellow  – footer progress bar
+\colorlet{mcDim}{mcRule!30}             % dimmed / de-emphasised text
+
+% ---- Base text -------------------------------------------------------
+\setbeamercolor{normal text}{fg=mcRule, bg=white}
+\setbeamercolor{alerted text}{fg=mcPrimary}
+\setbeamercolor{example text}{fg=mcGradTop}
+
+% ---- Structure / accents --------------------------------------------
+\setbeamercolor{structure}{fg=mcPrimary}
+\setbeamercolor{palette primary}{fg=white, bg=mcPrimary}
+
+% ---- Frame titles: white background, maroon text (content slides) ----
+\setbeamercolor{frametitle}{fg=mcPrimary, bg=white}
+\setbeamercolor{frametitle right}{fg=mcPrimary, bg=white}
+
+% ---- Title-page elements (drawn over the gradient in the outer theme)-
+\setbeamercolor{title}{fg=white}
+\setbeamercolor{subtitle}{fg=mcLight}
+\setbeamercolor{author}{fg=white}
+\setbeamercolor{institute}{fg=mcLight}
+\setbeamercolor{date}{fg=mcLight}
+
+% ---- Section pages ---------------------------------------------------
+\setbeamercolor{section title}{fg=white}
+\setbeamercolor{section page}{fg=white}
+
+% ---- Blocks ----------------------------------------------------------
+% The three block environments inherit metropolis's own colour scheme:
+% a light-grey title fill with metropolis's signature colour pop —
+% orange for alert blocks, green for example blocks.  These are set
+% explicitly (to metropolis's mLightBrown / mLightGreen) so the blocks
+% keep that pop even though the inline \alert{} emphasis stays maroon.
+\setbeamercolor{block title alerted}{fg=mLightBrown}
+\setbeamercolor{block title example}{fg=mLightGreen}
+
+% ---- Footer ----------------------------------------------------------
+\setbeamercolor{footline}{fg=white, bg=mcFooter}
+\setbeamercolor{progress bar}{fg=mcProgress}
+
+% ---- Itemize markers -------------------------------------------------
+% Shape/size left to the metropolis defaults; only the colour is set so
+% the standard bullets read maroon.
+\setbeamercolor{itemize item}{fg=mcPrimary}
+\setbeamercolor{itemize subitem}{fg=mcPrimary}
+\setbeamercolor{itemize subsubitem}{fg=mcPrimary}
+\setbeamercolor{enumerate item}{fg=mcPrimary}
+
+% ---- Standout (full-screen emphasis) frames --------------------------
+\setbeamercolor{standout}{fg=white, bg=mcPrimary}
+
+\endinput

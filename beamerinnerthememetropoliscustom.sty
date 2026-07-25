@@ -1,0 +1,93 @@
+% ======================================================================
+%  beamerinnerthememetropoliscustom
+%
+%  Bullets and the three block environments are metropolis's own (see the
+%  colour theme).  This file adds three reusable "design" helpers taken
+%  from the reference deck:
+%
+%    1. Red separators .............  \redhrule[<width>]   (horizontal)
+%                                     \redvrule[<height>]  (vertical)
+%                                     colsep=... option for columns
+%    2. Focus / dim effect .........  \focus{<n>}{<text>}  \dimtext{<text>}
+%    3. Translucent red highlight ..  \begin{redhighlight} ... \end{redhighlight}
+%                                     \redhl{<inline text>}
+% ======================================================================
+\ProvidesPackage{beamerinnerthememetropoliscustom}[2026/07/21 Custom metropolis inner theme + helpers]
+
+\RequirePackage{tikz}
+\RequirePackage[most]{tcolorbox}
+
+% ----------------------------------------------------------------------
+%  1. RED SEPARATORS
+% ----------------------------------------------------------------------
+% Horizontal rule in the theme maroon.  Optional width (default \linewidth)
+% and thickness via \redrulethickness.
+\newlength{\redrulethickness}\setlength{\redrulethickness}{0.9pt}
+
+\newcommand{\redhrule}[1][\linewidth]{%
+  \par\smallskip
+  {\color{mcPrimary}\rule{#1}{\redrulethickness}}%
+  \par\smallskip
+}
+
+% Vertical rule in the theme maroon.  Optional height (default 0.7\textheight).
+\newcommand{\redvrule}[1][0.7\textheight]{%
+  {\color{mcPrimary}\rule{\redrulethickness}{#1}}%
+}
+
+% Drop-in vertical divider for use *between* two \column blocks: put it in
+% a very narrow middle column, e.g.  \begin{column}{1pt}\coldivider\end{column}
+\newcommand{\coldivider}[1][0.72\textheight]{%
+  \hfill\redvrule[#1]\hfill%
+}
+
+% ----------------------------------------------------------------------
+%  2. FOCUS / DIM EFFECT
+% ----------------------------------------------------------------------
+% \dimtext{...}  -> render text de-emphasised (looks like reduced opacity)
+\newcommand{\dimtext}[1]{{\color{mcDim}#1}}
+
+% \focus{<n>}{<text>} -> on overlay <n> the text is bold maroon; on every
+% other overlay it is dimmed.  Use one per \item to walk a list, e.g.
+%   \begin{itemize}
+%     \item \focus{1}{First point}
+%     \item \focus{2}{Second point}
+%   \end{itemize}
+% (Each \focus number becomes an overlay step on the frame.)
+\newcommand{\focus}[2]{%
+  \temporal<#1>{\dimtext{#2}}{{\color{mcPrimary}\textbf{#2}}}{\dimtext{#2}}%
+}
+
+% Optional maroon bullet that also dims/highlights with its line.  Use as
+% \item[\focusbullet{<n>}] alongside \focus{<n>}{...} for a fully synced row.
+\newcommand{\focusbullet}[1]{%
+  \temporal<#1>{\color{mcDim}\textbullet}{\color{mcPrimary}\textbullet}{\color{mcDim}\textbullet}%
+}
+
+% ----------------------------------------------------------------------
+%  3. TRANSLUCENT RED HIGHLIGHT BOX
+% ----------------------------------------------------------------------
+% A faint maroon box to highlight a block of content as a whole.  We use
+% a solid light TINT (mcPrimary!10) rather than a transparent fill: on the
+% white slide it reads as an almost-translucent wash, and it renders
+% reliably (true PDF opacity is unreliable inside beamer + metropolis).
+% Adjust the "!10" to taste — higher = stronger tint.
+\tcbset{
+  redhighlight/.style={
+    enhanced, arc=2mm,
+    colback=mcPrimary!10,              % faint tint (looks translucent on white)
+    colframe=mcPrimary!60, boxrule=0.6pt,
+    left=2.5mm, right=2.5mm, top=2mm, bottom=2mm,
+    before skip=2mm, after skip=2mm,
+  },
+}
+\newtcolorbox{redhighlight}{redhighlight}
+
+% Inline maroon highlighter (a soft marker-pen tint), same idea.
+\newcommand{\redhl}[1]{%
+  \tikz[baseline=(x.base)]{%
+    \node[rectangle, fill=mcPrimary!15, inner xsep=2pt, inner ysep=1pt,
+          rounded corners=1pt] (x) {#1};}%
+}
+
+\endinput

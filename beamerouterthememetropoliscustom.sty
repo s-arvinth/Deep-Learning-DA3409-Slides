@@ -1,0 +1,116 @@
+% ======================================================================
+%  beamerouterthememetropoliscustom
+%  * Full-width maroon footer bar with left / right text
+%  * Diagonal indigo -> red gradient title page with a logo row
+%  * Matching gradient section pages
+% ======================================================================
+\ProvidesPackage{beamerouterthememetropoliscustom}[2026/07/21 Custom metropolis outer theme]
+
+\RequirePackage{tikz}
+\RequirePackage{pgfmath}
+
+% ----------------------------------------------------------------------
+%  User-facing footer content.  Defaults fall back to the short title /
+%  short institute so the bar is never empty.
+% ----------------------------------------------------------------------
+\newcommand*{\mc@footleft}{\insertshorttitle}
+\newcommand*{\mc@footright}{\insertshortinstitute}
+\newcommand{\footleft}[1]{\renewcommand*{\mc@footleft}{#1}}
+\newcommand{\footright}[1]{\renewcommand*{\mc@footright}{#1}}
+
+% ----------------------------------------------------------------------
+%  Footer geometry (tweak here).  Deliberately compact.
+% ----------------------------------------------------------------------
+\newlength{\mc@footh}   \setlength{\mc@footh}{2.8mm}   % total bar height
+\newlength{\mc@progh}   \setlength{\mc@progh}{0.6pt}   % progress-bar thickness
+\newlength{\mc@footpad} \setlength{\mc@footpad}{1.1em} % left/right inset
+\newlength{\mc@footty}                                 % text baseline (computed)
+
+% ----------------------------------------------------------------------
+%  Logo row shown on the title page.  Fill with \includegraphics calls.
+% ----------------------------------------------------------------------
+\newcommand*{\mc@titlelogos}{}
+\newcommand{\titlelogos}[1]{\renewcommand*{\mc@titlelogos}{#1}}
+
+% ----------------------------------------------------------------------
+%  Footer bar
+%    * compact maroon bar
+%    * a thin yellow progress bar rides along its TOP edge and grows
+%      with the slide number
+%    * small left / right text plus a discreet "n / N" slide number
+%  (\inserttotalframenumber needs a second compile to settle.)
+% ----------------------------------------------------------------------
+\setbeamertemplate{footline}{%
+  \usebeamerfont{footline}%
+  \setlength{\mc@footty}{\dimexpr(\mc@footh-\mc@progh)/2\relax}%
+  \pgfmathsetlengthmacro{\mc@fillw}{\paperwidth*\insertframenumber/\inserttotalframenumber}%
+  \begin{tikzpicture}
+    \useasboundingbox (0,0) rectangle (\paperwidth,\mc@footh);
+    % maroon bar
+    \fill[mcFooter] (0,0) rectangle (\paperwidth,\mc@footh);
+    % progress track + fill along the top edge
+    \fill[mcFooter!55!black] (0,\dimexpr\mc@footh-\mc@progh\relax)
+          rectangle (\paperwidth,\mc@footh);
+    \fill[mcProgress] (0,\dimexpr\mc@footh-\mc@progh\relax)
+          rectangle (\mc@fillw,\mc@footh);
+    % text row
+    \node[anchor=west, text=white, inner sep=0pt]
+          at (\mc@footpad,\mc@footty) {\mc@footleft};
+    \node[anchor=center, text=white!85, inner sep=0pt]
+          at (0.5\paperwidth,\mc@footty) {\insertframenumber\,/\,\inserttotalframenumber};
+    \node[anchor=east, text=white, inner sep=0pt]
+          at (\dimexpr\paperwidth-\mc@footpad\relax,\mc@footty) {\mc@footright};
+  \end{tikzpicture}%
+}
+
+% ----------------------------------------------------------------------
+%  Helper: paint the diagonal gradient across the whole page
+%  (indigo at top-left  ->  deep red at bottom-right)
+% ----------------------------------------------------------------------
+% Diagonal gradient: indigo at the top-left corner, deep red at the
+% bottom-right corner.  We draw two shaded triangles meeting along the
+% anti-diagonal so the corner colours are exact and unambiguous.
+\newcommand{\mc@gradientbg}{%
+  \begin{tikzpicture}[remember picture,overlay]
+    \shade[top color=mcGradTop, bottom color=mcGradBot,
+           shading angle=45]
+      (current page.south west) rectangle (current page.north east);
+  \end{tikzpicture}%
+}
+
+% ----------------------------------------------------------------------
+%  Title page  (text drawn directly over the gradient, no boxes)
+% ----------------------------------------------------------------------
+\setbeamertemplate{title page}{%
+  \mc@gradientbg%
+  \begin{minipage}[c][\textheight][c]{\textwidth}%
+    \centering
+    {\usebeamerfont{title}\color{white}\inserttitle\par}%
+    \ifx\insertsubtitle\empty\else
+      \vskip0.9em{\usebeamerfont{subtitle}\color{mcLight}\insertsubtitle\par}%
+    \fi
+    \vskip2.6em
+    {\usebeamerfont{author}\color{white}\insertauthor\par}%
+    \ifx\insertinstitute\empty\else
+      \vskip0.6em{\usebeamerfont{institute}\color{mcLight}\insertinstitute\par}%
+    \fi
+    \ifx\insertdate\empty\else
+      \vskip0.4em{\usebeamerfont{date}\color{mcLight}\insertdate\par}%
+    \fi
+    \vskip2.8em
+    {\mc@titlelogos\par}%
+  \end{minipage}%
+}
+
+% ----------------------------------------------------------------------
+%  Section page (gradient background, large white title)
+% ----------------------------------------------------------------------
+\setbeamertemplate{section page}{%
+  \mc@gradientbg%
+  \begin{minipage}[c][\textheight][c]{\textwidth}%
+    \centering
+    {\usebeamerfont{section title}\color{white}\insertsectionhead\par}%
+  \end{minipage}%
+}
+
+\endinput

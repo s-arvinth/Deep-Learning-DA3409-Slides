@@ -1,0 +1,814 @@
+% =====================================================================
+%  Fundamentals of Deep Learning — Class 7
+%  Topic: Deep Networks — SNN to FNN, Universal Function Approximation
+%
+%  Plots are produced by  src/make_figures.py  (SciencePlots "science"
+%  preset).  Concepts follow Prince (2023) Ch. 4 and Bishop & Bishop
+%  (2024) Ch. 6.
+%
+%  Compile:  xelatex main.tex   (run twice)
+% =====================================================================
+\documentclass[aspectratio=169, 11pt]{beamer}
+
+\usetheme{metropoliscustom}
+
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}  % prefer vector PDF
+\graphicspath{{figs/}{Class07_Deep_Networks_Universal_Approximation/B_Recreated_Figures/figs/}}
+\usepackage{amsmath, amssymb}
+\usepackage{bm}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing,
+                backgrounds, fit}
+\tcbuselibrary{skins}
+
+% ---- one palette, shared with the figure script ---------------------
+\definecolor{shc}{HTML}{341651}    % layer 1 / network 1 / class A
+\definecolor{tealc}{HTML}{1C7293}  % layer 2 / activation glyphs
+\definecolor{dpc}{HTML}{800000}    % composition / deep / output
+\definecolor{accc}{HTML}{B8860B}   % fourth series
+
+% ---- parallel strip: Shallow (left) vs Deep (right)
+\newcommand{\shpar}[2]{%
+  \vfill
+  {\footnotesize
+  \begin{tcolorbox}[enhanced, sidebyside, sidebyside align=top,
+                    lefthand ratio=0.485,
+                    segmentation style={shc!35, line width=0.6pt},
+                    colback=shc!5, colframe=shc!35, boxrule=0.5pt,
+                    arc=1.5mm, left=2mm, right=2mm, top=0.8mm, bottom=0.8mm]
+    {\color{shc}\textbf{SHALLOW}}\;\; #1
+  \tcblower
+    {\color{dpc}\textbf{DEEP}}\;\; #2
+  \end{tcolorbox}}%
+  \vspace{0.6em}%
+}
+
+\newcommand{\figsource}[1]{{\scriptsize\color{mcMuted} #1}}
+
+% ---- a hidden unit drawn as a circle with the activation inside -----
+% #1 name  #2 position  #3 colour  #4 label
+\newcommand{\unit}[4]{%
+  \node[circle, draw=#3, fill=#3!6, line width=0.7pt,
+        minimum size=10mm, inner sep=0pt] (#1) at #2 {};
+  % ReLU drawn edge-to-edge inside the circle
+  \begin{scope}
+    \clip #2 circle (0.5);
+    \draw[tealc, line width=1.1pt]
+      ($#2+(-0.50,-0.26)$) -- ($#2+(0.02,-0.26)$) -- ($#2+(0.46,0.28)$);
+  \end{scope}
+  \node[font=\large, #3] at ($#2+(0,0.78)$) {#4};
+}
+% plain input / output node
+\newcommand{\plainunit}[4]{%
+  \node[circle, draw=#3, fill=black!4, line width=0.7pt,
+        minimum size=10mm, inner sep=0pt, font=\small] (#1) at #2 {#4};
+}
+
+% =====================================================================
+\title{Deep Networks}
+\subtitle{From Shallow to Feedforward, and Universal Approximation}
+\author{Fundamentals of Deep Learning \ \textperiodcentered\ Class 7}
+\institute{Prof.~Nirav Bhatt}
+\date{5 August}
+
+\footleft{Fundamentals of Deep Learning}
+\footright{Deep Networks}
+\titlelogos{}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% =====================================================================
+\section{Composing Networks}
+% =====================================================================
+
+\begin{frame}{Where the shallow network left us}
+  \begin{itemize}
+    \item A shallow network is a linear read-out over
+          \alert{learned features} $h_d=\mathrm{a}[\theta_{d0}
+          +\theta_{d1}x]$ (Classes~5--6)
+    \item With enough hidden units it is a
+          \alert{universal approximator} --- but the number of
+          units may be enormous
+    \item Question for today: what if we feed the output of
+          one network into the \alert{input of another}?
+  \end{itemize}
+  \vspace{0.3em}
+  \begin{redhighlight}
+    Stacking shallow networks gives a \alert{deep network}.
+    The same building block, composed --- and far more
+    efficient.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{An intuition: solve a big problem in stages}
+  \begin{itemize}
+    \item A shallow network must map raw inputs to the answer
+          in \alert{one leap} --- every hidden unit works
+          directly on $x$
+    \item A deep network solves the problem in
+          \alert{stages}: layer~1 extracts simple features,
+          layer~2 combines them into richer ones, and so on
+    \item Reading is the analogy: \alert{strokes $\to$
+          letters $\to$ words $\to$ meaning}. Nobody jumps
+          from ink to meaning in a single step
+    \item Each stage is \emph{easy} because it builds on the
+          stage before --- the difficulty is \alert{spread
+          across depth}
+  \end{itemize}
+  \shpar{one leap: raw input $\to$ answer}
+        {staged: input $\to$ features $\to$ features of
+         features $\to$ answer}
+\end{frame}
+
+\begin{frame}{Two networks to work with}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.48\textwidth}
+      \centering
+      {\small\textbf{\color{shc}Network 1}}\\[0.2em]
+      \begin{tikzpicture}[>=Stealth, line width=0.6pt,
+          scale=0.55, transform shape, font=\small]
+        \plainunit{p}{(0,0)}{black!55}{$x$}
+        \unit{q1}{(2.0,2.1)}{shc}{$h_1$}
+        \unit{q2}{(2.0,0.0)}{shc}{$h_2$}
+        \unit{q3}{(2.0,-2.1)}{shc}{$h_3$}
+        \plainunit{r}{(4.0,0)}{black!55}{$y$}
+        \foreach \i in {1,2,3} \draw[->, black!45] (p)--(q\i);
+        \foreach \i in {1,2,3} \draw[->, black!45] (q\i)--(r);
+      \end{tikzpicture}
+      \\[0.1em]
+      {\footnotesize
+      $\begin{aligned}
+        h_1 &= \mathrm{ReLU}(x + 1)\\
+        h_2 &= \mathrm{ReLU}(x + 0.5)\\
+        h_3 &= \mathrm{ReLU}(x - 0.5)\\[1pt]
+        f_1(x) &= -1 + 4h_1 - 6h_2 + 6h_3
+      \end{aligned}$}
+    \end{column}
+    \hfill
+    \begin{column}{0.48\textwidth}
+      \centering
+      {\small\textbf{\color{dpc}Network 2}}\\[0.2em]
+      \begin{tikzpicture}[>=Stealth, line width=0.6pt,
+          scale=0.55, transform shape, font=\small]
+        \plainunit{p}{(0,0)}{black!55}{$y$}
+        \unit{q1}{(2.0,2.1)}{dpc}{$h'_1$}
+        \unit{q2}{(2.0,0.0)}{dpc}{$h'_2$}
+        \unit{q3}{(2.0,-2.1)}{dpc}{$h'_3$}
+        \plainunit{r}{(4.0,0)}{black!55}{$y'$}
+        \foreach \i in {1,2,3} \draw[->, black!45] (p)--(q\i);
+        \foreach \i in {1,2,3} \draw[->, black!45] (q\i)--(r);
+      \end{tikzpicture}
+      \\[0.1em]
+      {\footnotesize
+      $\begin{aligned}
+        h'_1 &= \mathrm{ReLU}(y + 1)\\
+        h'_2 &= \mathrm{ReLU}(y)\\
+        h'_3 &= \mathrm{ReLU}(y - 0.5)\\[1pt]
+        f_2(y) &= -1 + 2h'_1 - 3.5h'_2 + 3h'_3
+      \end{aligned}$}
+    \end{column}
+  \end{columns}
+  \vspace{0.1em}
+  {\small $f_1$ traces $-1 \to +1 \to -1 \to +1$:
+  \alert{three monotone branches}.}
+\end{frame}
+
+\begin{frame}{Composing the two networks}
+  \centering
+  \includegraphics[height=0.34\textheight]{compose}
+  \\[0.2em]
+  \figsource{(a) $f_1$, a zigzag with three branches.
+  (b) $f_2$, evaluated over the range $f_1$ produces.
+  (c) the composition $f_2\!\circ\! f_1$.}
+  \vspace{0.2em}
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item Each network alone is piecewise linear with a few
+          joints
+    \item The composition has \alert{many more} joints ---
+          $f_2$'s shape appears \alert{once per branch} of
+          $f_1$
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Folding: why the pattern repeats}
+  \centering
+  \begin{tikzpicture}[line width=0.9pt, scale=0.80]
+    % --- the input strip, marked where the folds happen
+    \draw[shc, fill=shc!8] (-3.4,1.5) rectangle (3.4,2.1);
+    \foreach \x/\lab in {-1.13/{}, 1.13/{}}
+      \draw[dpc, dashed] (\x,1.42) -- (\x,2.18);
+    \node[font=\scriptsize, shc] at (-4.3,1.8) {input $x$};
+    \node[font=\scriptsize, dpc] at (0,2.42) {fold lines};
+
+    % --- the accordion: three branches stacked onto one range
+    \draw[shc, line width=1.4pt]
+      (-3.0,0.15) -- (-1.2,0.75) -- (0.6,0.15) -- (2.4,0.75);
+    \node[font=\scriptsize, shc] at (-4.3,0.45) {folded};
+    \node[font=\scriptsize, mcMuted, align=center]
+      at (3.7,0.45) {three branches\\land on one range};
+
+    % --- f2 drawn once on the folded strip
+    \draw[tealc, fill=tealc!10] (-3.4,-1.0) rectangle (3.4,-0.4);
+    \node[font=\scriptsize, tealc] at (-4.3,-0.7) {$f_2$ applied};
+    \draw[tealc, line width=1.2pt]
+      (-3.4,-0.95) .. controls (-1.5,-0.15) .. (0.0,-0.55)
+                   .. controls (1.5,-0.95) .. (3.4,-0.45);
+
+    % --- unfolded: the pattern appears three times
+    \node[font=\scriptsize, dpc] at (-4.3,-2.1) {unfolded};
+    \foreach \o in {-3.4,-1.13,1.13}{
+      \draw[dpc, line width=1.0pt]
+        (\o,-2.4) .. controls (\o+0.75,-1.7) .. (\o+1.13,-2.0)
+                  .. controls (\o+1.7,-2.4) .. (\o+2.27,-1.9);
+    }
+    \draw[->, mcMuted] (0,1.35) -- (0,0.95);
+    \draw[->, mcMuted] (0,-0.05) -- (0,-0.35);
+    \draw[->, mcMuted] (0,-1.1) -- (0,-1.5);
+  \end{tikzpicture}
+  \vspace{0.3em}
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item $f_1$ \alert{folds} the input line: three different
+          $x$ land on the same $y$
+    \item $f_2$ cannot tell them apart --- so its shape is
+          stamped \alert{once per branch}
+          \hfill{\scriptsize cf.\ Prince (2023), Fig.~4.3}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{The same thing, in the plots}
+  \centering
+  \includegraphics[height=0.32\textheight]{fold}
+  \\[0.2em]
+  \figsource{(a) the three branches of $f_1$, coloured.
+  (b) $f_2$ on the folded coordinate. (c) the composition ---
+  each branch carries its own copy of $f_2$, in the matching
+  colour.}
+  \shpar{joints add: $D$ units $\to$ $D{+}1$ regions}
+        {folding \emph{multiplies} regions across layers}
+\end{frame}
+
+\begin{frame}{Why folding multiplies regions}
+  Counting for the two networks above:
+  \vspace{0.3em}
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item $f_1$ has $3$ hidden units $\Rightarrow$
+          \alert{$3$ branches} on $[-1,1]$
+    \item $f_2$ has $3$ hidden units $\Rightarrow$
+          \alert{$4$ linear pieces} on its input range
+    \item The composition has up to
+          $3 \times 4 = \alert{12}$ linear pieces --- from
+          only $6$ hidden units
+  \end{itemize}
+  \vspace{0.3em}
+  In general, for $K$ layers of $D$ units on a scalar input:
+  \[
+    \#\text{regions (shallow, } KD \text{ units)} = KD + 1
+    \qquad\text{vs.}\qquad
+    \#\text{regions (deep)} \;\le\; (D+1)^K
+  \]
+  \begin{redhighlight}
+    Width \alert{adds} regions. Depth \alert{multiplies} them.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{Composing in two dimensions}
+  \centering
+  \includegraphics[height=0.40\textheight]{compose2d}
+  \\[0.2em]
+  \figsource{Network 1 here takes $\mathbf{x}=(x_1,x_2)$ into
+  three ReLU units, then one output.
+  (a) each unit contributes a line $h_d=0$; together they cut
+  the plane into \emph{convex} regions, one per activation
+  pattern.
+  (b) network 1's output is planar on each region.
+  (c) network 2 then bends the values \emph{within} every
+  region --- the regions of (a) are subdivided further.}
+  \vspace{0.1em}
+  \begin{itemize}\setlength{\itemsep}{0pt}
+    \item In 2-D the fold becomes a \alert{crease pattern};
+          depth creases an already-creased plane
+  \end{itemize}
+\end{frame}
+
+% =====================================================================
+\section{The Deep Network}
+% =====================================================================
+
+\begin{frame}{Two hidden layers}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \centering
+      \begin{tikzpicture}[>=Stealth, line width=0.7pt,
+          font=\small, scale=0.74, transform shape]
+        \plainunit{x}{(0,0)}{black!55}{$x$}
+        \unit{a1}{(2.0,1.45)}{shc}{$h_1$}
+        \unit{a2}{(2.0,0.0)}{shc}{$h_2$}
+        \unit{a3}{(2.0,-1.45)}{shc}{$h_3$}
+        \unit{b1}{(4.1,1.45)}{dpc}{$h'_1$}
+        \unit{b2}{(4.1,0.0)}{dpc}{$h'_2$}
+        \unit{b3}{(4.1,-1.45)}{dpc}{$h'_3$}
+        \plainunit{y}{(6.1,0)}{black!55}{$y'$}
+        \foreach \i in {1,2,3} \draw[->, black!45] (x)--(a\i);
+        \foreach \i in {1,2,3} \foreach \j in {1,2,3}
+          \draw[->, black!22] (a\i)--(b\j);
+        \foreach \i in {1,2,3} \draw[->, black!45] (b\i)--(y);
+        \node[font=\scriptsize, shc] at (2.0,-2.35) {layer 1};
+        \node[font=\scriptsize, dpc] at (4.1,-2.35) {layer 2};
+      \end{tikzpicture}
+      \\[0.3em]
+      \figsource{Each circle carries its activation function;
+      arrows are weights.}
+    \end{column}
+    \hfill
+    \begin{column}{0.44\textwidth}
+      \vspace{0.3em}
+      {\small Layer 1, layer 2, then the output:}
+      \begin{align*}
+        \mathbf{h}_1 &= \mathrm{a}[\bm\theta_0 +
+        \bm\theta_1 \mathbf{x}]\\
+        \mathbf{h}_2 &= \mathrm{a}[\bm\psi_0 +
+        \bm\psi_1 \mathbf{h}_1]\\
+        \mathbf{y} &= \bm\phi_0 + \bm\phi_1 \mathbf{h}_2
+      \end{align*}
+      {\small Each layer: \alert{linear map} then
+      \alert{activation}. Our $f_2\!\circ\! f_1$ is exactly
+      this, with $\mathrm{a}=\mathrm{ReLU}$.}
+    \end{column}
+  \end{columns}
+  \shpar{one hidden layer}
+        {hidden layers \emph{stacked}: same block, composed}
+\end{frame}
+
+\begin{frame}{Computed step by step}
+  \centering
+  \includegraphics[height=0.56\textheight]{buildup}
+  \\[0.1em]
+  \figsource{Top row (a--c): each hidden unit of layer~1 ---
+  dashed is the pre-activation $\theta_{d0}+\theta_{d1}x$,
+  solid is after the ReLU clips it at zero.
+  (d) the same units scaled by their output weights $\phi_d$.
+  (e) their sum plus the offset: this is $f_1$.
+  (f) that signal pushed through layer~2.}
+\end{frame}
+
+\begin{frame}{The general deep network}
+  \centering
+  \begin{tikzpicture}[>=Stealth, line width=0.6pt, font=\small,
+      scale=0.64, transform shape]
+    % input layer
+    \plainunit{x1}{(0,0.75)}{black!55}{}
+    \plainunit{x2}{(0,-0.75)}{black!55}{}
+    \node[font=\small] at (0,1.85) {$\mathbf{x}$};
+    \node[font=\scriptsize, mcMuted] at (0,-1.7) {$D_i=2$};
+    % hidden layers
+    \foreach \L/\c/\xx in {1/shc/2.3, 2/tealc/4.6, 3/dpc/6.9}{
+      \foreach \i/\yy in {1/1.55, 2/0.0, 3/-1.55}
+        \unit{l\L-\i}{(\xx,\yy)}{\c}{};
+      \node[font=\small] at (\xx,2.45) {$\mathbf{h}_{\L}$};
+      \node[font=\scriptsize, mcMuted] at (\xx,-2.42) {$D_{\L}=3$};
+    }
+    % output
+    \plainunit{y1}{(9.2,0.75)}{black!55}{}
+    \plainunit{y2}{(9.2,-0.75)}{black!55}{}
+    \node[font=\small] at (9.2,1.85) {$\mathbf{y}$};
+    \node[font=\scriptsize, mcMuted] at (9.2,-1.7) {$D_o=2$};
+    % connections
+    \foreach \i in {1,2} \foreach \j in {1,2,3}
+      \draw[->, black!22] (x\i)--(l1-\j);
+    \foreach \i in {1,2,3} \foreach \j in {1,2,3}{
+      \draw[->, black!18] (l1-\i)--(l2-\j);
+      \draw[->, black!18] (l2-\i)--(l3-\j);
+    }
+    \foreach \i in {1,2,3} \foreach \j in {1,2}
+      \draw[->, black!22] (l3-\i)--(y\j);
+    % weight / bias annotations between layers
+    \node[font=\scriptsize, shc]   at (1.15,-3.05)
+      {$\bm\beta_0,\bm\Omega_0$};
+    \node[font=\scriptsize, tealc] at (3.45,-3.05)
+      {$\bm\beta_1,\bm\Omega_1$};
+    \node[font=\scriptsize, dpc]   at (5.75,-3.05)
+      {$\bm\beta_2,\bm\Omega_2$};
+    \node[font=\scriptsize, black!60] at (8.05,-3.05)
+      {$\bm\beta_3,\bm\Omega_3$};
+  \end{tikzpicture}
+  \vspace{0.1em}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.44\textwidth}
+      \vspace{-0.4em}
+      \[
+        \mathbf{h}_k = \mathrm{a}\big[\bm\beta_{k-1} +
+        \bm\Omega_{k-1}\mathbf{h}_{k-1}\big]
+      \]
+    \end{column}
+    \hfill
+    \begin{column}{0.52\textwidth}
+      {\footnotesize
+      \begin{itemize}\setlength{\itemsep}{0pt}
+        \item $\bm\Omega_{k-1}$ weight matrix,
+              $\bm\beta_{k-1}$ bias, $\mathrm{a}[\cdot]$
+              element-wise activation
+        \item \alert{Depth} $=$ hidden layers ($K{=}3$);
+              \alert{width} $=$ units per layer --- both
+              \alert{hyperparameters}
+        \item Parameters here: $9+24+8=41$
+      \end{itemize}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{Building depth recursively}
+  The two-layer construction \alert{extends recursively}
+  (Bishop \& Bishop, 2024, \S6.2):
+  \[
+    \mathbf{z}^{(1)} = h\big(\mathbf{W}^{(1)}\mathbf{x}\big),
+    \quad
+    \mathbf{z}^{(2)} = h\big(\mathbf{W}^{(2)}\mathbf{z}^{(1)}\big),
+    \quad \dots, \quad
+    \mathbf{y} = f\big(\mathbf{W}^{(L)}\mathbf{z}^{(L-1)}\big)
+  \]
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item Each layer feeds the next --- the \alert{same
+          operation} (linear map $+$ nonlinearity) repeated
+    \item The construction extends into a \alert{hierarchical
+          model with many layers} --- the basis for deep
+          networks
+          \hfill{\scriptsize Bishop \& Bishop, \S6.2}
+    \item Nothing new is needed --- depth is \alert{repetition
+          of a single idea}
+  \end{itemize}
+  \shpar{$\mathbf{y} = \phi_0 + \bm\phi\,h(\mathbf{Wx})$}
+        {$\mathbf{y} = f(\mathbf{W}^{(L)}h(\cdots
+         h(\mathbf{W}^{(1)}\mathbf{x})))$}
+\end{frame}
+
+\begin{frame}{A note on counting layers}
+  \centering
+  \begin{tikzpicture}[>=Stealth, line width=0.6pt, font=\small,
+      scale=0.70, transform shape]
+    \plainunit{i1}{(0,0.75)}{black!55}{}
+    \plainunit{i2}{(0,-0.75)}{black!55}{}
+    \unit{m1}{(2.5,0.75)}{shc}{}
+    \unit{m2}{(2.5,-0.75)}{shc}{}
+    \plainunit{o1}{(5.0,0)}{black!55}{}
+    \foreach \i in {1,2} \foreach \j in {1,2}
+      \draw[->, black!25] (i\i)--(m\j);
+    \foreach \i in {1,2} \draw[->, black!25] (m\i)--(o1);
+    \node[font=\scriptsize] at (0,-1.6) {inputs};
+    \node[font=\scriptsize, shc] at (2.5,-1.6) {hidden};
+    \node[font=\scriptsize] at (5.0,-1.6) {output};
+    % brace: layers of units
+    \draw[decorate, decoration={brace, amplitude=4pt},
+          mcMuted] (-0.5,1.6) -- (5.5,1.6)
+      node[midway, above=4pt, font=\scriptsize, mcMuted]
+      {3 layers \emph{of units}};
+    % brace: layers of weights
+    \draw[decorate, decoration={brace, amplitude=4pt, mirror},
+          dpc] (0.6,-2.15) -- (4.4,-2.15)
+      node[midway, below=4pt, font=\scriptsize, dpc]
+      {2 layers \emph{of weights}};
+  \end{tikzpicture}
+  \vspace{0.1em}
+  \begin{itemize}\setlength{\itemsep}{0pt}
+    \item The same network is called ``three-layer'',
+          ``single-hidden-layer'', or ``two-layer'' depending
+          on what is counted
+    \item Bishop recommends counting \alert{layers of weights}
+          --- the adaptive parameters
+          \hfill{\scriptsize Bishop \& Bishop (2024), \S6.3}
+    \item In this course: \alert{deep} $=$ more than one hidden
+          layer
+  \end{itemize}
+\end{frame}
+
+% =====================================================================
+\section{What Deep Networks Represent}
+% =====================================================================
+
+\begin{frame}{Depth as an inductive bias}
+  \begin{itemize}
+    \item Universality tells us \emph{what} a network
+          \emph{can} represent; it says nothing about what it
+          \emph{prefers} to learn
+    \item A deep architecture encodes an \alert{inductive
+          bias}: that the output relates to the input through
+          a \alert{hierarchy} of intermediate concepts
+          \hfill{\scriptsize Bishop \& Bishop, \S6.3.1}
+    \item For images, the map from pixels to a concept like
+          `cat' is \alert{highly nonlinear} --- hopeless for
+          one layer, natural for many
+    \item The right bias means the network needs \alert{less
+          data} and generalises better
+  \end{itemize}
+  \shpar{bias: output is one nonlinear map of the input}
+        {bias: output is a \alert{hierarchy} of simpler maps}
+\end{frame}
+
+\begin{frame}{Hierarchical representations}
+  \centering
+  \begin{tikzpicture}[>=Stealth, line width=0.8pt,
+      b/.style={rounded corners=3pt, draw=dpc, fill=dpc!7,
+                align=center, minimum height=0.9cm,
+                inner xsep=5pt, font=\small},
+      lbl/.style={font=\scriptsize\itshape, mcMuted}]
+    \node[b] (a) {pixels};
+    \node[b, right=9mm of a] (b) {edges};
+    \node[b, right=9mm of b] (c) {motifs\\ / parts};
+    \node[b, right=9mm of c] (d) {objects};
+    \node[b, right=9mm of d] (e) {`cat'};
+    \draw[->] (a)--(b); \draw[->] (b)--(c);
+    \draw[->] (c)--(d); \draw[->] (d)--(e);
+    \node[lbl, below=1mm of a] {input};
+    \node[lbl, below=1mm of b] {layer 1};
+    \node[lbl, below=1mm of c] {layer 2};
+    \node[lbl, below=1mm of d] {layer 3};
+    \node[lbl, below=1mm of e] {output};
+  \end{tikzpicture}
+  \vspace{0.5em}
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item Early layers detect \alert{low-level} features;
+          later layers assemble them into \alert{high-level}
+          concepts
+    \item Each layer reuses the layer below --- features are
+          \alert{shared} by everything built on top
+          \hfill{\scriptsize Bishop \& Bishop, \S6.3.1}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Why hierarchy is the right bias for real data}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.46\textwidth}
+      \centering
+      \includegraphics[height=0.40\textheight]{Bishop6_8}
+      \\[0.1em]
+      \figsource{Bishop \& Bishop (2024), Fig.~6.8: natural
+      images (top) vs.\ random pixels (bottom).}
+    \end{column}
+    \hfill
+    \begin{column}{0.50\textwidth}
+      \vspace{0.2em}
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item Almost every random pixel pattern is
+              \alert{noise} --- images like the `cat' above
+              are vanishingly rare among all possible images
+        \item Natural data lives on a \alert{low-dimensional
+              manifold} with strong structure
+        \item That structure is \alert{compositional}, so a
+              compositional model captures it efficiently
+      \end{itemize}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}{A hierarchy, built explicitly}
+  \centering
+  \includegraphics[height=0.32\textheight]{hierarchy}
+  \\[0.2em]
+  \figsource{(a) three level-1 units, each a bump
+  $\mathrm{ReLU}(1-|x-c|/w)$ centred at $c\in\{0.2,0.5,0.8\}$
+  with $w=0.12$.
+  (b) a level-2 unit sums them into one motif.
+  (c) level 3 modulates that motif by
+  $0.6+0.4\sin(6\pi x)$.}
+  \vspace{0.1em}
+  \begin{itemize}\setlength{\itemsep}{0pt}
+    \item Each stage is a \alert{simple} operation on the
+          stage below --- yet the result is intricate
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Distributed representations}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.44\textwidth}
+      \centering
+      \begin{tikzpicture}[line width=0.8pt, font=\scriptsize]
+        \foreach \i/\lab in {0/fur,1/whiskers,2/round eyes,
+                             3/pointy ears}{
+          \node[circle, draw=dpc, fill=dpc!8, minimum size=6mm]
+            (u\i) at (0,-\i*0.95) {};
+          \node[right=1mm of u\i] {\lab};
+        }
+        \node[align=center, font=\scriptsize\itshape, mcMuted]
+          at (1.1,-4.0) {a hidden layer};
+      \end{tikzpicture}
+    \end{column}
+    \hfill
+    \begin{column}{0.52\textwidth}
+      \vspace{0.2em}
+      \begin{itemize}\setlength{\itemsep}{2pt}
+        \item Each unit signals whether a \alert{feature} is
+              present (high) or absent (low)
+        \item $M$ units name $M$ features --- but their
+              \alert{combinations} can encode up to
+              \alert{$2^M$} distinct patterns
+        \item Concepts are represented by \alert{patterns of
+              activity}, not single units --- a
+              \alert{distributed} code
+              \hfill{\scriptsize Bishop \& Bishop, \S6.3.2}
+      \end{itemize}
+    \end{column}
+  \end{columns}
+  \shpar{features fixed and hand-chosen}
+        {features learned, and \alert{shared combinatorially}}
+\end{frame}
+
+\begin{frame}{Representation learning: the set-up}
+  Two interleaved half-moons, $400$ points, Gaussian noise
+  $\sigma=0.1$; inputs standardised. Network
+  $2 \to 24 \to 2 \to 1$, all ReLU:
+  \[
+    \mathbf{z}_1 = \mathrm{ReLU}(\mathbf{W}_1\mathbf{x}+\mathbf{b}_1),
+    \quad
+    \mathbf{z}_2 = \mathrm{ReLU}(\mathbf{W}_2\mathbf{z}_1+\mathbf{b}_2),
+    \quad
+    s = \mathbf{w}_3^{\!\top}\mathbf{z}_2 + b_3
+  \]
+  Trained by gradient descent on the binary cross-entropy of
+  $p=\sigma(s)$:
+  \[
+    L = -\frac{1}{N}\sum_{n} \Big[ y_n\log p_n
+        + (1-y_n)\log(1-p_n)\Big],
+    \qquad
+    \bm\theta \leftarrow \bm\theta - \eta\,\nabla_{\bm\theta}L
+  \]
+  \begin{itemize}\setlength{\itemsep}{1pt}
+    \item $\eta = 0.5$, $6000$ full-batch steps, He
+          initialisation
+    \item The last hidden layer is \alert{2-dimensional} on
+          purpose --- so we can plot the representation the
+          network learns
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Representation learning: the result}
+  \centering
+  \includegraphics[height=0.40\textheight]{representation}
+  \\[0.2em]
+  \figsource{(a) the data in input space --- no straight line
+  separates the classes.
+  (b) the same points plotted in the coordinates
+  $(z_1,z_2)$ of the last hidden layer; the dashed line is the
+  output layer's boundary
+  $\mathbf{w}_3^{\!\top}\mathbf{z}+b_3=0$.
+  (c) the loss over training.}
+  \vspace{0.1em}
+  \begin{itemize}\setlength{\itemsep}{0pt}
+    \item The network has \alert{rearranged the data} until a
+          line is enough
+          \hfill{\scriptsize cf.\ Bishop \& Bishop, \S6.3.3}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{What that experiment shows}
+  \begin{itemize}\setlength{\itemsep}{2pt}
+    \item Each layer \alert{transforms} the data to make the
+          task easier for the next one
+    \item By the final hidden layer the classes are arranged
+          so a \alert{simple linear classifier} suffices
+    \item That layer's output is the \alert{learned
+          representation} (the \emph{embedding}); the output
+          layer merely draws a line in it
+          \hfill{\scriptsize Bishop \& Bishop, \S6.3.3}
+    \item Nobody designed those coordinates --- they were
+          \alert{learned from the data}
+  \end{itemize}
+  \shpar{one transform, then a linear read-out}
+        {\emph{many} learned transforms, then a linear
+         read-out}
+\end{frame}
+
+% =====================================================================
+\section{Why Depth?}
+% =====================================================================
+
+\begin{frame}{Universal approximation, revisited}
+  \begin{itemize}
+    \item A shallow network is \alert{already} a universal
+          approximator (Class~5) --- so why go deep?
+    \item Because universality says a solution
+          \alert{exists}, not that it is \alert{small}:
+          matching a complex function may need exponentially
+          many hidden units in one layer
+    \item Deep networks can represent the same functions with
+          \alert{far fewer parameters}
+  \end{itemize}
+  \vspace{0.3em}
+  \begin{redhighlight}
+    The question is not \emph{whether} but \emph{how
+    efficiently} a network represents a function.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{Linear regions per parameter}
+  \centering
+  \includegraphics[height=0.38\textheight]{regions}
+  \\[0.2em]
+  \figsource{Parameter counts for a $1$-input, $1$-output ReLU
+  net: $P_{\text{shallow}}(D)=3D+1$ and
+  $P_{\text{deep}}(D,K)=2D+(K{-}1)D(D{+}1)+D+1$; regions
+  $D{+}1$ and $(D{+}1)^K$.
+  (a) regions bought per parameter, log--log.
+  (b) a \emph{fixed} budget $P$ spent on $K$ layers: for each
+  $K$ we take the widest $D$ that still fits, then plot the
+  regions it buys.}
+  \shpar{regions grow \emph{polynomially} with width}
+        {regions grow \emph{exponentially} with depth}
+\end{frame}
+
+\begin{frame}{Shallow vs.\ deep: the trade-off}
+  \centering
+  \renewcommand{\arraystretch}{1.2}
+  {\small
+  \begin{tabular}{p{0.26\textwidth} p{0.32\textwidth}
+                  p{0.32\textwidth}}
+    & \textbf{\color{shc}Shallow (1 layer)}
+    & \textbf{\color{dpc}Deep (many layers)}\\
+    \hline
+    Expressivity & universal, but needs many units
+      & universal with \alert{far fewer} units\\
+    Regions & polynomial in width
+      & exponential in depth\\
+    Features & one level of learned features
+      & \alert{hierarchical} features, layer on layer\\
+    Training & convex read-out only
+      & harder landscape; needs backprop (Class 11+)\\
+    \hline
+  \end{tabular}}
+  \vspace{0.5em}
+  \begin{redhighlight}
+    Depth trades a harder optimisation problem for a
+    dramatic gain in representational efficiency.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{Why depth tends to win in practice}
+  \begin{itemize}
+    \item Real data is \alert{compositional}: edges $\to$
+          shapes $\to$ objects; phonemes $\to$ words $\to$
+          meaning
+    \item Deep networks mirror this --- each layer builds
+          \alert{features of the previous layer's features}
+    \item Fewer parameters for the same function means
+          \alert{better generalisation} and less data to fit
+    \item Caveat: depth alone is not enough --- training deep
+          networks needs the tools of the coming classes
+          (initialisation, normalisation, residual
+          connections)
+  \end{itemize}
+  \shpar{flat: features of the raw input}
+        {hierarchical: features of features of features}
+\end{frame}
+
+\begin{frame}{Takeaways}
+  \begin{enumerate}\setlength{\itemsep}{2pt}
+    \item A \alert{deep network} is shallow networks
+          \alert{composed}: each layer is a linear map
+          followed by an activation
+    \item Composition \alert{folds} input space, so regions
+          \alert{multiply} across layers rather than add ---
+          $3\times 4 = 12$ pieces from $6$ units
+    \item Both shallow and deep nets are universal --- but
+          deep nets reach the same functions with
+          \alert{exponentially fewer parameters}
+    \item Depth suits \alert{compositional} data by building
+          hierarchical features, as the half-moons experiment
+          showed
+  \end{enumerate}
+  \vspace{0.3em}
+  \begin{redhighlight}
+    Next: depth and width efficiency theorems, then how to
+    actually \alert{train} these networks (backpropagation).
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{References}
+  \footnotesize
+  \begin{itemize}\setlength{\itemsep}{3pt}
+    \item S.~J.~D.~Prince. \textit{Understanding Deep
+          Learning.} MIT Press, 2023. Chapter~4 --- composition,
+          folding, region counting, deep network formulation.
+    \item C.~M.~Bishop \& H.~Bishop. \textit{Deep Learning:
+          Foundations and Concepts.} Springer, 2024.
+          Chapter~6 --- recursive construction, layer
+          counting, hierarchical and distributed
+          representations, representation learning.
+          Figure~6.8 reproduced with attribution.
+    \item G.~Cybenko (1989); K.~Hornik (1991);
+          Mont\'ufar et al.\ (2014) on linear regions and
+          depth.
+    \item Plots generated with \texttt{src/make\_figures.py}
+          (NumPy, Matplotlib, SciencePlots).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[standout]
+  Questions?
+\end{frame}
+
+\end{document}

@@ -68,11 +68,11 @@
 % =====================================================================
 \title{Introduction to Neural Networks}
 \subtitle{Biology, the McCulloch--Pitts Neuron, and Linear Separability}
-\author{Fundamentals of Deep Learning \ \textperiodcentered\ Class 2}
-\institute{Prof.~Nirav Bhatt}
+\author{DA3409 Deep Learning \ \textperiodcentered\ }
+%\institute{Prof.~Nirav Bhatt}
 \date{28 July}
 
-\footleft{Fundamentals of Deep Learning}
+\footleft{DA3409 Deep Learning}
 \footright{Introduction to Neural Networks}
 \titlelogos{}
 
@@ -93,8 +93,8 @@
     \item The brain: roughly $10^{11}$ neurons, each connected
           to up to $10^{4}$ others --- massively
           \alert{parallel}, not sequential
-    \item Slow components ($\sim$ms switching) yet faster than
-          any computer at perception and motor control
+    % \item Slow components ($\sim$ms switching) yet faster than
+    %       any computer at perception and motor control
     \item Rojas: artificial neural networks are best understood
           as \alert{networks of primitive functions} ---
           simple units, wired together
@@ -206,8 +206,8 @@
               scaled by a \alert{weight} $w_i$
         \item The body integrates the inputs (usually a sum)
               and applies a \alert{primitive function} $f$
-        \item Everything in this course is a variation on this
-              one picture
+        % \item Everything in this course is a variation on this
+        %       one picture
       \end{itemize}
     \end{column}
   \end{columns}
@@ -219,7 +219,7 @@
 
 \begin{frame}{Networks of primitive functions}
   \begin{itemize}
-    \item An artificial neural network is nothing but a
+    \item An artificial neural network  can be visualized as a
           \alert{network of primitive functions}
           \hfill{\scriptsize Rojas (1996), \S1.3.1}
     \item Models differ only in three choices:
@@ -252,8 +252,8 @@
   \vspace{0.1em}
   \begin{itemize}\setlength{\itemsep}{0pt}
     \item Individually crude; \alert{summed}, they approximate
-          anything --- this is the seed of universal
-          approximation (Class 7)
+          anything --- this is a seed of universal function
+          approximation 
   \end{itemize}
 \end{frame}
 
@@ -289,7 +289,7 @@
           output is a fixed function of the input
     \item \alert{Recurrent}: cycles let signals loop back,
           giving the network \alert{state} and memory
-    \item This course focuses on feed-forward networks
+    \item Focuses on feed-forward networks
           \hfill{\scriptsize Rojas (1996), \S2.1.1}
   \end{itemize}
 \end{frame}
@@ -342,7 +342,7 @@
 \begin{frame}{The firing rule}
   A unit receives $x_1,\dots,x_n$ on $n$ excitatory edges and
   $y_1,\dots,y_m$ on $m$ inhibitory edges
-  (Rojas, 1996, \S2.1):
+ 
   \vspace{0.1em}
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item If $m\ge 1$ and \alert{any} inhibitory signal
@@ -625,7 +625,7 @@
   \end{enumerate}
   \vspace{0.3em}
   \begin{redhighlight}
-    Class~3: add \alert{weights} and a \alert{learning rule}
+    Next Topic: add \alert{weights} and a \alert{learning rule}
     --- the perceptron.
   \end{redhighlight}
 \end{frame}
@@ -643,13 +643,12 @@
           Biophysics}, 5, 115--133.
     \item Counts of linearly separable Boolean functions:
           OEIS A000609.
-    \item Plots generated with \texttt{src/make\_figures.py}
-          (NumPy, Matplotlib, SciencePlots).
+
   \end{itemize}
 \end{frame}
 
-\begin{frame}[standout]
-  Questions?
-\end{frame}
+% \begin{frame}[standout]
+%   Questions?
+% \end{frame}
 
 \end{document}

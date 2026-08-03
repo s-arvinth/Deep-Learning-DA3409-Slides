@@ -43,7 +43,13 @@
 \setbeamertemplate{footline}{%
   \usebeamerfont{footline}%
   \setlength{\mc@footty}{\dimexpr(\mc@footh-\mc@progh)/2\relax}%
-  \pgfmathsetlengthmacro{\mc@fillw}{\paperwidth*\insertframenumber/\inserttotalframenumber}%
+  % NB: divide FIRST -- \paperwidth*\insertframenumber overflows TeX's
+%     16383.99pt dimension limit on decks longer than ~35 frames.
+  \ifnum\inserttotalframenumber>0\relax
+    \pgfmathsetlengthmacro{\mc@fillw}{\paperwidth*(\insertframenumber/\inserttotalframenumber)}%
+  \else
+    \setlength{\mc@fillw}{0pt}%
+  \fi
   \begin{tikzpicture}
     \useasboundingbox (0,0) rectangle (\paperwidth,\mc@footh);
     % maroon bar

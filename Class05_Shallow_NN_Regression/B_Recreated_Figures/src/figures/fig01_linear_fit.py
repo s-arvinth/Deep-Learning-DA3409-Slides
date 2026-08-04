@@ -29,7 +29,7 @@ def build():
                lw=1.7, zorder=3, label=r"data  $(x_n,\,y_n)$")
     ax.plot(xs, w[0] + w[1] * xs, color=OUTC, lw=2.4, zorder=2,
             label=r"$\hat y(x,\mathbf{w})=w_0+w_1x$")
-    ax.legend(loc="upper left", fontsize=10.5, handlelength=1.6)
+    ax.legend(loc="upper left", fontsize=13.7, handlelength=1.6)
     ax.set(xlabel=r"input  $x$", ylabel=r"target  $y$",
            title=rf"minimising $\sum_n(y_n-\hat y_n)^2$:  "
                  rf"$w_0={w[0]:.2f}$,  $w_1={w[1]:.2f}$")

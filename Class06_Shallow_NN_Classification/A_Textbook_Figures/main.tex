@@ -220,10 +220,10 @@
 \end{frame}
 
 % =====================================================================
-\section{The Maximum-Likelihood Recipe}
+\section{The Maximum-Likelihood Principle}
 % =====================================================================
 
-\begin{frame}{The recipe for a loss function}
+\begin{frame}{Where the loss function comes from}
   The network predicts, for each input, the
   \alert{parameters of a probability distribution} over
   the output (Prince, 2023, \S5.1--5.2):
@@ -262,7 +262,7 @@
     \hfill
     \begin{column}{0.41\textwidth}
       \vspace{0.2em}
-      {\small Class 5, rewritten as the recipe:}
+      {\small Class 5, restated in this framework:}
       \begin{itemize}\setlength{\itemsep}{2pt}
         \item {\small Domain $y\in\mathbb{R}$ $\to$
               choose a \alert{Gaussian}}
@@ -276,7 +276,7 @@
   \mlparallel{Gaussian noise $\to$ squared error
               (B\&B \S4.1.1)}
              {today: Bernoulli $\to$ cross-entropy,
-              same recipe}
+              same construction}
 \end{frame}
 
 % =====================================================================
@@ -397,7 +397,7 @@
           prediction is wrong
     \item Cross-entropy has no $\sigma'$ factor ---
           learning does not stall
-    \item This is the recipe at work: \alert{match the
+    \item The principle at work: \alert{match the
           loss to the output distribution}
   \end{itemize}
   \vspace{0.3em}
@@ -527,7 +527,7 @@
 \section{The Bigger Picture}
 % =====================================================================
 
-\begin{frame}{One recipe, any output type}
+\begin{frame}{One principle, any output type}
   \centering
   \includegraphics[height=0.62\textheight]{LossDataTypes}
   \\[0.1em]

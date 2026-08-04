@@ -45,14 +45,21 @@ RC = {
     "mathtext.tt":      "Fira Mono",
     "mathtext.cal":     "Fira Sans:italic",
     "mathtext.default": "regular",
-    # --- type sizes: large on purpose (figures are scaled down on slides)
-    "font.size":        13.0,
-    "axes.titlesize":   14.0,
-    "axes.labelsize":   13.5,
-    "xtick.labelsize":  11.5,
-    "ytick.labelsize":  11.5,
-    "legend.fontsize":  11.5,
-    "axes.titlepad":    7.0,
+    # --- type sizes: deliberately large.  Figures are scaled down a lot
+    #     when placed on a slide, so what looks oversized in the PDF is
+    #     what reads correctly from the back of a lecture theatre.
+    "font.size":        16.0,
+    "axes.titlesize":   17.5,
+    "axes.labelsize":   17.0,
+    "xtick.labelsize":  14.5,
+    "ytick.labelsize":  14.5,
+    "legend.fontsize":  14.0,
+    "axes.titlepad":    9.0,
+    "axes.linewidth":   0.9,
+    "xtick.major.size": 4.5,
+    "ytick.major.size": 4.5,
+    "xtick.major.width": 0.9,
+    "ytick.major.width": 0.9,
     "figure.dpi":       150,
     "pdf.fonttype":     42,      # embed TrueType, keep text selectable
     "ps.fonttype":      42,

@@ -38,7 +38,7 @@ def build():
               title=r"(c)  sigmoid:  $\sigma((x-\mu_j)/s)$")
 
     for a in ax:
-        a.set_title(a.get_title(), fontsize=12.5)
+        a.set_title(a.get_title(), fontsize=16.2)
         style.square(a)
     fig.tight_layout(w_pad=2.2)
     return style.save(fig, NAME)

@@ -33,11 +33,11 @@ def build():
         axis.set_title(rf"({tag})  output $\hat y_{{{1 if tag=='a' else 2}}}"
                        rf"=w^{{(2)}}_{{{1 if tag=='a' else 2}0}}"
                        rf"+\sum_j w^{{(2)}}_{{{1 if tag=='a' else 2}j}}z_j$",
-                       fontsize=11.5)
+                       fontsize=15.0)
         style.square(axis)
     ax[0].set_ylabel(r"$\hat y$")
     fig.suptitle(r"shared hidden units $\Rightarrow$ joints at the same $x$",
-                 fontsize=13, y=1.03)
+                 fontsize=16.9, y=1.03)
     fig.tight_layout(w_pad=2.2)
     return style.save(fig, NAME)
 

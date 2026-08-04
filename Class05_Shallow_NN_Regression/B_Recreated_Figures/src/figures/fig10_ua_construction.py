@@ -35,11 +35,11 @@ def build():
         ramp = (relu(x - a0) - relu(x - a0 - d)) / d
         ax[0].plot(x, ramp, lw=2.2, color=cmap(0.06 + 0.22 * i),
                    label=rf"$\delta={d:g}$")
-    ax[0].legend(loc="upper left", fontsize=10.5, title=r"gap $\delta$",
-                 title_fontsize=10.5)
+    ax[0].legend(loc="upper left", fontsize=13.7, title=r"gap $\delta$",
+                 title_fontsize=13.7)
     ax[0].set(xlabel=r"$x$", ylabel=r"$g_{\delta}(x)$", ylim=(-0.08, 1.15))
     ax[0].set_title(r"(a)  $\frac{1}{\delta}[h(x-a)-h(x-a-\delta)]"
-                    r"\to \mathbb{1}[x>a]$", fontsize=11.5)
+                    r"\to \mathbb{1}[x>a]$", fontsize=15.0)
 
     # ---- (b) the interpolant is a network ---------------------------
     M = 7
@@ -50,11 +50,11 @@ def build():
                mew=1.0, label=r"$\hat y(x)$  ($M=7$ units)")
     for k in knots[1:-1]:
         ax[1].axvline(k, color=GREY, lw=0.6, ls=":")
-    ax[1].legend(loc="lower left", fontsize=10.5, framealpha=.92,
+    ax[1].legend(loc="lower left", fontsize=13.7, framealpha=.92,
                  facecolor="white", edgecolor="none")
     ax[1].set(xlabel=r"$x$", ylabel=r"$y$")
     ax[1].set_title(r"(b)  $\hat y=f(x_0)+s_1(x-x_0)+\sum_j(s_{j+1}-s_j)h(x-x_j)$",
-                    fontsize=10.5)
+                    fontsize=13.7)
 
     # ---- (c) mesh size controls the error ---------------------------
     for i, Mi in enumerate([3, 6, 12]):
@@ -63,11 +63,11 @@ def build():
         e = np.abs(f(x) - yh)
         ax[2].plot(x, e, lw=2.0, color=cmap(0.06 + 0.28 * i),
                    label=rf"$M={Mi}$:  $\sup|f-\hat y|={e.max():.3f}$")
-    ax[2].legend(loc="upper right", fontsize=10, framealpha=.92,
+    ax[2].legend(loc="upper right", fontsize=13.0, framealpha=.92,
                  facecolor="white", edgecolor="none")
     ax[2].set(xlabel=r"$x$", ylabel=r"$|f(x)-\hat y(x)|$")
     ax[2].set_title(r"(c)  mesh $<\delta\,\Rightarrow\,"
-                    r"\sup|f-\hat y|\leq\varepsilon$", fontsize=11.5)
+                    r"\sup|f-\hat y|\leq\varepsilon$", fontsize=15.0)
 
     for axis in ax:
         style.square(axis)

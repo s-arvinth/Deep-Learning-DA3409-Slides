@@ -31,10 +31,10 @@ def build():
         err = np.abs(target - yh).max()
         axis.plot(x, target, color=GREY, lw=2.0, ls="--", label=r"target $f(x)$")
         axis.plot(x, yh, color=c, lw=2.2, label=rf"$M={M}$ units")
-        axis.legend(loc="upper right", fontsize=10.5)
+        axis.legend(loc="upper right", fontsize=13.7)
         axis.set(xlabel=r"$x$", ylabel=r"$y$")
         axis.set_title(rf"$M={M}$:  $M+1={M+1}$ linear pieces,  "
-                       rf"$\sup|f-\hat y|={err:.3f}$", fontsize=12)
+                       rf"$\sup|f-\hat y|={err:.3f}$", fontsize=15.6)
         style.square(axis)
 
     Ms = np.unique(np.round(np.logspace(0, 2.1, 22)).astype(int))
@@ -44,9 +44,9 @@ def build():
                 mew=0.8, label=r"$\sup_x|f(x)-\hat y(x)|$")
     axis.loglog(Ms, 0.9 * np.asarray(Ms, float) ** -2.0, color=GREY, lw=1.4,
                 ls=":", label=r"reference slope $M^{-2}$")
-    axis.legend(loc="lower left", fontsize=10.5)
+    axis.legend(loc="lower left", fontsize=13.7)
     axis.set(xlabel=r"hidden units $M$", ylabel=r"maximum error")
-    axis.set_title(r"error $\to 0$ as $M\to\infty$", fontsize=12.5)
+    axis.set_title(r"error $\to 0$ as $M\to\infty$", fontsize=16.2)
     style.square(axis)
     fig.tight_layout(w_pad=2.4, h_pad=2.6)
     return style.save(fig, NAME)

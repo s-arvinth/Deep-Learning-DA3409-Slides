@@ -34,32 +34,32 @@ def build():
         if abs(w2) > 1e-9:
             ax0.plot(g, -(w1 * g + b) / w2, color=BRANCH[j], lw=2.0,
                      label=rf"$a_{j+1}=0$")
-    ax0.legend(loc="lower left", fontsize=9.5, framealpha=.9,
+    ax0.legend(loc="lower left", fontsize=12.3, framealpha=.9,
                facecolor="white", edgecolor="none")
     ax0.set(xlim=(-2, 2), ylim=(-2, 2), xlabel=r"$x_1$", ylabel=r"$x_2$")
     ax0.set_title(r"(a)  $M=3$ hinges cut the plane into convex regions",
-                  fontsize=11)
+                  fontsize=14.3)
 
     m = ax1.pcolormesh(X1, X2, y, cmap=style.SEQ, shading="auto")
     m.set_rasterized(True)
     ax1.contour(X1, X2, pattern, levels=np.arange(-.5, 8.5, 1),
                 colors="white", linewidths=0.8, alpha=.9)
     cb = fig.colorbar(m, ax=ax1, fraction=0.046, pad=0.03)
-    cb.set_label(r"$\hat y$", fontsize=11)
-    cb.ax.tick_params(labelsize=9.5)
+    cb.set_label(r"$\hat y$", fontsize=14.3)
+    cb.ax.tick_params(labelsize=12.3)
     ax1.set(xlabel=r"$x_1$", ylabel=r"$x_2$")
     ax1.set_title(r"(b)  $\hat y$ is a single plane on each region",
-                  fontsize=11)
+                  fontsize=14.3)
 
     s = ax2.plot_surface(X1[::6, ::6], X2[::6, ::6], y[::6, ::6],
                          cmap=style.SEQ, linewidth=0, antialiased=True)
     s.set_rasterized(True)
-    ax2.set_xlabel(r"$x_1$", fontsize=12)
-    ax2.set_ylabel(r"$x_2$", fontsize=12)
-    ax2.set_zlabel(r"$\hat y$", fontsize=12)
+    ax2.set_xlabel(r"$x_1$", fontsize=15.6)
+    ax2.set_ylabel(r"$x_2$", fontsize=15.6)
+    ax2.set_zlabel(r"$\hat y$", fontsize=15.6)
     ax2.set_title(r"(c)  the same surface, folded along the hinges",
-                  fontsize=11)
-    ax2.tick_params(labelsize=9)
+                  fontsize=14.3)
+    ax2.tick_params(labelsize=11.7)
     for pane in (ax2.xaxis, ax2.yaxis, ax2.zaxis):
         pane.pane.set_facecolor("white")
         pane.pane.set_edgecolor("#DDDDDD")

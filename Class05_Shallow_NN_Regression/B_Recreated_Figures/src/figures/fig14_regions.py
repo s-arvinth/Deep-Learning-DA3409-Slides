@@ -28,8 +28,8 @@ def build():
     ax[0].set(xscale="log", yscale="log", xlabel=r"hidden units  $M$",
               ylabel=r"maximum linear regions")
     ax[0].set_title(r"(a)  $\sum_{j=0}^{D}\binom{M}{j}$  (Zaslavsky, 1975)",
-                    fontsize=12)
-    ax[0].legend(loc="upper left", fontsize=10.5)
+                    fontsize=15.6)
+    ax[0].legend(loc="upper left", fontsize=13.7)
 
     x = np.linspace(0, 1, 1000)
     for M_, c, mk in zip([2, 5, 12], [L1, L2, OUTC], ["o", "s", "^"]):
@@ -41,11 +41,11 @@ def build():
                    label=rf"$M={M_}$  ($M+1={M_+1}$ pieces)")
         ax[1].plot(cuts, np.interp(cuts, x, yv), ls="none", marker=mk, ms=6.5,
                    color=c, mec="white", mew=0.9)
-    ax[1].legend(loc="lower left", fontsize=9.5, framealpha=.92,
+    ax[1].legend(loc="lower left", fontsize=12.3, framealpha=.92,
                  facecolor="white", edgecolor="none")
     ax[1].set(xlabel=r"$x$", ylabel=r"$\hat y$")
     ax[1].set_title(r"(b)  $D=1$: markers are the joints, one per unit",
-                    fontsize=12)
+                    fontsize=15.6)
     for axis in ax:
         style.square(axis)
     fig.tight_layout(w_pad=2.4)

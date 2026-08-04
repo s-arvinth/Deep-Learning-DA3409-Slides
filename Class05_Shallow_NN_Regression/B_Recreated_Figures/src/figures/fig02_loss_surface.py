@@ -37,8 +37,8 @@ def build():
     ax[0].contour(W0, W1, E, levels=12, colors="white", linewidths=0.6,
                   alpha=.6)
     cb = fig.colorbar(m, ax=ax[0], fraction=0.046, pad=0.03)
-    cb.set_label(r"$E(\mathbf{w})$", fontsize=12)
-    cb.ax.tick_params(labelsize=10)
+    cb.set_label(r"$E(\mathbf{w})$", fontsize=15.6)
+    cb.ax.tick_params(labelsize=13.0)
     ax[0].set(xlabel=r"intercept  $w_0$", ylabel=r"slope  $w_1$",
               title=r"(a)  the error surface $E(\mathbf{w})$")
 
@@ -50,7 +50,7 @@ def build():
     ax[1].scatter([H[-1, 0]], [H[-1, 1]], s=150, marker="*", color=OUTC,
                   edgecolor="white", zorder=5,
                   label=r"minimum $\mathbf{w}_{\mathrm{ML}}$")
-    ax[1].legend(loc="lower right", fontsize=10, framealpha=.93,
+    ax[1].legend(loc="lower right", fontsize=13.0, framealpha=.93,
                  facecolor="white", edgecolor="none")
     ax[1].set(xlabel=r"intercept  $w_0$", ylabel=r"slope  $w_1$",
               title=r"(b)  one convex bowl, one minimum")

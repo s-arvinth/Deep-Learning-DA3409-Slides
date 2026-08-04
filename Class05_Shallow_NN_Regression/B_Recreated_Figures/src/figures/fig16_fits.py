@@ -32,11 +32,11 @@ def build():
         axis.plot(xs, relu_design(xs, cuts) @ w, color=OUTC, lw=2.4,
                   label=r"network $\hat y$")
         axis.set(xlabel=r"$x$")
-        axis.set_title(rf"({tag})  {nm},  $M=8$ units", fontsize=12)
+        axis.set_title(rf"({tag})  {nm},  $M=8$ units", fontsize=15.6)
         style.square(axis)
     ax[0].set_ylabel(r"$y$")
     h, lb = ax[0].get_legend_handles_labels()
-    fig.legend(h, lb, loc="lower center", ncol=3, fontsize=11.5,
+    fig.legend(h, lb, loc="lower center", ncol=3, fontsize=15.0,
                frameon=False, bbox_to_anchor=(0.5, -0.06))
     fig.tight_layout(w_pad=2.4)
     return style.save(fig, NAME)

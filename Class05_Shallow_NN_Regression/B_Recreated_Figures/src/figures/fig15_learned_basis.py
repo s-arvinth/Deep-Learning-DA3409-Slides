@@ -36,14 +36,14 @@ def build():
         axis.plot(x, tgt, color=GREY, lw=1.8, ls=":", label=r"target")
         axis.plot(x, A @ w, color=OUTC, lw=2.4, label=r"$\hat y$")
         axis.set(xlabel=r"$x$")
-        axis.set_title(nm, fontsize=12)
+        axis.set_title(nm, fontsize=15.6)
         style.square(axis)
     ax[0].set_ylabel(r"$y$")
     h, lb = ax[0].get_legend_handles_labels()
-    fig.legend(h, lb, loc="lower center", ncol=3, fontsize=11.5,
+    fig.legend(h, lb, loc="lower center", ncol=3, fontsize=15.0,
                frameon=False, bbox_to_anchor=(0.5, -0.07))
     fig.suptitle(r"same architecture ($M=6$, $\tanh$), four targets: "
-                 r"the units rearrange themselves", fontsize=12.5, y=1.04)
+                 r"the units rearrange themselves", fontsize=16.2, y=1.04)
     fig.tight_layout(w_pad=1.8)
     return style.save(fig, NAME)
 

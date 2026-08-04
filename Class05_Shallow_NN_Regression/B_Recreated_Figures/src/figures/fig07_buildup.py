@@ -27,23 +27,23 @@ def build():
         ax[0, j].axhline(0, color=GREY, lw=0.5, ls=":")
         ax[0, j].set(xlabel=r"$x$", ylabel=rf"$z_{j+1}$")
         ax[0, j].set_title(rf"({chr(97+j)})  $z_{j+1}=h({w:.0f}\,x{b:+.2f})$",
-                           fontsize=12.5)
-    ax[0, 0].legend(loc="upper left", fontsize=9.8)
+                           fontsize=16.2)
+    ax[0, 0].legend(loc="upper left", fontsize=12.7)
 
     for j in range(3):
         ax[1, 0].plot(x, W2[j + 1] * z[j], color=BRANCH[j], lw=2.2,
                       label=rf"$w^{{(2)}}_{j+1}z_{j+1}$")
     ax[1, 0].axhline(0, color=GREY, lw=0.5, ls=":")
-    ax[1, 0].legend(fontsize=10)
+    ax[1, 0].legend(fontsize=13.0)
     ax[1, 0].set(xlabel=r"$x$", ylabel=r"$w^{(2)}_j z_j$")
     ax[1, 0].set_title(r"(d)  each unit scaled by its output weight",
-                       fontsize=12.5)
+                       fontsize=16.2)
 
     ax[1, 1].plot(x, yhat, color=OUTC, lw=2.6)
     ax[1, 1].axhline(0, color=GREY, lw=0.5, ls=":")
     ax[1, 1].set(xlabel=r"$x$", ylabel=r"$\hat y$")
     ax[1, 1].set_title(r"(e)  $\hat y=w^{(2)}_0+\sum_j w^{(2)}_j z_j$",
-                       fontsize=12.5)
+                       fontsize=16.2)
 
     J = joints()
     ax[1, 2].plot(x, yhat, color=OUTC, lw=2.6)
@@ -53,7 +53,7 @@ def build():
                       color=BRANCH[j], mec="white", mew=1.0, zorder=5)
     ax[1, 2].set(xlabel=r"$x$", ylabel=r"$\hat y$")
     ax[1, 2].set_title(r"(f)  one joint per unit, at $x=-w^{(1)}_{j0}/w^{(1)}_{j1}$",
-                       fontsize=12)
+                       fontsize=15.6)
     for axis in ax.ravel():
         style.square(axis)
     fig.tight_layout(w_pad=2.0, h_pad=2.4)

@@ -31,7 +31,7 @@ def build():
         axis.plot(a, ya, color=c, lw=2.4)
         axis.axhline(0, color=GREY, lw=0.5, ls=":")
         axis.axvline(0, color=GREY, lw=0.5, ls=":")
-        axis.set_title(f"{nm}\n{formula}", fontsize=12)
+        axis.set_title(f"{nm}\n{formula}", fontsize=15.6)
         axis.set_xlabel(r"$a$")
         style.square(axis)
     for r in range(2):

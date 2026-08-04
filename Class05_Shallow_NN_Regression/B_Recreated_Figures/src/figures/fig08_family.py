@@ -26,11 +26,11 @@ def build():
             axis.plot(x, shallow(x, w1, w2)[2], lw=2.0, alpha=.92)
         axis.axhline(0, color=GREY, lw=0.5, ls=":")
         axis.set(xlabel=r"$x$")
-        axis.set_title(rf"({tag})  four random $\mathbf{{w}}$", fontsize=12.5)
+        axis.set_title(rf"({tag})  four random $\mathbf{{w}}$", fontsize=16.2)
         style.square(axis)
     ax[0].set_ylabel(r"$\hat y(x,\mathbf{w})$")
     fig.suptitle(r"$M=3$ units $\Rightarrow$ continuous, piecewise linear, "
-                 r"at most $M+1=4$ pieces", fontsize=13, y=1.03)
+                 r"at most $M+1=4$ pieces", fontsize=16.9, y=1.03)
     fig.tight_layout(w_pad=2.2)
     return style.save(fig, NAME)
 

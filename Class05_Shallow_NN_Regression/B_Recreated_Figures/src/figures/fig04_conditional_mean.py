@@ -33,13 +33,13 @@ def build():
     ax.plot(x0 + 0.26 * pdf, yy, color=L2, lw=2.2)
     ax.axvline(x0, color=GREY, lw=0.9, ls=":")
     ax.annotate(r"$p(y\mid x_0)$", xy=(x0 + 0.29, w0 + w1 * x0 + 0.02),
-                color=L2, fontsize=15, ha="left", va="center")
+                color=L2, fontsize=19.5, ha="left", va="center")
     ax.annotate(r"$=\mathcal{N}(y\mid\hat y(x_0),\,\sigma^2)$",
-                xy=(x0 + 0.29, w0 + w1 * x0 - 0.15), color=L2, fontsize=11.5,
+                xy=(x0 + 0.29, w0 + w1 * x0 - 0.15), color=L2, fontsize=15.0,
                 ha="left", va="center")
     ax.annotate(r"$x_0$", xy=(x0, ax.get_ylim()[0]), xytext=(x0 + 0.012, 0.02),
-                color=GREY, fontsize=12)
-    ax.legend(loc="upper left", fontsize=11.5)
+                color=GREY, fontsize=15.6)
+    ax.legend(loc="upper left", fontsize=15.0)
     ax.set(xlabel=r"input  $x$", ylabel=r"target  $y$", xlim=(0, 1.42),
            title=r"the best prediction is the conditional mean")
     ax.title.set_fontsize(12.5)

@@ -21,9 +21,9 @@ def build():
     ax.axhline(0, color=GREY, lw=0.6, ls=":")
     ax.axvline(0, color=GREY, lw=0.6, ls=":")
     ax.set_ylim(-1.05, 2.1)
-    ax.annotate("inactive", xy=(-1.5, 0.12), color=GREY, fontsize=11)
-    ax.annotate("active", xy=(0.75, 0.45), color=OUTC, fontsize=11)
-    ax.legend(loc="upper left", fontsize=11)
+    ax.annotate("inactive", xy=(-1.5, 0.12), color=GREY, fontsize=14.3)
+    ax.annotate("active", xy=(0.75, 0.45), color=OUTC, fontsize=14.3)
+    ax.legend(loc="upper left", fontsize=14.3)
     ax.set(xlabel=r"pre-activation  $a$", ylabel=r"activation  $h(a)$",
            title=r"the rectified linear unit")
     ax.title.set_fontsize(12.5)

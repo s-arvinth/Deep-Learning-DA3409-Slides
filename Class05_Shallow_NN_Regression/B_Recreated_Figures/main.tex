@@ -86,12 +86,12 @@
 % =====================================================================
 \title{Single-layer NN/Shallow NN}
 \subtitle{Regression and Classification}
-\author{Fundamentals of Deep Learning \ \textperiodcentered\ Class 5
+\author{DA3409 Introduction to Deep Learning
         \ \textperiodcentered\ Regression}
 \institute{}
 \date{}
 
-\footleft{Fundamentals of Deep Learning}
+\footleft{DA3409 Introduction to Deep Learning}
 \footright{Single-layer NN/Shallow NN}
 \titlelogos{}
 
@@ -225,7 +225,7 @@
     $\Phi_{nj}=\phi_j(\mathbf{x}_n)$ and let
     $E(\mathbf{w})=\tfrac12\lVert\boldsymbol{\Phi}\mathbf{w}
     -\mathbf{y}\rVert^2$.
-    If $\boldsymbol{\Phi}$ has full column rank, $E$ has the unique
+    If $\boldsymbol{\Phi}$ has full column rank, $E(\mathbf{w})$ has the unique
     minimiser
     \[
       \mathbf{w}_{\mathrm{ML}}
@@ -332,7 +332,7 @@
   \begin{theorem}[The optimal predictor is the conditional mean]
     {\small For squared loss, the function minimising
     $\mathbb{E}_{\mathbf{x},y}\big[(f(\mathbf{x})-y)^2\big]$ over all
-    measurable $f$ is $f^{*}(\mathbf{x})=\mathbb{E}[y\mid\mathbf{x}]$,
+    measurable $f$ is $f^{*}(\mathbf{x})=\mathbb{E}_y[y\mid\mathbf{x}]$,
     and for any $f$,
     \[
       \mathbb{E}\big[(f-y)^2\big]
@@ -672,9 +672,10 @@
       \begin{itemize}\setlength{\itemsep}{2pt}
         \item Each pre-activation is an \alert{oriented plane} over
               the input space
-        \item $a_j=0$ is a \alert{line}: on one side the unit is
-              off, on the other it rises linearly
-      \end{itemize}}
+      %   \item $a_j=0$ is a \alert{line}: on one side the unit is
+      %         off, on the other it rises linearly
+       \end{itemize}
+      }
     \end{column}
   \end{columns}
   \vspace{1.1em}

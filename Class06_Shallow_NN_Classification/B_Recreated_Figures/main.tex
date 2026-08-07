@@ -65,12 +65,12 @@
 % =====================================================================
 \title{Single-layer NN/Shallow NN}
 \subtitle{Regression and Classification}
-\author{Fundamentals of Deep Learning \ \textperiodcentered\ Class 6
+\author{Introduction to Deep Learning \ \textperiodcentered\ Class 6
         \ \textperiodcentered\ Classification}
 \institute{}
-\date{4 August}
+\date{}
 
-\footleft{Fundamentals of Deep Learning}
+\footleft{Introduction to Deep Learning}
 \footright{Single-layer NN/Shallow NN}
 \titlelogos{}
 
@@ -150,7 +150,7 @@
 
 \begin{frame}{Recap: the shallow network}
   \vspace{0.2em}
-  From Class~5 (Bishop \& Bishop, 2024, Eqs.~6.1--6.3):
+  Recall the shallow Network discussed in the regression%From Class~5 (Bishop \& Bishop, 2024, Eqs.~6.1--6.3):
   \[
     a_j = \sum_{i=1}^{D} w_{ji}^{(1)} x_i + w_{j0}^{(1)},
     \qquad
@@ -182,7 +182,8 @@
     \begin{column}{0.46\textwidth}
       \vspace{0.4em}
       {\small The simplest classifier
-      (B\&B, 2024, \S5.1.1):}
+      %(B\&B, 2024, \S5.1.1):
+      }
       \vspace{0.2em}
       \[
         a(\mathbf{x}) = \mathbf{w}^{\!\top}\mathbf{x} + w_0
@@ -220,23 +221,23 @@
       r \;=\; \frac{a(\mathbf{x})}{\lVert\mathbf{w}\rVert}
       \;=\;\frac{\mathbf{w}^{\!\top}\mathbf{x}+w_0}
                 {\lVert\mathbf{w}\rVert}.
-      \tag{B\&B 5.7}
+     % \tag{B\&B 5.7}
     \]}
   \end{theorem}
   \vspace{-0.1em}
   {\scriptsize
   \begin{itemize}\setlength{\itemsep}{1pt}
-    \item \focus{1}{Write $\mathbf{x}=\mathbf{x}_{\!\perp}
+    \item {Write $\mathbf{x}=\mathbf{x}_{\!\perp}
           + r\,\mathbf{w}/\lVert\mathbf{w}\rVert$, with
           $\mathbf{x}_{\!\perp}$ the foot of the perpendicular}
-    \item \focus{2}{Apply $a(\cdot)$:
+    \item {Apply $a(\cdot)$:
           $a(\mathbf{x}) = \mathbf{w}^{\!\top}\mathbf{x}_{\!\perp}
           + w_0 + r\,\mathbf{w}^{\!\top}\mathbf{w}
           /\lVert\mathbf{w}\rVert$}
-    \item \focus{3}{The first two terms are
+    \item {The first two terms are
           $a(\mathbf{x}_{\!\perp})=0$, because
           $\mathbf{x}_{\!\perp}$ lies on the boundary}
-    \item \focus{4}{So $a(\mathbf{x})
+    \item {So $a(\mathbf{x})
           = r\lVert\mathbf{w}\rVert$, that is
           $r=a(\mathbf{x})/\lVert\mathbf{w}\rVert$
           \hfill $\square$}
@@ -282,20 +283,24 @@
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\setlength{\itemsep}{1pt}
-    \item \focus{1}{By Bayes,
+    \item %\focus{1}
+    {By Bayes,
           $p(\mathcal{C}_2\mid\mathbf{x})=\sigma(a)$ where $a$ is
           the \alert{log-odds}
           $a=\ln\dfrac{p(\mathbf{x}\mid\mathcal{C}_2)
           p(\mathcal{C}_2)}{p(\mathbf{x}\mid\mathcal{C}_1)
           p(\mathcal{C}_1)}$}
-    \item \focus{2}{Substitute the two Gaussians. The quadratic
+    \item %\focus{2}
+    {Substitute the two Gaussians. The quadratic
           terms $-\tfrac12\mathbf{x}^{\!\top}\bm\Sigma^{-1}
           \mathbf{x}$ are \emph{identical} and cancel --- this is
           exactly where the shared $\bm\Sigma$ is used}
-    \item \focus{3}{What survives is linear in $\mathbf{x}$:
+    \item %\focus{3}
+    {What survives is linear in $\mathbf{x}$:
           $a=(\bm\mu_2-\bm\mu_1)^{\!\top}\bm\Sigma^{-1}\mathbf{x}
           + w_0$ \hfill $\square$}
-    \item \focus{4}{Drop the shared-covariance assumption and the
+    \item %\focus{4}
+    {Drop the shared-covariance assumption and the
           quadratic terms remain: the boundary becomes a
           \alert{quadratic} surface}
   \end{itemize}}

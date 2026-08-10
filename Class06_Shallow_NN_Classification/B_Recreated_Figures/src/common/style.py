@@ -1,4 +1,4 @@
-"""Shared plotting style for the Fundamentals of Deep Learning decks.
+"""Shared plotting style for the Introduction to Deep Learning decks.
 
 Loads the SciencePlots "science" preset, registers the bundled Fira Sans
 faces, and fixes one palette so every figure in every deck matches.
@@ -10,6 +10,7 @@ import os, glob
 import sci_style                       # SciencePlots 'science' preset
 import matplotlib.pyplot as plt
 from matplotlib import font_manager
+from matplotlib.ticker import MaxNLocator, FixedLocator
 
 # ---- locate the deck root (…/B_Recreated_Figures) --------------------
 COMMON = os.path.dirname(os.path.abspath(__file__))
@@ -33,6 +34,13 @@ GREY = "#6E6E6E"      # neutral   — references, guides, truth curves
 BRANCH = [L1, L2, OUTC, ACC]
 SEQ    = "viridis"    # sequential colormap for surfaces and densities
 CAT    = "plasma"     # categorical ramp for ordered families of curves
+
+# muted tints for activation-pattern regions (deliberately not a rainbow)
+from matplotlib.colors import ListedColormap
+REGION_CMAP = ListedColormap([
+    "#EFECF3", "#E1EAEF", "#F3E7E7", "#F6F1E5",
+    "#E9EDE9", "#EDE6F0", "#E4EEF1", "#F8F4EC",
+])
 
 RC = {
     "text.usetex":      False,
@@ -60,6 +68,26 @@ RC = {
     "ytick.major.size": 4.5,
     "xtick.major.width": 0.9,
     "ytick.major.width": 0.9,
+    # --- the science preset turns minor ticks on; at these type sizes
+    #     they crowd the axis and the labels start to collide, so off.
+    "xtick.minor.visible": False,
+    "ytick.minor.visible": False,
+    "xtick.major.pad":  4.0,
+    "ytick.major.pad":  4.0,
+    # --- legends: compact, opaque, never a box drawn over the data
+    "legend.frameon":       True,
+    "legend.framealpha":    0.92,
+    "legend.facecolor":     "white",
+    "legend.edgecolor":     "none",
+    "legend.borderpad":     0.35,
+    "legend.labelspacing":  0.30,
+    "legend.handlelength":  1.5,
+    "legend.handletextpad": 0.5,
+    "legend.columnspacing": 0.9,
+    "legend.borderaxespad": 0.4,
+    # --- a little breathing room so curves do not touch the frame
+    "axes.xmargin":     0.04,
+    "axes.ymargin":     0.08,
     "figure.dpi":       150,
     "pdf.fonttype":     42,      # embed TrueType, keep text selectable
     "ps.fonttype":      42,
@@ -74,8 +102,40 @@ def use():
         color=[L1, L2, OUTC, ACC, GREY])
 
 
-def save(fig, name):
-    """Write `fig` to ../figs/<name>.pdf as vector output."""
+def thin_ticks(fig, nx=5, ny=5):
+    """Cap the number of major ticks on every linear axis of `fig`.
+
+    At the type sizes this deck uses, matplotlib's default tick density
+    makes the labels collide.  Log axes and colourbars are left alone.
+    """
+    for ax in fig.axes:
+        if getattr(ax, "name", "") == "3d":
+            continue
+        if getattr(ax, "_colorbar", None) is not None:
+            continue
+        locked = getattr(ax, "_idl_locked", set())
+        try:
+            # never override ticks the figure set on purpose
+            if ("x" not in locked
+                    and ax.get_xscale() == "linear"
+                    and not isinstance(ax.xaxis.get_major_locator(),
+                                       FixedLocator)):
+                ax.xaxis.set_major_locator(MaxNLocator(nbins=nx, prune=None))
+            if ("y" not in locked
+                    and ax.get_yscale() == "linear"
+                    and not isinstance(ax.yaxis.get_major_locator(),
+                                       FixedLocator)):
+                ax.yaxis.set_major_locator(MaxNLocator(nbins=ny, prune=None))
+        except Exception:
+            pass
+
+
+def save(fig, name, nx=5, ny=5):
+    """Write `fig` to ../figs/<name>.pdf as vector output.
+
+    Thins the ticks first, so no figure ships with colliding labels.
+    """
+    thin_ticks(fig, nx, ny)
     path = os.path.join(FIGS, name + ".pdf")
     fig.savefig(path, bbox_inches="tight", dpi=400)
     plt.close(fig)
@@ -86,3 +146,22 @@ def save(fig, name):
 def square(ax):
     """Force a square data box — the preferred aspect for these decks."""
     ax.set_box_aspect(1.0)
+
+
+def integer_ticks(ax, axis="x", nbins=6):
+    """Whole-number ticks, for axes that count things (units, layers).
+
+    Marks the axis so the automatic thinning in save() leaves it alone.
+    """
+    loc = MaxNLocator(nbins=nbins, integer=True)
+    (ax.xaxis if axis == "x" else ax.yaxis).set_major_locator(loc)
+    locked = getattr(ax, "_idl_locked", set())
+    locked.add(axis)
+    ax._idl_locked = locked
+
+
+def tidy3d(ax, ticks=(0.0, 0.5, 1.0), labelsize=11):
+    """Three ticks per axis on a 3-D panel, which is all that fits."""
+    for a in (ax.xaxis, ax.yaxis, ax.zaxis):
+        a.set_ticks(list(ticks))
+    ax.tick_params(labelsize=labelsize, pad=0.5)

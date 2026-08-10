@@ -1,4 +1,4 @@
-# Notation contract — Fundamentals of Deep Learning
+# Notation contract — Introduction to Deep Learning
 
 One symbol family, used in **every** deck, in **every** figure, and in
 **every** caption. Based on Bishop & Bishop (2024). Where Prince (2023)

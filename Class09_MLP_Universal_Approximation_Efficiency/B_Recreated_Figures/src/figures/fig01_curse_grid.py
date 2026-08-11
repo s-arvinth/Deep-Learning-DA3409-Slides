@@ -17,11 +17,11 @@ S = 4          # cells per axis
 
 def build():
     style.use()
-    fig = plt.figure(figsize=(9.4, 8.4))
-    ax0 = fig.add_subplot(2, 2, 1)
-    ax1 = fig.add_subplot(2, 2, 2)
-    ax2 = fig.add_subplot(2, 2, 3, projection="3d")
-    ax3 = fig.add_subplot(2, 2, 4)
+    fig = plt.figure(figsize=(15.0, 4.0))
+    ax0 = fig.add_subplot(1, 4, 1)
+    ax1 = fig.add_subplot(1, 4, 2)
+    ax2 = fig.add_subplot(1, 4, 3, projection="3d")
+    ax3 = fig.add_subplot(1, 4, 4)
 
     e = np.linspace(0, 1, S + 1)
     cmap = plt.get_cmap(style.CAT)
@@ -68,7 +68,7 @@ def build():
     ax2.set(xlim=(0, 1), ylim=(0, 1), zlim=(0, 1))
     ax2.set_xlabel(r"$x_1$", fontsize=12); ax2.set_ylabel(r"$x_2$", fontsize=12)
     ax2.set_zlabel(r"$x_3$", fontsize=12)
-    style.tidy3d(ax2, ticks=(0.0, 0.5, 1.0), labelsize=12)
+    style.tidy3d(ax2, ticks=(0.0, 0.5, 1.0), labelsize=11)
     ax2.view_init(elev=20, azim=-58)
     ax2.set_title(rf"(c)  $D=3$:  ${S**3}$ cells", fontsize=12.5)
 
@@ -87,7 +87,7 @@ def build():
     style.square(ax3)
     for a in (ax0, ax1):
         style.square(a)
-    fig.tight_layout(w_pad=2.6, h_pad=2.6)
+    fig.tight_layout(w_pad=2.2)
     return style.save(fig, NAME)
 
 

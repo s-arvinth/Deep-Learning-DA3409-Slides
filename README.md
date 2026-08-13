@@ -55,9 +55,13 @@ Class09_MLP_Universal_Approximation_Efficiency/ A_… / B_… / C_…
     C_Textbook_Theorems_Only/    B, minus every result absent from both books
 Class10_Depth_Width_Efficiency_Theorems/       A_… / B_… / C_…
 Class11_Activations_Errors_Backprop_AD/        A_… / B_…
+Class13_Gradient_Descent_Optimization/         A_… / B_…
 
 _shared/
   NOTATION.md                    the symbol contract every deck follows
+  PLAN_Classes13_14_15.md        how Bishop Ch.7 and Prince Ch.6-7 are
+                                 split across the three classes that
+                                 share them, with no overlap
   FIGURE_SOURCES.md              how src/ is organised and how to re-render
   deck_style.py                  the shared matplotlib style
   fonts/                         master copy of the Fira faces

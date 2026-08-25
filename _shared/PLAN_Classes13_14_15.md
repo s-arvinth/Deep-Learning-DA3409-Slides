@@ -97,7 +97,7 @@ Polyak's heavy-ball rate, Nesterov's $O(1/T^2)$, and the Robbins–Monro
 conditions. Everything that survives is in Bishop §7.3 or Prince
 §6.3–6.5.
 
-**Built.** Class 14 ships as A (57 pages), B (64 pages) and C (57 pages).
+**Built.** Class 14 ships as A (59 pages), B (70 pages) and C (62 pages).
 Its narrative order is: the best case (equal curvature, one step), then
 ill-conditioning as the problem, then momentum, schedules and adaptive
 rates as the successive fixes.

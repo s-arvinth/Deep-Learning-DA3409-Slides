@@ -1,0 +1,474 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{graphicx}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codegray}{RGB}{90,90,90}
+\definecolor{codegreen}{RGB}{0,110,0}
+\definecolor{codeblue}{RGB}{0,70,170}
+
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{codegray},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    columns=fullflexible,
+    tabsize=4
+}
+
+\setlist{nosep}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Assignment 4}
+\cfoot{\thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{DA3410: Assignment 4}}\\[0.4em]
+    {\Large \textbf{Neural Network Training from Scratch with PyTorch Primitives}}\\[1em]
+\end{center}
+
+\section{Learning Objectives}
+
+By the end of this assignment, you should be able to implement the complete neural-network training process \textbf{manually from scratch using PyTorch tensor primitives}, including:
+
+\begin{enumerate}
+    \item forward propagation with a self-implemented automatic differentiation system;
+    \item backpropagation and parameter-gradient computation through the automatic differentiation system;
+    \item stochastic gradient descent (SGD), mini-batch gradient descent, and full-batch gradient descent;
+    \item forward-pass and backward-pass memory-cost analysis;
+    \item an end-to-end training, validation, checkpointing, and prediction pipeline.
+\end{enumerate}
+
+\section{Overview}
+
+In Assignment 3, you trained neural networks using PyTorch and investigated how width and depth affect model performance.
+
+In this assignment, you will implement neural network training \textbf{from scratch using PyTorch tensor primitives}. You will implement the architecture, forward pass, loss computation, automatic differentiation, backpropagation, gradient updates, training and validation loops, checkpointing, and test prediction. You will compare SGD, mini-batch gradient descent, and full-batch gradient descent, analyze memory use during forward and backward propagation, and investigate vanishing and exploding gradients in deep networks.
+
+Use the same train, validation, and test data and learned input representations from Assignment 3.
+
+\section{Datasets and Input Representations}
+
+\begin{center}
+\begin{tabular}{p{0.17\textwidth} p{0.25\textwidth} p{0.45\textwidth}}
+\toprule
+\textbf{Dataset} & \textbf{Task} & \textbf{Input representation} \\
+\midrule
+\code{kcat} & Regression & Molformer SMILES embeddings + ESM2 650M embeddings \\
+\code{protein} & Enzyme classification & ESM2 650M embeddings \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Required PyTorch-Primitive Implementation}
+
+Implement the complete training process manually using \textbf{PyTorch tensor primitives}. Your implementation must include parameter initialization, forward propagation, activation functions, loss functions, a self-implemented automatic differentiation system, backpropagation, gradients for all weights and biases, SGD and mini-batch construction, full-batch updates, training and validation loops, evaluation metrics, best-model checkpointing and restoration, and test prediction.
+
+Your automatic differentiation system must perform the forward and backward passes for \textbf{every experiment}. During the forward pass, it must retain the operations and intermediate quantities required for differentiation. During the backward pass, it must propagate gradients in reverse order using the chain rule. This automatic differentiation system is the required implementation of backpropagation. Do not hard-code a separate backward pass for each network depth or experiment.
+
+You may use low-level PyTorch tensor creation, indexing, arithmetic,
+linear-algebra, reduction, shape, and elementary mathematical operations. You must implement the automatic differentiation system, neural-network operations, loss functions, and parameter updates yourself.
+
+Do \textbf{NOT} use \code{requires\_grad=True}, \code{torch.autograd},
+\code{Tensor.backward()}, \code{torch.autograd.grad}, \code{torch.nn},
+\code{torch.nn.functional}, or \code{torch.optim}.
+
+You may use standard libraries such as Pandas for data loading and Matplotlib for figures.
+
+\section{Training Configuration}
+
+Every main experiment must use:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Required value} \\
+\midrule
+Framework & PyTorch tensor primitives \\
+Random seed & \code{3410} \\
+Hidden activation & ReLU \\
+Learning rate & $5\times10^{-4}$ \\
+SGD batch size & 1 \\
+Mini-batch gradient descent batch size & 128 \\
+Full-batch gradient descent batch size & Complete training set \\
+Number of epochs & 25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Train every dataset--architecture combination with all three optimization regimes:
+
+\begin{enumerate}
+    \item \textbf{SGD:} one training sample per parameter update;
+    \item \textbf{Mini-batch gradient descent:} 128 training samples per parameter update, except for the final smaller batch when required;
+    \item \textbf{Full-batch gradient descent:} the complete training set per parameter update.
+\end{enumerate}
+
+One epoch is one complete pass through the training set for all three regimes. Keep the architecture, learning rate, loss function, data split, and all other applicable settings fixed when comparing the optimization regimes.
+
+Do not use momentum, Adam, RMSProp, learning-rate schedulers, or other optimizer modifications. For every update, update each trainable parameter $\theta$ using
+
+\[
+\theta \leftarrow \theta-\eta\nabla_{\theta}\mathcal{L},
+\]
+
+where $\eta$ is the learning rate.
+
+\section{Reproducibility}
+
+Use the following function before parameter initialization and training for every dataset:
+
+\begin{lstlisting}[language=Python]
+import os
+import random
+import torch
+
+def seed_all(seed: int = 3410):
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+SEED = 3410
+seed_all(SEED)
+\end{lstlisting}
+
+\textbf{Do not change the seed.} Shuffle the training samples before constructing updates in the SGD and mini-batch regimes for each epoch. Full-batch gradient descent must use all training samples in one update per epoch.
+
+\section{Primary Validation Metrics}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Dataset} & \textbf{Primary validation metric} \\
+\midrule
+\code{kcat} & RMSE on \code{log10\_value} \\
+\code{protein} & Multiclass MCC \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Additional metrics may be reported, but use the metrics above for model evaluation.
+
+\section{Training and Checkpointing}
+
+Train every main experiment for \textbf{25 epochs}. For each epoch, record the training loss, validation loss, and primary validation metric.
+
+Keep the parameters from the epoch with the \textbf{lowest validation loss}. You may save the required tensors in a PyTorch \code{.pt} file.
+
+\section{Trainable Parameter Count}
+
+For every dataset and architecture, report the input dimension, output dimension, and total number of trainable parameters once. For each optimization regime, report the best epoch, best validation loss, and primary validation metric.
+
+\section{Memory Cost of Forward and Backward Propagation}
+
+For every main experiment, analyze the memory required for one training update. Report the memory used by the arrays that are required for:
+
+\begin{enumerate}
+    \item trainable parameters;
+    \item quantities retained by the automatic differentiation system during the forward pass;
+    \item backward-pass gradients and adjoints, including parameter gradients.
+\end{enumerate}
+
+Report the forward-pass and backward-pass memory costs separately in bytes or MiB. Base the calculation on the actual tensor shapes and data type used by your implementation. Do not include the storage required for the complete dataset.
+
+Explain how the memory cost changes with network depth and batch size. Since the required width is fixed at 128, also state how the memory cost would scale with width in a general implementation.
+
+\section{Required Experiments}
+
+The identifier \code{Dk\_W128} denotes a network with $k$ hidden layers of width 128. The linear baseline \code{D0} has no hidden layer.
+
+The required architectures are:
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+\textbf{Depth} & \textbf{Architecture} \\
+\midrule
+0 & \code{D0} \\
+1 & \code{D1\_W128} \\
+10 & \code{D10\_W128} \\
+30 & \code{D30\_W128} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Your implementation must support arbitrary depth and width. Do not hard-code a separate network for each experiment.
+
+\section{Stage 1 --- Backpropagation Through Increasing Depth}
+
+\textbf{Due 25.08.2026 - 5.05PM}
+
+Complete \code{D0}, \code{D1\_W128}, \code{D10\_W128}, and \code{D30\_W128} on both datasets using mini-batch gradient descent:
+
+\[
+4\ \text{architectures}\times2\ \text{datasets}
+=\boxed{8\text{ models}}.
+\]
+
+For each experiment, report:
+\begin{itemize}
+    \item experiment ID;
+    \item number of hidden layers;
+    \item hidden width;
+    \item number of trainable parameters;
+    \item best epoch;
+    \item best validation loss;
+    \item primary validation metric.
+\end{itemize}
+
+Use the same training configuration, checkpointing procedure, loss function, and validation metric for all architectures within a dataset.
+
+\section{Stage 2 --- Optimization Regime Experiments}
+
+\textbf{Due 31.08.2026 - 11.59PM}
+
+For every dataset and architecture from Stage 1, train the same model with SGD and full-batch gradient descent. Together with the mini-batch runs from Stage 1, each dataset--architecture combination must therefore have results for all three optimization regimes.
+
+Stage 2 adds
+
+\[
+4\ \text{architectures}\times2\ \text{datasets}\times2\ \text{additional regimes}
+=\boxed{16\text{ models}}.
+\]
+
+The complete set of main experiments is
+
+\[
+4\ \text{architectures}\times2\ \text{datasets}\times3\ \text{optimization regimes}
+=\boxed{24\text{ experiments}}.
+\]
+
+For all three optimization regimes, define $\mathcal{L}$ as the mean of the per-sample losses in the current batch. Do not sum the per-sample losses.
+
+For each dataset, architecture, and optimization regime, report the same performance details as in Stage 1 and the forward-pass and backward-pass memory costs defined above.
+
+\section{Stage 3 --- Vanishing and Exploding Gradients}
+
+\textbf{Due 31.08.2026 - 11.59PM}
+
+Use \code{D30\_W128} on both datasets to investigate gradient propagation. Use mini-batch gradient descent with batch size 128, learning rate $5\times10^{-4}$, and the same data splits and random seed as the main experiments. Keep all other applicable settings fixed.
+
+Run the following three diagnostic conditions:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+\textbf{Condition} & \textbf{Hidden activation} & \textbf{Weight initialization} \\
+\midrule
+Stable reference & ReLU & He initialization \\
+Vanishing-gradient condition & Sigmoid & Xavier initialization \\
+Exploding-gradient condition & ReLU & $2\times$ He initialization \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For the exploding-gradient condition, initialize each weight matrix as $W=2W^{\mathrm{He}}$. Use zero biases in all three diagnostic conditions.
+
+During the forward pass, record the root-mean-square activation magnitude
+
+\[
+A_l=\frac{\|H_l\|_F}{\sqrt{\# H_l}}.
+\]
+
+During the backward pass, record the root-mean-square parameter-gradient magnitude
+
+\[
+G_l=
+\frac{\left\|\partial\mathcal{L}/\partial W_l\right\|_F}
+{\sqrt{\# W_l}}.
+\]
+
+Plot $A_l$ and $\log_{10}G_l$ against layer index. Use these measurements to identify stable, vanishing, and exploding gradient behavior. If a diagnostic run produces non-finite values, record when this first occurs and stop that diagnostic run. For the required layerwise plots, record $A_l$ and $G_l$ on the first mini-batch before the first parameter update.
+
+This stage adds
+
+\[
+2\ \text{datasets}\times3\ \text{diagnostic conditions}
+=\boxed{6\text{ diagnostic runs}}.
+\]
+
+These diagnostic runs are separate from the 24 main experiments and do not require test-prediction CSV files. You \textbf{MUST} submit the code files for these experiments.
+
+\section{Required Figures}
+
+For \textbf{each dataset and main experiment}, produce:
+
+\begin{enumerate}
+    \item \textbf{Training and Validation Loss:} Plot training and validation loss across all 25 epochs.
+    \item \textbf{Validation Performance:} Plot the primary validation metric across all 25 epochs and indicate the epoch selected using the lowest validation loss.
+\end{enumerate}
+
+For Stage 3, also provide the required layerwise activation-magnitude and gradient-magnitude plots for each diagnostic condition.
+
+Use appropriate labels, titles, legends, and axes.
+
+\section{Required Test Prediction Files}
+
+Generate one test-prediction CSV for \textbf{every main experiment} using the checkpoint with the lowest validation loss.
+
+Use the filename:
+
+\begin{center}
+\code{submission\_<dataset>\_<architecture>\_<optimizer>.csv}
+\end{center}
+
+Use \code{SGD}, \code{MBGD}, and \code{FBGD} as the optimizer identifiers for stochastic, mini-batch, and full-batch gradient descent, respectively.
+
+Use the following prediction columns:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Dataset} & \textbf{Required prediction column(s)} \\
+\midrule
+\code{kcat} & \code{log10\_value} \\
+\code{protein} & \code{ec\_number} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Preserve the original test-sample order. Do not include a DataFrame index, extra columns, or unnecessary rounding.
+
+The complete assignment therefore produces
+
+\[
+4\ \text{architectures}\times2\ \text{datasets}\times3\ \text{optimization regimes}
+=\boxed{24\text{ prediction CSV files}}.
+\]
+
+\section{Required Final Analysis}
+
+Answer the following questions using evidence from your experiments.
+
+\subsection*{Part A --- Optimization}
+
+\begin{enumerate}
+    \item Does training loss decrease consistently under SGD, mini-batch gradient descent, and full-batch gradient descent?
+    \item Does validation loss follow the same pattern for all three optimization regimes?
+    \item At which epoch is the lowest validation loss obtained for each dataset, architecture, and optimization regime?
+    \item Does each model converge within 25 epochs?
+    \item How do the three optimization regimes differ in update noise, convergence behavior, and computational cost?
+\end{enumerate}
+
+\subsection*{Part B --- Generalization}
+
+\begin{enumerate}
+    \item Is there evidence of underfitting or overfitting on either dataset?
+    \item Does the epoch with the lowest training loss also have the lowest validation loss?
+    \item How does the training-validation gap change during training?
+    \item Why should validation performance, rather than training loss, be used to select the final checkpoint?
+\end{enumerate}
+
+\subsection*{Part C --- Automatic Differentiation, Backpropagation, and Memory}
+
+\begin{enumerate}
+    \item What quantities must be stored during the forward pass for automatic differentiation and backpropagation?
+    \item In what order are the gradients computed during the backward pass, and how does the chain rule propagate them through the computation graph?
+    \item How does the learning rate affect each gradient-descent update?
+    \item Why must gradients be computed before the parameters are updated?
+    \item How do the forward-pass and backward-pass memory costs change with depth and batch size?
+\end{enumerate}
+
+\subsection*{Part D --- Dataset Differences}
+
+\begin{enumerate}
+    \item Does the same PyTorch-primitive implementation train equally well on both datasets?
+    \item Which dataset is easier and harder to optimize?
+    \item How do the different output operations and loss functions affect the backward pass?
+    \item Why can the same hidden-layer implementation support multi-class classification and regression?
+\end{enumerate}
+
+\subsection*{Part E --- Vanishing and Exploding Gradients}
+
+\begin{enumerate}
+    \item How do the layerwise activation magnitudes differ across the stable, vanishing-gradient, and exploding-gradient conditions?
+    \item How does $\log_{10}G_l$ change from the output side to the input side of the network in each condition?
+    \item What evidence shows that gradients vanish or explode in the \code{D30\_W128} network?
+    \item Why does the stable reference propagate gradients more reliably than the two diagnostic conditions?
+\end{enumerate}
+
+% \subsection*{Part F --- Comparison with Assignment 3}
+
+% Compare your Assignment 4 implementation and results with your Assignment 3 implementation. Use directly comparable configurations when available. Discuss:
+
+% \begin{enumerate}
+%     \item implementation differences between PyTorch high-level modules in Assignment 3 and your PyTorch-primitive automatic differentiation system in Assignment 4;
+%     \item predictive performance and training behavior;
+%     \item computational cost;
+%     \item memory requirements and the quantities that must be retained for backpropagation.
+% \end{enumerate}
+
+\section{Final Results Table}
+
+Include a final table similar to:
+
+\begin{center}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccr}
+\toprule
+\textbf{Dataset} &
+\textbf{Best arch.} &
+\textbf{Optimizer} &
+\textbf{Best epoch} &
+\textbf{Best val. loss} &
+\textbf{Val. metric} &
+\textbf{Parameters} \\
+\midrule
+\code{kcat}    & & & & & & \\
+\code{protein} & & & & & & \\
+\bottomrule
+\end{tabular}%
+}
+\end{center}
+
+\section{Final Submission}
+
+Submit:
+
+\begin{enumerate}
+    \item complete executable PyTorch-primitive code/notebook(s)
+    \item all required results tables
+    \item all required figures
+    \item all 24 test-prediction CSV files
+    \item report
+\end{enumerate}
+
+Your code must allow the TAs to identify the dataset, parameter initialization, automatic differentiation forward pass, loss computation, backward pass, optimization-regime update, training history, best validation epoch, and final test predictions.
+
+All neural-network training operations must use PyTorch tensor primitives. All experiments must use \code{seed = 3410}.
+
+\end{document}

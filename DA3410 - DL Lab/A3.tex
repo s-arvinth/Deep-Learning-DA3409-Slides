@@ -1,0 +1,504 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{microtype}
+\usepackage{graphicx}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codegray}{RGB}{90,90,90}
+\definecolor{codegreen}{RGB}{0,110,0}
+\definecolor{codeblue}{RGB}{0,70,170}
+
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{codegray},
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    columns=fullflexible,
+    tabsize=4
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Assignment 3}
+\cfoot{\thepage}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{DA3410: Assignment 3}}\\[0.4em]
+    {\Large \textbf{Width and Depth in Shallow Neural Networks}}\\[1em]
+\end{center}
+
+\section{Overview}
+
+In Assignments 1 and 2, you investigated how \textbf{input representation} and \textbf{activation functions} affect model performance.
+
+In this assignment, the input representation and training procedure are fixed. You will investigate:
+
+\begin{enumerate}
+    \item \textbf{Width:} What happens when the number of neurons in a single hidden layer increases?
+    \item \textbf{Depth:} What happens when additional hidden layers are added while the width of each hidden layer is held fixed?
+\end{enumerate}
+
+You will use the same four datasets: PatchCamelyon (\code{pcam}), kcat regression (\code{kcat}), Protein EC classification (\code{protein}), and spectral regression (\code{spectra}).
+
+The assignment has \textbf{two stages}. \textbf{Stage 1} is due at 5.05PM IST on August 18th 2026. \textbf{Stage 2} is due at 11.59PM IST on August 24th, 2026.
+
+\section{Datasets and Input Representations}
+
+\begin{center}
+\begin{tabular}{p{0.17\textwidth} p{0.25\textwidth} p{0.45\textwidth}}
+\toprule
+\textbf{Dataset} & \textbf{Task} & \textbf{Input representation} \\
+\midrule
+\code{pcam} & Binary classification & Dinov2\_vits14 Embeddings \\
+\code{kcat} & Regression & Molformer SMILES embeddings + ESM2 650M embeddings \\
+\code{protein} & 7-class classification & ESM2 650M embeddings \\
+\code{spectra} & Multi-output regression &  PLS Latent Embeddings\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Required NN Experiments}
+
+Implement the following eight architectures. These are the \textbf{exact identifiers} to use in filenames and results.
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Experiment ID} & \textbf{Number of hidden layers} & \textbf{Hidden width} \\
+\midrule
+\code{D0} & 0 & --- \\
+\code{D1\_W16} & 1 & 16 \\
+\code{D1\_W64} & 1 & 64 \\
+\code{D1\_W128} & 1 & 128 \\
+\code{D1\_W256} & 1 & 256 \\
+\code{D2\_W128} & 2 & 128 per layer \\
+\code{D3\_W128} & 3 & 128 per layer \\
+\code{D4\_W128} & 4 & 128 per layer \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Training Configuration}
+
+Every experiment must use:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Required value} \\
+\midrule
+Framework & PyTorch \\
+Random seed & \code{3410} \\
+Hidden activation & ReLU \\
+Optimizer & Adam \\
+Learning rate & $5\times10^{-4}$ \\
+Batch size & 128 \\
+Number of epochs & 25 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Reproducibility}
+
+Use the following function for every experiment:
+
+\begin{lstlisting}[language=Python]
+import os
+import random
+
+import numpy as np
+import torch
+
+
+def seed_all(seed: int = 3410):
+    """
+    Seed Python, NumPy, and PyTorch for reproducible experiments.
+
+    Call this function before constructing the model and starting
+    each experiment.
+    """
+
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
+
+    random.seed(seed)
+    np.random.seed(seed)
+
+    torch.manual_seed(seed)
+
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    torch.use_deterministic_algorithms(True, warn_only=True)
+
+
+SEED = 3410
+seed_all(SEED)
+\end{lstlisting}
+
+Call \code{seed\_all(3410)} at the beginning of \textbf{every experiment}, before constructing the model and starting training. \textbf{Do not change the seed.}
+
+\section{Primary Validation Metrics}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+\textbf{Dataset} & \textbf{Primary validation metric} \\
+\midrule
+\code{pcam} & ROC-AUC \\
+\code{kcat} & RMSE on \code{log10\_value} \\
+\code{protein} & Multiclass MCC \\
+\code{spectra} & RMSE \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+For \code{spectra}, also report RMSE separately for each of the six targets. Additional metrics may be reported, but the metrics above should be used for architecture comparisons.
+
+\section{Training and Checkpointing}
+
+Train every model for all \textbf{25 epochs}. For every epoch, record:
+
+\begin{itemize}
+    \item training loss;
+    \item validation loss;
+    \item primary validation metric.
+\end{itemize}
+
+Keep the checkpoint with the \textbf{lowest validation loss}. After epoch 25, restore this checkpoint, report its validation results, record the selected epoch, and use it to generate the test predictions.
+
+\section{Trainable Parameter Count}
+
+For every architecture, report the total number of \textbf{trainable parameters} and include at least the following table for each dataset:
+
+\begin{center}
+\small
+\resizebox{0.97\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Experiment} &
+\textbf{Hidden layers} &
+\textbf{Width} &
+\textbf{Parameters} &
+\textbf{Best epoch} &
+\textbf{Best val. loss} &
+\textbf{Primary val. metric} \\
+\midrule
+\code{D0} & & & & & & \\
+\code{D1\_W16} & & & & & & \\
+\code{D1\_W64} & & & & & & \\
+\code{D1\_W128} & & & & & & \\
+\code{D1\_W256} & & & & & & \\
+\code{D2\_W128} & & & & & & \\
+\code{D3\_W128} & & & & & & \\
+\code{D4\_W128} & & & & & & \\
+\bottomrule
+\end{tabular}%
+}
+\end{center}
+
+Consider the change in parameter count when discussing width and depth.
+
+\section{Stage 1 --- Width Experiment}
+
+\subsection{Deadline}
+
+\textbf{5:05 PM IST --- August 18th 2026.}
+
+Complete the following architectures on all four datasets:
+
+\begin{itemize}
+    \item \code{D0}
+    \item \code{D1\_W16}
+    \item \code{D1\_W64}
+\end{itemize}
+
+This gives:
+
+\[
+3\ \text{architectures}\times4\ \text{datasets}
+=12\ \text{required Stage 1 experiments}.
+\]
+
+\subsection{Required Stage 1 Results}
+
+For each dataset, report the experiment ID, hidden-layer width, trainable parameters, best epoch, best validation loss, and primary validation metric. Preserve the training history required for the figures.
+
+\subsection{Required Stage 1 Figures}
+
+For \textbf{each dataset}, produce:
+
+\subsubsection*{Figure 1 --- Width vs Validation Performance}
+
+Compare \code{D0}, \code{D1\_W16}, and \code{D1\_W64} using the primary validation metric. Clearly distinguish the linear \code{D0} baseline.
+
+\subsubsection*{Figure 2 --- Trainable Parameters vs Validation Performance}
+
+Plot the primary validation metric against the number of trainable parameters for the Stage 1 architectures.
+
+\subsubsection*{Figure 3 --- Training and Validation Loss}
+
+Plot training and validation loss across all 25 epochs so that the Stage 1 architectures can be compared clearly. Use appropriate labels, titles, legends, and axes.
+
+\subsection{Stage 1 Test Predictions}
+
+For every Stage 1 experiment, restore the best validation checkpoint, run it on the test inputs, and save the predictions as a separate CSV.
+
+Stage 1 therefore produces:
+
+\[
+3\times4=12
+\]
+
+test-prediction CSV files.
+
+\section{Stage 2 --- Depth Experiment}
+
+\subsection{Deadline}
+
+\textbf{11:59 PM IST --- August 24th 2026.}
+
+Stage 2 adds the following architectures for every dataset:
+
+\begin{itemize}
+    \item \code{D1\_W128}
+    \item \code{D1\_W256}
+    \item \code{D2\_W128}
+    \item \code{D3\_W128}
+    \item \code{D4\_W128}
+\end{itemize}
+
+The depth comparison is:
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Experiment} & \textbf{Effective hidden depth} & \textbf{Width per hidden layer} \\
+\midrule
+\code{D1\_W128} & 1 & 128 \\
+\code{D1\_W256} & 1 & 256 \\
+\code{D2\_W128} & 2 & 128 \\
+\code{D3\_W128} & 3 & 128 \\
+\code{D4\_W128} & 4 & 128 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Stage 2 adds:
+
+\[
+5\ \text{architectures}\times4\ \text{datasets}
+=20\ \text{training runs}.
+\]
+
+Across the complete assignment:
+
+\[
+12+20=\boxed{32\ \text{required models}}.
+\]
+
+\subsection{Required Stage 2 Figures}
+
+For \textbf{each dataset}, produce:
+
+\subsubsection*{Figure 4 --- Depth vs Validation Performance}
+
+Compare \code{D1\_W128}, \code{D2\_W128}, \code{D3\_W128}, and \code{D4\_W128} using the primary validation metric.
+
+\subsubsection*{Figure 5 --- Parameter Count vs Performance for the Depth Study}
+
+Plot the primary validation metric against trainable parameter count for \code{D1\_W128}, \code{D2\_W128}, \code{D3\_W128}, and \code{D4\_W128}. Your discussion must acknowledge that increasing depth also increases parameter count.
+
+\subsubsection*{Figure 6 --- Depth Training Curves}
+
+Compare the training and validation loss curves for the width-128 networks with one, two, three, and four hidden layers.
+
+\section{Required Test Prediction Files}
+
+Produce one test-prediction CSV for every required experiment using:
+
+\begin{center}
+\code{submission\_<dataset>\_<experiment>.csv}
+\end{center}
+
+Dataset names are \code{pcam}, \code{kcat}, \code{protein}, and \code{spectra}. Experiment names are:
+
+\begin{itemize}
+    \item \code{D0}, \code{D1\_W16}, \code{D1\_W64}, \code{D1\_W128}, \code{D1\_W256},
+    \code{D2\_W128}, \code{D3\_W128}, and \code{D4\_W128}.
+\end{itemize}
+
+Examples include \code{submission\_pcam\_D0.csv}, \code{submission\_pcam\_D1\_W16.csv},
+\code{submission\_kcat\_D1\_W128.csv}, \code{submission\_protein\_D2\_W128.csv}, and
+\code{submission\_spectra\_D4\_W128.csv}.
+
+Each CSV must preserve the test-sample order and required column names. Do not add an unnecessary DataFrame index or extra columns, and do not round predictions unnecessarily.
+
+The complete assignment therefore produces:
+
+\[
+8\times4=\boxed{32\text{ prediction CSV files}},
+\]
+
+with 12 from Stage 1 and 20 from Stage 2.
+
+\section{Required Final Analysis}
+
+Your report must answer the following questions using evidence from your experiments.
+
+\subsection*{Part A --- Linear vs Nonlinear Model}
+
+\begin{enumerate}
+    \item How does \code{D0} compare with the \code{D1} one-hidden-layer models?
+    \item Does introducing the first nonlinear hidden layer provide a substantial improvement?
+    \item Is the effect consistent across all four datasets?
+\end{enumerate}
+
+\subsection*{Part B --- Width}
+
+Compare:
+
+\[
+16\rightarrow64\rightarrow128\rightarrow256.
+\]
+
+Discuss:
+
+\begin{enumerate}
+    \item Does increasing width consistently improve training loss?
+    \item Does increasing width consistently improve validation performance?
+    \item Is there evidence of diminishing returns?
+    \item Is there evidence of overfitting?
+    \item Which width performs best for each dataset?
+    \item Is the widest model always the best model?
+    \item How does trainable parameter count change with width?
+    \item Does increased parameter count reliably correspond to increased validation performance?
+\end{enumerate}
+
+\subsection*{Part C --- Depth}
+
+Compare:
+
+\[
+1\rightarrow2\rightarrow3\rightarrow4
+\]
+
+hidden layers while holding hidden width fixed at 128.
+
+Discuss:
+
+\begin{enumerate}
+    \item Does training loss improve as the model becomes deeper?
+    \item Does validation performance improve as the model becomes deeper?
+    \item Is the deepest model always the best model?
+    \item Does increasing depth make optimization easier or harder?
+    \item Does the training-validation gap change with depth?
+    \item How much additional capacity is introduced by the extra hidden layers?
+    \item At what depth, if any, does additional depth stop being useful?
+\end{enumerate}
+
+\subsection*{Part D --- Width vs Depth}
+
+Discuss:
+
+\begin{enumerate}
+    \item Is increasing width more useful than increasing depth?
+    \item Does this conclusion depend on the dataset?
+    \item Can two models with very different architectures achieve similar validation performance?
+    \item How does model parameter count influence your interpretation?
+    \item Is it valid to conclude that depth alone caused an improvement when the deeper model also contains more trainable parameters?
+\end{enumerate}
+
+\subsection*{Part E --- Generalization}
+
+Using the training and validation curves, discuss:
+
+\begin{enumerate}
+    \item Which models appear to underfit or overfit?
+    \item Does the model with the lowest final training loss also have the best validation performance?
+    \item Does the epoch with the lowest validation loss usually occur near epoch 25?
+    \item Which architectures show the largest training-validation gap?
+    \item Why is validation performance more useful than training performance when choosing a model?
+\end{enumerate}
+
+\subsection*{Part F --- Input Representation and Dataset Differences}
+
+Discuss:
+
+\begin{enumerate}
+    \item Which dataset benefits most and least from increasing network capacity?
+    \item Are simple networks surprisingly competitive on any supplied learned embeddings?
+    \item Why might a strong pretrained representation reduce the need for a large prediction network?
+    \item Why might the relationship between model capacity and performance differ between images, protein embeddings, molecular/protein embeddings, and spectral features?
+\end{enumerate}
+
+\section{Final Model-Selection Table}
+
+Include a final table similar to:
+
+\begin{center}
+\small
+\begin{tabular}{p{0.12\textwidth} p{0.18\textwidth} p{0.18\textwidth} p{0.22\textwidth} p{0.13\textwidth}}
+\toprule
+\textbf{Dataset} &
+\textbf{Best width experiment} &
+\textbf{Best depth experiment} &
+\textbf{Overall preferred architecture} &
+\textbf{Validation metric} \\
+\midrule
+\code{pcam} & & & & \\
+\code{kcat} & & & & \\
+\code{protein} & & & & \\
+\code{spectra} & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Final Submission}
+
+The final submission must include:
+
+\begin{enumerate}
+    \item complete executable code/notebook(s);
+    \item all required results tables;
+    \item all required figures;
+    \item written analysis;
+    \item all 32 required test-prediction CSV files.
+\end{enumerate}
+
+Your code must allow the TAs to reproduce the experiments and determine the dataset, experiment, architecture, fixed hyperparameters, preprocessing used, training history, best validation epoch, and final test predictions. All required experiments must use \code{seed = 3410}.
+
+\end{document}

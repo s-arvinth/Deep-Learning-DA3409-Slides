@@ -100,7 +100,7 @@ def build():
     j = int(np.argmin(gabor_loss(W0, np.full_like(W0, w1_slice), x, y)))
     ax.axvline(W0[j], color=S.GREY, lw=1.2, ls=(0, (4, 3)))
     ax.set_xlabel("$w_0$   (slice at $w_1 = 16.6$)")
-    ax.set_ylabel("$E(w)$")
+    ax.set_ylabel(r"$E(\mathbf{w})$")
     ax.set_ylim(0, None)
     ax.legend(loc="upper center", fontsize=12.5)
     ax.set_title("(c) each batch draws its own surface")

@@ -130,11 +130,11 @@
     \begin{column}{0.49\textwidth}
       \begin{tabular}{@{}l@{\hspace{1.5em}}l@{}}
         $\mathbf{x}$, $y$, $\hat y$ & input, target, prediction\\
-        $w$ & every learnable parameter\\
-        $E(w)$ & the error function being minimized\\
-        $E_n(w)$ & its contribution from point $n$\\
-        $\nabla E$ & gradient of $E$ with respect to $w$\\
-        $H$ & Hessian, $\nabla\nabla E$\\
+        $\mathbf{w}$ & every learnable parameter\\
+        $E(\mathbf{w})$ & the error function being minimized\\
+        $E_n(\mathbf{w})$ & its contribution from point $n$\\
+        $\nabla E$ & gradient of $E$ with respect to $\mathbf{w}$\\
+        $\mathbf{H}$ & Hessian, $\nabla\nabla E$\\
       \end{tabular}
     \end{column}
     \begin{column}{0.49\textwidth}
@@ -144,7 +144,7 @@
         $N$ & training-set size\\
         $B$ & mini-batch size\\
         $W$ & number of parameters\\
-        $\lambda_i$, $u_i$ & eigenvalues, eigenvectors of $H$\\
+        $\lambda_i$, $\mathbf{u}_i$ & eigenvalues, eigenvectors of $\mathbf{H}$\\
       \end{tabular}
     \end{column}
   \end{columns}}
@@ -153,17 +153,17 @@
 \begin{frame}{The training objective}
   \vspace{-0.7em}
   \[
-    \hat w = \arg\min_{w} E(w),
+    \hat{\mathbf{w}} = \arg\min_{\mathbf{w}} E(\mathbf{w}),
     \qquad
-    E(w) = \sum_{n=1}^{N} E_n(w)
+    E(\mathbf{w}) = \sum_{n=1}^{N} E_n(\mathbf{w})
   \]
   \vspace{-1.0em}
   \begin{itemize}\itemsep0.35em
-    \item Class 6 built $E(w)$ from maximum likelihood; Class 11 made
+    \item Class 6 built $E(\mathbf{w})$ from maximum likelihood; Class 11 made
           $\nabla E$ computable
     \item $E$ is a \alert{sum over data points} because the likelihood of
           independent observations is a product
-    \item No closed form solves $\nabla E(w) = 0$ for a network, so we
+    \item No closed form solves $\nabla E(\mathbf{w}) = 0$ for a network, so we
           iterate
   \end{itemize}
   \begin{redhighlight}
@@ -177,8 +177,8 @@
   \begin{center}
     \includegraphics[height=0.55\textheight]{Bishop7_1}
   \end{center}
-  \figcap[0.97]{$E$ viewed as a surface over weight space. $w_A$ is a
-  local minimum and $w_B$ the global minimum; at $w_C$ the local slope
+  \figcap[0.97]{$E$ viewed as a surface over weight space. $\mathbf{w}_A$ is a
+  local minimum and $\mathbf{w}_B$ the global minimum; at $\mathbf{w}_C$ the local slope
   is $\nabla E$. Bishop \& Bishop (2024), Fig.~7.1.}
 \end{frame}
 
@@ -188,8 +188,8 @@
   \renewcommand{\arraystretch}{1.34}
   \begin{tabular}{@{}l@{\hspace{2.2em}}l@{}}
     \textbf{On the mountain} & \textbf{In training}\\
-    the altitude at your feet & $E(w)$ at the current $w$\\
-    the slope you can feel underfoot & $\nabla E(w)$\\
+    the altitude at your feet & $E(\mathbf{w})$ at the current $\mathbf{w}$\\
+    the slope you can feel underfoot & $\nabla E(\mathbf{w})$\\
     fog: no view of the far side & no access to the global shape of $E$\\
     the length of one stride & the learning rate $\eta$\\
     the valley you happen to start in & the initialization\\
@@ -212,14 +212,14 @@
   \begin{block}{Definition (convex function)}
     $E$ is \alert{convex} if no chord lies below its graph:
     \[
-      E\big(\theta u + (1-\theta) v\big)
-        \;\leq\; \theta E(u) + (1-\theta) E(v)
-      \qquad \forall\, u, v, \; \theta \in [0,1].
+      E\big(\theta \mathbf{u} + (1-\theta) \mathbf{v}\big)
+        \;\leq\; \theta E(\mathbf{u}) + (1-\theta) E(\mathbf{v})
+      \qquad \forall\, \mathbf{u}, \mathbf{v}, \; \theta \in [0,1].
     \]
   \end{block}
   \vspace{0.4em}
   \begin{itemize}\itemsep0.4em
-    \item Where $E$ is twice differentiable this says the Hessian $H$ is
+    \item Where $E$ is twice differentiable this says the Hessian $\mathbf{H}$ is
           positive semi-definite \alert{everywhere}
     \item Least squares for a \alert{linear} model is convex
     \item So is logistic regression, and every generalised linear model
@@ -241,7 +241,7 @@
           nowhere bad to get stuck
     \item The set of minimisers is connected: no isolated wrong answers
     \item Wherever we start, walking downhill reaches the best solution
-    \item Progress can be measured: $E(w) - E(\hat w)$ is a meaningful
+    \item Progress can be measured: $E(\mathbf{w}) - E(\hat{\mathbf{w}})$ is a meaningful
           number that decreases
   \end{itemize}
   \vspace{0.6em}
@@ -256,14 +256,14 @@
   \vspace{0.2em}
   Every method in this class and the next has the same shape,
   \[
-    w^{(\tau)} \;=\; w^{(\tau-1)} + \Delta w^{(\tau-1)} ,
+    \mathbf{w}^{(\tau)} \;=\; \mathbf{w}^{(\tau-1)} + \Delta \mathbf{w}^{(\tau-1)} ,
   \]
-  and differs only in the choice of $\Delta w$. Today,
+  and differs only in the choice of $\Delta \mathbf{w}$. Today,
   \vspace{-0.2em}
   \begin{block}{Definition (batch gradient descent)}
     \[
-      w^{(\tau)} \;=\; w^{(\tau-1)}
-        - \eta\, \nabla E\!\left(w^{(\tau-1)}\right),
+      \mathbf{w}^{(\tau)} \;=\; \mathbf{w}^{(\tau-1)}
+        - \eta\, \nabla E\!\left(\mathbf{w}^{(\tau-1)}\right),
       \qquad \eta > 0 .
     \]
     Each $\nabla E$ uses the whole training set, which is what makes the
@@ -276,26 +276,26 @@
 \begin{frame}{Why the step goes along $-\nabla E$}
   \vspace{0.2em}
   A small step changes the error, to first order, by
-  $\Delta E \simeq \Delta w^{\mathsf T}\,\nabla E(w)$.
+  $\Delta E \simeq \Delta \mathbf{w}^{\mathsf T}\,\nabla E(\mathbf{w})$.
   \vspace{-0.15em}
   \begin{lemmax}[The negative gradient is the steepest direction]\label{th:steep}
     \small
-    Fix $w$ with $\nabla E(w) \neq 0$. Among all unit vectors $d$, the
-    quantity $d^{\mathsf T}\nabla E(w)$ is minimised uniquely at
-    $d^\star = -\nabla E(w) / \|\nabla E(w)\|$, where it equals
-    $-\|\nabla E(w)\|$.
+    Fix $\mathbf{w}$ with $\nabla E(\mathbf{w}) \neq 0$. Among all unit vectors $\mathbf{d}$, the
+    quantity $\mathbf{d}^{\mathsf T}\nabla E(\mathbf{w})$ is minimised uniquely at
+    $\mathbf{d}^\star = -\nabla E(\mathbf{w}) / \|\nabla E(\mathbf{w})\|$, where it equals
+    $-\|\nabla E(\mathbf{w})\|$.
   \end{lemmax}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
     \item \focus{1}{By Cauchy--Schwarz,
-          $|d^{\mathsf T}\nabla E| \leq \|d\|\,\|\nabla E\|
-          = \|\nabla E\|$ for any unit $d$.}
-    \item \focus{2}{So $d^{\mathsf T}\nabla E \geq -\|\nabla E\|$: no
+          $|\mathbf{d}^{\mathsf T}\nabla E| \leq \|\mathbf{d}\|\,\|\nabla E\|
+          = \|\nabla E\|$ for any unit $\mathbf{d}$.}
+    \item \focus{2}{So $\mathbf{d}^{\mathsf T}\nabla E \geq -\|\nabla E\|$: no
           unit direction beats $-\|\nabla E\|$.}
-    \item \focus{3}{Equality holds only when $d$ is parallel to
+    \item \focus{3}{Equality holds only when $\mathbf{d}$ is parallel to
           $\nabla E$; the sign forces \emph{anti}-parallel.}
-    \item \focus{4}{So $d^\star$ attains the bound and is the unique
+    \item \focus{4}{So $\mathbf{d}^\star$ attains the bound and is the unique
           minimiser. \hfill $\square$}
   \end{itemize}}
   \srcline{Bishop \& Bishop (2024), Eqs.~7.1--7.2.}
@@ -383,13 +383,13 @@
 \end{frame}
 
 \begin{frame}{Why gradients are worth their cost}
-  \bridge{The surface near a minimum is described by $b$ and $H$, so
+  \bridge{The surface near a minimum is described by $\mathbf{b}$ and $\mathbf{H}$, so
   locating it means pinning those down.}
   \vspace{-0.55em}
   \[
-    \underbrace{W}_{\text{entries of } b}
+    \underbrace{W}_{\text{entries of } \mathbf{b}}
     \;+\;
-    \underbrace{\tfrac{W(W+1)}{2}}_{\text{independent entries of the symmetric } H}
+    \underbrace{\tfrac{W(W+1)}{2}}_{\text{independent entries of the symmetric } \mathbf{H}}
     \;=\; \frac{W(W+3)}{2} \;=\; O(W^2) \ \text{numbers}
   \]
   \vspace{-0.85em}
@@ -412,38 +412,38 @@
   large a step is safe.}
   \vspace{-0.35em}
   \[
-    E(w) \;\simeq\; E(\hat w) + (w - \hat w)^{\mathsf T} b
-          + \tfrac12 (w - \hat w)^{\mathsf T} H (w - \hat w),
+    E(\mathbf{w}) \;\simeq\; E(\hat{\mathbf{w}}) + (\mathbf{w} - \hat{\mathbf{w}})^{\mathsf T} \mathbf{b}
+          + \tfrac12 (\mathbf{w} - \hat{\mathbf{w}})^{\mathsf T} \mathbf{H} (\mathbf{w} - \hat{\mathbf{w}}),
   \]
   \vspace{-1.0em}
   \[
-    b \equiv \nabla E \big|_{w = \hat w},
+    \mathbf{b} \equiv \nabla E \big|_{\mathbf{w} = \hat{\mathbf{w}}},
     \qquad
-    H(\hat w) \equiv \nabla\nabla E(w) \big|_{w = \hat w} .
+    \mathbf{H}(\hat{\mathbf{w}}) \equiv \nabla\nabla E(\mathbf{w}) \big|_{\mathbf{w} = \hat{\mathbf{w}}} .
   \]
   \vspace{-0.5em}
   \begin{itemize}\itemsep0.35em
-    \item $b$ has length $W$; $H$ is $W \times W$ and symmetric
-    \item At a minimum $w^\star$ the linear term vanishes, leaving
-          $E(w) = E(w^\star)
-           + \tfrac12 (w-w^\star)^{\mathsf T} H (w-w^\star)$
+    \item $\mathbf{b}$ has length $W$; $\mathbf{H}$ is $W \times W$ and symmetric
+    \item At a minimum $\mathbf{w}^\star$ the linear term vanishes, leaving
+          $E(\mathbf{w}) = E(\mathbf{w}^\star)
+           + \tfrac12 (\mathbf{w}-\mathbf{w}^\star)^{\mathsf T} \mathbf{H} (\mathbf{w}-\mathbf{w}^\star)$
     \item Everything in this section is read off that one expression
   \end{itemize}
   \srcline{Bishop \& Bishop (2024), Eqs.~7.3--7.7.}
 \end{frame}
 
-\begin{frame}{Rotating into the eigenvectors of $H$}
+\begin{frame}{Rotating into the eigenvectors of $\mathbf{H}$}
   \vspace{0.1em}
-  With $H u_i = \lambda_i u_i$ and $u_i^{\mathsf T} u_j = \delta_{ij}$,
+  With $\mathbf{H} \mathbf{u}_i = \lambda_i \mathbf{u}_i$ and $\mathbf{u}_i^{\mathsf T} \mathbf{u}_j = \delta_{ij}$,
   expand the displacement as
-  $w - w^\star = \sum_i \alpha_i u_i$. Then
+  $\mathbf{w} - \mathbf{w}^\star = \sum_i \alpha_i \mathbf{u}_i$. Then
   \vspace{-0.35em}
   \[
-    E(w) \;=\; E(w^\star) + \tfrac12 \sum_i \lambda_i \alpha_i^2 .
+    E(\mathbf{w}) \;=\; E(\mathbf{w}^\star) + \tfrac12 \sum_i \lambda_i \alpha_i^2 .
   \]
   \vspace{-0.6em}
   \begin{itemize}\itemsep0.35em
-    \item A change of coordinates: origin at $w^\star$, axes along the
+    \item A change of coordinates: origin at $\mathbf{w}^\star$, axes along the
           eigenvectors
     \item Every cross term cancels, by orthonormality
   \end{itemize}
@@ -459,14 +459,14 @@
   \begin{center}
     \includegraphics[height=0.56\textheight]{Bishop7_2}
   \end{center}
-  \figcap[0.97]{Contours of the quadratic model are ellipses centred on $w^\star$, with axes along the eigenvectors $u_i$ of $H$ and semi-axis lengths proportional to $\lambda_i^{-1/2}$. Bishop \& Bishop (2024), Fig.~7.2.}
+  \figcap[0.97]{Contours of the quadratic model are ellipses centred on $\mathbf{w}^\star$, with axes along the eigenvectors $\mathbf{u}_i$ of $\mathbf{H}$ and semi-axis lengths proportional to $\lambda_i^{-1/2}$. Bishop \& Bishop (2024), Fig.~7.2.}
 \end{frame}
 \begin{frame}{Smoothness: one number for the worst curvature}
   \begin{block}{Definition ($L$-smooth)}
     $E$ is \alert{$L$-smooth} if its gradient is Lipschitz,
     \[
-      \|\nabla E(u) - \nabla E(v)\| \;\leq\; L \|u - v\|
-      \qquad \forall\, u, v .
+      \|\nabla E(\mathbf{u}) - \nabla E(\mathbf{v})\| \;\leq\; L \|\mathbf{u} - \mathbf{v}\|
+      \qquad \forall\, \mathbf{u}, \mathbf{v} .
     \]
   \end{block}
   \vspace{0.3em}
@@ -486,20 +486,20 @@
   \vspace{-0.25em}
   \begin{lemmax}[One step is guaranteed to go downhill]\label{th:desc}
     \small
-    Let $E$ be $L$-smooth and let $w^+ = w - \eta\,\nabla E(w)$. Then
+    Let $E$ be $L$-smooth and let $\mathbf{w}^+ = \mathbf{w} - \eta\,\nabla E(\mathbf{w})$. Then
     \[
-      E(w^+) \;\leq\; E(w)
-        - \eta\Big(1 - \tfrac{L\eta}{2}\Big)\,\|\nabla E(w)\|^2 .
+      E(\mathbf{w}^+) \;\leq\; E(\mathbf{w})
+        - \eta\Big(1 - \tfrac{L\eta}{2}\Big)\,\|\nabla E(\mathbf{w})\|^2 .
     \]
-    In particular $E(w^+) < E(w)$ whenever $0 < \eta < 2/L$ and
-    $\nabla E(w) \neq 0$; the bound is tightest at $\eta = 1/L$.
+    In particular $E(\mathbf{w}^+) < E(\mathbf{w})$ whenever $0 < \eta < 2/L$ and
+    $\nabla E(\mathbf{w}) \neq 0$; the bound is tightest at $\eta = 1/L$.
   \end{lemmax}
   {\footnotesize
   \begin{itemize}\itemsep0.26em
-    \item \focus{1}{$L$-smoothness gives $E(v) \leq E(w) +
-          (v-w)^{\mathsf T}\nabla E(w) + \tfrac{L}{2}\|v-w\|^2$.}
-    \item \focus{2}{Put $v = w^+$, so $v - w = -\eta\nabla E(w)$:
-          $E(w^+) \leq E(w) - \eta\|\nabla E\|^2
+    \item \focus{1}{$L$-smoothness gives $E(\mathbf{v}) \leq E(\mathbf{w}) +
+          (\mathbf{v}-\mathbf{w})^{\mathsf T}\nabla E(\mathbf{w}) + \tfrac{L}{2}\|\mathbf{v}-\mathbf{w}\|^2$.}
+    \item \focus{2}{Put $\mathbf{v} = \mathbf{w}^+$, so $\mathbf{v} - \mathbf{w} = -\eta\nabla E(\mathbf{w})$:
+          $E(\mathbf{w}^+) \leq E(\mathbf{w}) - \eta\|\nabla E\|^2
           + \tfrac{L\eta^2}{2}\|\nabla E\|^2$.}
     \item \focus{3}{Collecting the $\|\nabla E\|^2$ terms gives the
           bound; $\eta(1 - L\eta/2) > 0$ on $(0, 2/L)$ and is maximal at
@@ -539,7 +539,7 @@
   \begin{center}
     \includegraphics[height=0.50\textheight]{TrainGaborData}
   \end{center}
-  \figcap[0.97]{28 points, made by sampling the model at $w = [0.0,\, 16.6]^{\mathsf T}$ and adding Gaussian noise. Prince (2023), Fig.~6.3.}
+  \figcap[0.97]{28 points, made by sampling the model at $\mathbf{w} = [0.0,\, 16.6]^{\mathsf T}$ and adding Gaussian noise. Prince (2023), Fig.~6.3.}
 \end{frame}
 \begin{frame}{A loss that is not convex}
   \vspace{0.2em}
@@ -568,8 +568,8 @@
   \vspace{-0.2em}
   \begin{propx}[Classification of stationary points]\label{th:sig}
     \small
-    Let $\nabla E(w^\star) = 0$ and let $H$ be the Hessian at $w^\star$,
-    with eigenvalues $\{\lambda_i\}$. Then $w^\star$ is a local minimum
+    Let $\nabla E(\mathbf{w}^\star) = 0$ and let $\mathbf{H}$ be the Hessian at $\mathbf{w}^\star$,
+    with eigenvalues $\{\lambda_i\}$. Then $\mathbf{w}^\star$ is a local minimum
     if and only if $\lambda_i > 0$ for all $i$; a local maximum if and
     only if $\lambda_i < 0$ for all $i$; and a saddle point if the signs
     are mixed.
@@ -578,13 +578,13 @@
   {\footnotesize
   \begin{itemize}\itemsep0.28em
     \item \focus{1}{Fix $j$, set $\alpha_i = 0$ for $i \neq j$ and vary
-          $\alpha_j$: then $E - E(w^\star) =
+          $\alpha_j$: then $E - E(\mathbf{w}^\star) =
           \tfrac12 \lambda_j \alpha_j^2$.}
     \item \focus{2}{So each eigen-direction votes independently: $E$
-          rises along $u_j$ if $\lambda_j > 0$ and falls if
+          rises along $\mathbf{u}_j$ if $\lambda_j > 0$ and falls if
           $\lambda_j < 0$.}
-    \item \focus{3}{Writing $v = \sum_i c_i u_i$ gives
-          $v^{\mathsf T} H v = \sum_i c_i^2 \lambda_i$, so $H$ is
+    \item \focus{3}{Writing $\mathbf{v} = \sum_i c_i \mathbf{u}_i$ gives
+          $\mathbf{v}^{\mathsf T} \mathbf{H} \mathbf{v} = \sum_i c_i^2 \lambda_i$, so $\mathbf{H}$ is
           positive definite exactly when every $\lambda_i > 0$.}
     \item \focus{4}{That is the condition for a minimum.
           \hfill $\square$}
@@ -659,7 +659,7 @@
 \begin{frame}{The cost of a batch step}
   \vspace{0.3em}
   \begin{itemize}\itemsep0.45em
-    \item $E(w) = \sum_{n=1}^{N} E_n(w)$, so one gradient costs $N$
+    \item $E(\mathbf{w}) = \sum_{n=1}^{N} E_n(\mathbf{w})$, so one gradient costs $N$
           backward passes
     \item With $N$ in the millions, a single parameter update becomes a
           major computation
@@ -677,8 +677,8 @@
 \begin{frame}{Stochastic gradient descent}
   \vspace{-0.3em}
   \[
-    w^{(\tau)} \;=\; w^{(\tau-1)}
-      - \eta\, \nabla E_n\!\left(w^{(\tau-1)}\right)
+    \mathbf{w}^{(\tau)} \;=\; \mathbf{w}^{(\tau-1)}
+      - \eta\, \nabla E_n\!\left(\mathbf{w}^{(\tau-1)}\right)
   \]
   \vspace{-0.85em}
   \begin{itemize}\itemsep0.3em
@@ -691,12 +691,12 @@
   \begin{algox}[Stochastic gradient descent]\label{th:sgd}
     \small
     \textbf{Input:} data indexed by $n \in \{1,\dots,N\}$; per-point
-    error $E_n(w)$; learning rate $\eta$; initial $w$\\[0.25em]
+    error $E_n(\mathbf{w})$; learning rate $\eta$; initial $\mathbf{w}$\\[0.25em]
     $n \leftarrow 1$;\quad
     \textbf{repeat}\quad
-      $w \leftarrow w - \eta \nabla E_n(w)$;\quad
+      $\mathbf{w} \leftarrow \mathbf{w} - \eta \nabla E_n(\mathbf{w})$;\quad
       $n \leftarrow n + 1 \pmod N$\\
-    \textbf{until} convergence;\quad \textbf{return} $w$
+    \textbf{until} convergence;\quad \textbf{return} $\mathbf{w}$
   \end{algox}
   \srcline{Bishop \& Bishop (2024), Eq.~7.18, Alg.~7.1; Bottou (2010).}
 \end{frame}
@@ -706,8 +706,8 @@
   \begin{propx}[Mean and variance of the mini-batch gradient]\label{th:mb}
     \small
     Let $\mathcal{B}$ be $B$ indices drawn uniformly at random and let
-    $\hat g = \tfrac{N}{B} \sum_{n \in \mathcal{B}} \nabla E_n(w)$. Then
-    $\mathbb{E}[\hat g] = \nabla E(w)$, and each component of $\hat g$
+    $\hat{\mathbf{g}} = \tfrac{N}{B} \sum_{n \in \mathcal{B}} \nabla E_n(\mathbf{w})$. Then
+    $\mathbb{E}[\hat{\mathbf{g}}] = \nabla E(\mathbf{w})$, and each component of $\hat{\mathbf{g}}$
     has standard deviation $N\sigma/\sqrt{B}$, where $\sigma$ is the
     standard deviation of that component across the data.
   \end{propx}
@@ -717,9 +717,9 @@
     \item \focus{1}{Each index is uniform on $\{1,\dots,N\}$, so
           $\mathbb{E}[\nabla E_n] = \tfrac1N \nabla E$.}
     \item \focus{2}{Linearity over the $B$ draws gives
-          $\mathbb{E}[\hat g] = \tfrac{N}{B}\, B\, \tfrac1N \nabla E
+          $\mathbb{E}[\hat{\mathbf{g}}] = \tfrac{N}{B}\, B\, \tfrac1N \nabla E
           = \nabla E$: \alert{unbiased, for every $B$}.}
-    \item \focus{3}{$\hat g$ is $N$ times a sample mean of $B$ draws, so
+    \item \focus{3}{$\hat{\mathbf{g}}$ is $N$ times a sample mean of $B$ draws, so
           its variance is $N^2\sigma^2/B$.}
     \item \focus{4}{The $\sqrt{B}$ in the denominator is the whole
           argument for mini-batches. \hfill $\square$}
@@ -754,9 +754,9 @@
 \begin{frame}{Mini-batches}
   \vspace{-0.35em}
   \[
-    w^{(\tau)} \;=\; w^{(\tau-1)}
+    \mathbf{w}^{(\tau)} \;=\; \mathbf{w}^{(\tau-1)}
       - \eta \sum_{n \in \mathcal{B}_\tau}
-        \nabla E_n\!\left(w^{(\tau-1)}\right)
+        \nabla E_n\!\left(\mathbf{w}^{(\tau-1)}\right)
   \]
   \vspace{-0.7em}
   \begin{itemize}\itemsep0.35em
@@ -778,17 +778,17 @@
   \begin{algox}[Mini-batch stochastic gradient descent]\label{th:msgd}
     \small
     \textbf{Input:} data indexed by $n \in \{1,\dots,N\}$; batch size
-    $B$; per-batch error $E_{n:n+B-1}(w)$; learning rate $\eta$;
-    initial $w$\\[0.35em]
+    $B$; per-batch error $E_{n:n+B-1}(\mathbf{w})$; learning rate $\eta$;
+    initial $\mathbf{w}$\\[0.35em]
     $n \leftarrow 1$\\
     \textbf{repeat}\\
-    \hspace{1.4em} $w \leftarrow w - \eta \nabla E_{n:n+B-1}(w)$
+    \hspace{1.4em} $\mathbf{w} \leftarrow \mathbf{w} - \eta \nabla E_{n:n+B-1}(\mathbf{w})$
       \hfill \textcolor{mcMuted}{// weight vector update}\\
     \hspace{1.4em} $n \leftarrow n + B$\\
     \hspace{1.4em} \textbf{if} $n > N$ \textbf{then}
       \; shuffle data; \; $n \leftarrow 1$ \; \textbf{end if}\\
     \textbf{until} convergence\\
-    \textbf{return} $w$
+    \textbf{return} $\mathbf{w}$
   \end{algox}
   \srcline{Bishop \& Bishop (2024), Algorithm 7.2.}
 \end{frame}
@@ -891,12 +891,12 @@
       g/.style={rounded corners=3pt, draw=accc, fill=accc!10,
                 align=center, minimum height=0.95cm,
                 inner xsep=4pt, font=\footnotesize}]
-    \node[g] (init) {initialize $w$};
+    \node[g] (init) {initialize $\mathbf{w}$};
     \node[b, right=5mm of init] (sh)  {shuffle\\ the data};
     \node[b, right=5mm of sh]   (bat) {take a batch\\ of size $B$};
     \node[b, right=5mm of bat]  (fwd) {forward pass\\ $\to E_{\mathcal{B}}$};
     \node[d, right=5mm of fwd]  (bwd) {backward pass\\ $\to \nabla E_{\mathcal{B}}$};
-    \node[d, right=5mm of bwd]  (upd) {$w \leftarrow w - \eta \nabla E_{\mathcal{B}}$};
+    \node[d, right=5mm of bwd]  (upd) {$\mathbf{w} \leftarrow \mathbf{w} - \eta \nabla E_{\mathcal{B}}$};
     \foreach \a/\b in {init/sh, sh/bat, bat/fwd, fwd/bwd, bwd/upd}
       \draw[->] (\a) -- (\b);
     \draw[->, dpc] (upd.south) -- ++(0,-0.72)
@@ -924,7 +924,7 @@
     $B$ & \alert{us} & noise $\propto 1/\sqrt{B}$, cost $\propto B$
       (Prop.~\ref{th:mb})\\
     shuffling & \alert{us} & required for Proposition~\ref{th:mb}\\
-    $w^{(0)}$ & \alert{us} & taken up in Class 15\\
+    $\mathbf{w}^{(0)}$ & \alert{us} & taken up in Class 15\\
   \end{tabular}}
   \vspace{0.9em}
 
@@ -942,7 +942,7 @@
           is global, wherever we start
     \item $-\nabla E$ is the steepest descent direction, and uniquely so
           (Lemma~\ref{th:steep})
-    \item The eigenvalues of $H$ are curvatures; $\lambda_{\max}$ is the
+    \item The eigenvalues of $\mathbf{H}$ are curvatures; $\lambda_{\max}$ is the
           sharpest one, and it sets $L$
     \item A step with $\eta < 2/L$ is guaranteed to lower $E$; a larger
           one can raise it (Lemma~\ref{th:desc})

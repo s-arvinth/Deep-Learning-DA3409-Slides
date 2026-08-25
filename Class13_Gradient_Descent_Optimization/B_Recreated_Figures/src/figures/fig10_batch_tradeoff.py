@@ -86,7 +86,7 @@ def build():
         m = c <= 24000
         ax.semilogy(c[m], E[m], color=col, lw=2.0, label=lab)
     ax.set_xlabel("gradient evaluations")
-    ax.set_ylabel("$E(w)$   (running median)")
+    ax.set_ylabel(r"$E(\mathbf{w})$   (running median)")
     ax.set_xlim(0, 24000)
     ax.set_ylim(1e-4, 20)
     ax.legend(loc="upper right", fontsize=13)

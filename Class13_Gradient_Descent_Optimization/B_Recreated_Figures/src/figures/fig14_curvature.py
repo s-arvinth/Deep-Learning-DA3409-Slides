@@ -44,8 +44,8 @@ def build():
     ax.contourf(G1, G2, Z, levels=22, cmap=S.SEQ, alpha=0.92)
     ax.contour(G1, G2, Z, levels=22, colors="white", linewidths=0.4,
                alpha=0.55)
-    for u, col, lab in ((umin, "#F2F2F2", r"$u_{min}$"),
-                        (umax, S.OUTC, r"$u_{max}$")):
+    for u, col, lab in ((umin, "#F2F2F2", r"$\mathbf{u}_{min}$"),
+                        (umax, S.OUTC, r"$\mathbf{u}_{max}$")):
         ax.annotate("", xy=tuple(2.15 * u), xytext=tuple(-2.15 * u),
                     arrowprops=dict(arrowstyle="<|-|>", color=col, lw=2.2))
         ax.annotate(lab, xy=tuple(2.42 * u), color=col, fontsize=17,
@@ -67,8 +67,8 @@ def build():
                 xytext=(0.30, 6.2), fontsize=15, color=S.OUTC)
     ax.annotate(r"$\lambda_{min} = %.1f$" % LMIN, xy=(1.9, 0.5 * LMIN * 3.6),
                 xytext=(0.55, 1.55), fontsize=15, color=S.L2)
-    ax.set_xlabel(r"distance $t$ from $w^\star$")
-    ax.set_ylabel(r"$E(w^\star + t\,u) - E(w^\star)$")
+    ax.set_xlabel(r"distance $t$ from $\mathbf{w}^\star$")
+    ax.set_ylabel(r"$E(\mathbf{w}^\star + t\,\mathbf{u}) - E(\mathbf{w}^\star)$")
     ax.set_ylim(-0.3, 8.0)
     ax.legend(loc="upper center", fontsize=13)
     ax.set_title("(b) the eigenvalue is a curvature")

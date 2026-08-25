@@ -49,7 +49,7 @@ def build():
     ax.fill_between(eta, bound, 0.0, where=(bound < 0),
                     color=S.L1, alpha=0.12)
     ax.set_xlabel(r"step size  $\eta$")
-    ax.set_ylabel(r"$E(w - \eta \nabla E) - E(w)$")
+    ax.set_ylabel(r"$E(\mathbf{w} - \eta \nabla E) - E(\mathbf{w})$")
     ax.set_xlim(0, 0.62)
     ax.legend(loc="lower left", fontsize=13)
     ax.set_title("(a) the guarantee, as a function of the step")

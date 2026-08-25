@@ -89,8 +89,18 @@ Robbins & Monro (1951); Polyak (1964); Nesterov (1983); Duchi et al. (2011);
 Tieleman & Hinton (2012); Kingma & Ba (2015); Reddi et al. (2018);
 Loshchilov & Hutter (2017, 2019); Dauphin et al. (2014).
 
-Because several of these results sit outside both textbooks, **Class 14 will
-need a C variant** (textbook-only theorems), as Classes 9 and 10 did.
+Because several of these results sit outside both textbooks, Class 14 has
+a **C variant** (textbook-only theorems), as Classes 9 and 10 do. The
+five results it removes are the optimal fixed learning rate and its
+factor $(\kappa-1)/(\kappa+1)$, the step count in terms of $\kappa$,
+Polyak's heavy-ball rate, Nesterov's $O(1/T^2)$, and the Robbins–Monro
+conditions. Everything that survives is in Bishop §7.3 or Prince
+§6.3–6.5.
+
+**Built.** Class 14 ships as A (57 pages), B (64 pages) and C (57 pages).
+Its narrative order is: the best case (equal curvature, one step), then
+ill-conditioning as the problem, then momentum, schedules and adaptive
+rates as the successive fixes.
 
 ### Class 15 — Normalization
 
@@ -104,6 +114,14 @@ analysis); §7.1 insofar as it defines the exploding/vanishing quantities.
 Publications: Glorot & Bengio (2010); He et al. (2015); Ioffe & Szegedy
 (2015); Ba, Kiros & Hinton (2016); Wu & He (2018); Santurkar et al. (2018);
 Xiong et al. (2020).
+
+**Built.** Class 15 ships as A (45 pages), B (55 pages) and C (45 pages).
+Its narrative order is: normalize the inputs, defeated by depth;
+initialization, defeated by training; batch normalization, defeated by a
+small batch; layer normalization. The four results it states from the
+literature rather than the books — the feature-scale law for κ, batch
+normalization's scale invariance, the smoothness explanation, and the
+pre-norm/post-norm placement — are the four the C variant removes.
 
 Initialization is taught **with** normalization rather than with gradient
 descent, even though Bishop files it under §7.2, because its content is a

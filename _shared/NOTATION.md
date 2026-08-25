@@ -4,6 +4,26 @@ One symbol family, used in **every** deck, in **every** figure, and in
 **every** caption. Based on Bishop & Bishop (2024). Where Prince (2023)
 differs we keep Bishop's symbols and silently translate his figures.
 
+## Bold means more than one number
+
+Vectors and matrices are set in upright bold with `\mathbf{...}`.
+Scalars, and the individual components of a vector or matrix, are left
+in light italic. So `\mathbf{w}` is the parameter vector and `w_i` is
+one weight; `\mathbf{H}` is the Hessian and `H_{ij}` is one entry.
+
+Three things that stay light even though they look like they should not:
+
+* `\nabla E` — the `\nabla` already marks it as a gradient, and this
+  is Bishop's own convention
+* a subscript that names a variance, as in `\sigma_w^2` — the `w` there
+  is a label, not the vector
+* any symbol that happens to be a scalar in this particular deck, such
+  as `W` for the number of parameters, or the `s` of a power-law
+  learning-rate schedule
+
+Accents go outside the bold and are braced: `\hat{\mathbf{w}}`,
+`\bar{\mathbf{a}}`. Never `\hat \mathbf{w}`.
+
 ## Data
 
 | symbol | meaning |

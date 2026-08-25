@@ -38,8 +38,8 @@ def build():
     c, s = np.cos(ROT), np.sin(ROT)
     u1 = np.array([c, s])          # eigenvector for lambda_1
     u2 = np.array([-s, c])         # eigenvector for lambda_2
-    for u, lm, lab, col in ((u1, lam[0], "$u_1$", S.OUTC),
-                            (u2, lam[1], "$u_2$", S.L2)):
+    for u, lm, lab, col in ((u1, lam[0], r"$\mathbf{u}_1$", S.OUTC),
+                            (u2, lam[1], r"$\mathbf{u}_2$", S.L2)):
         L = 2.0 * lm ** -0.5
         ax.annotate("", xy=tuple(L * u), xytext=(0, 0),
                     arrowprops=dict(arrowstyle="-|>", color=col, lw=2.0))
@@ -48,7 +48,7 @@ def build():
         ax.annotate(r"$\lambda^{-1/2}$", xy=tuple(0.55 * L * u + 0.30 * np.array([-u[1], u[0]])),
                     color=col, fontsize=14, ha="center", va="center")
     ax.plot(0, 0, "o", ms=8, mfc="white", mec=S.OUTC, mew=2.0, zorder=5)
-    ax.annotate("$w^\\star$", xy=(0.14, -0.34), fontsize=16, color=S.OUTC)
+    ax.annotate(r"$\mathbf{w}^\star$", xy=(0.14, -0.34), fontsize=16, color=S.OUTC)
     ax.set_xlim(-2.6, 2.6); ax.set_ylim(-2.6, 2.6)
     ax.set_xlabel("$w_1$"); ax.set_ylabel("$w_2$")
     ax.set_title(r"axes are the eigenvectors of $H$")

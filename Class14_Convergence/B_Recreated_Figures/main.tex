@@ -611,12 +611,22 @@
 
 \begin{frame}{Momentum on the valley}
   \begin{center}
-    \includegraphics[height=0.455\textheight]{momentum_paths}
+    \includegraphics[width=0.94\linewidth]{momentum_paths}
   \end{center}
-  \figcap[0.97]{The same surface and start for all three, each run with
-  the constants that are optimal for it. Left to right, the stride along
-  the valley lengthens and the crossing of the valley disappears; the
-  first twenty iterates are marked.}
+  \figcap[0.97]{The same surface and start, each method at the constants
+  that are optimal for it; the first twenty iterates are marked. Momentum
+  crosses the valley fewer times and travels much further along it per
+  step, and the contraction factor falls from $0.818$ to $0.519$.}
+\end{frame}
+
+\begin{frame}{Nesterov on the same valley}
+  \begin{center}
+    \includegraphics[width=0.94\linewidth]{nesterov_path}
+  \end{center}
+  \figcap[0.97]{Momentum repeated on the left as the reference. Nesterov
+  removes the crossing of the valley in a single step and then runs
+  straight along the floor, because the gradient is measured at the
+  look-ahead point rather than at the current one.}
 \end{frame}
 
 \begin{frame}{What that costs in iterations}
@@ -1108,14 +1118,22 @@
 
 \begin{frame}{Five update rules, by family}
   \begin{center}
-    \includegraphics[height=0.45\textheight]{optimiser_compare}
+    \includegraphics[width=0.94\linewidth]{optimiser_compare}
   \end{center}
   \figcap[0.97]{The same ill-conditioned quadratic and start throughout,
-  each method at constants that suit it. (a) the momentum family
-  attacks the ratio $\lambda_{\max}/\lambda_{\min}$. (b) the adaptive
-  family rescales each coordinate instead. (c) all five by error. Why
-  the families differ matters more than the ordering on any one
-  surface.}
+  each method at constants that suit it. (a) the momentum family attacks
+  the ratio $\lambda_{\max}/\lambda_{\min}$, and still crosses the
+  valley. (b) the adaptive family rescales each coordinate instead, and
+  turns along the floor rather than across it.}
+\end{frame}
+
+\begin{frame}{What the five cost}
+  \begin{center}
+    \includegraphics[width=0.80\linewidth]{optimiser_cost}
+  \end{center}
+  \figcap[0.97]{(a) the same five runs by error. (b) iterations needed to
+  reach $E < 10^{-6}$; Adam does not get there inside the budget. Why the
+  families differ matters more than the ordering on any one surface.}
 \end{frame}
 
 \begin{frame}{Four honest caveats}

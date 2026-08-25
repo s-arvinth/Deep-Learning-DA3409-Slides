@@ -1,11 +1,15 @@
 """Five update rules on one ill-conditioned quadratic, by family.
 
 Same starting point, same budget of iterations, each method at constants
-that suit it. The two families are drawn on separate copies of the
-surface -- the momentum family in (a), the adaptive family in (b) --
-because putting five trajectories on one contour hides the shape of
-every one of them. Panel (c) then compares all five by error, which is
-the only place a single axis can carry them all.
+that suit it. Two figures, so that neither is crowded and neither is
+wider than a slide:
+
+    optimiser_compare  (a) the momentum family   (b) the adaptive family
+    optimiser_cost     (a) all five by error     (b) iterations to 1e-6
+
+Putting five trajectories on one contour hides the shape of every one of
+them, so the families get separate panels; the error axis is the only
+one that can carry all five at once.
 
 The point is not which rule wins on this bowl. It is that the families
 fail and succeed for different reasons: momentum attacks the ratio
@@ -29,6 +33,7 @@ START = np.array([-2.40, 0.90])
 N = 60
 
 XLIM, YLIM = 2.80, 1.25
+TOL = 1e-6
 
 
 def _runs():
@@ -50,47 +55,90 @@ def _contour_panel(ax, runs, title):
     G1, G2 = np.meshgrid(g1, g2)
     Z = quad_E(G1, G2, lam=LAM)
     ax.contour(G1, G2, Z, levels=np.array([0.35, 0.9, 1.8, 3.0]),
-               colors=[S.GREY], linewidths=0.9, alpha=0.45)
+               colors=[S.GREY], linewidths=1.0, alpha=0.45)
     for lab, p, col in runs:
         q = p[:34]
         q = q[np.abs(q).max(axis=1) <= 3.2]
-        ax.plot(q[:, 0], q[:, 1], "-", color=col, lw=2.1, label=lab,
+        ax.plot(q[:, 0], q[:, 1], "-", color=col, lw=2.3, label=lab,
                 zorder=4)
-    ax.plot(*START, "o", ms=9, mfc="white", mec=S.OUTC, mew=2.0, zorder=6)
-    ax.plot(0, 0, "*", ms=15, mfc="white", mec=S.OUTC, mew=1.8, zorder=6)
+    ax.plot(*START, "o", ms=10, mfc="white", mec=S.OUTC, mew=2.1, zorder=6)
+    ax.plot(0, 0, "*", ms=17, mfc="white", mec=S.OUTC, mew=1.9, zorder=6)
     ax.set_xlim(-XLIM, XLIM)
     ax.set_ylim(-YLIM, YLIM)
     ax.set_xlabel("$w_1$")
     ax.set_ylabel("$w_2$")
-    ax.legend(loc="upper right", fontsize=11.5, ncol=1,
-              handlelength=1.4, borderpad=0.35, labelspacing=0.25)
+    ax.legend(loc="upper right", fontsize=13, handlelength=1.4,
+              borderpad=0.35, labelspacing=0.28)
     ax.set_title(title)
-    ax.set_box_aspect(0.62)
+    ax.set_box_aspect(0.55)
 
 
-def build():
-    S.use()
+def _families():
     grp_a, grp_b = _runs()
-    fig, axes = plt.subplots(1, 3, figsize=(15.4, 4.6))
-
+    fig, axes = plt.subplots(1, 2, figsize=(11.8, 4.5))
     _contour_panel(axes[0], grp_a, "(a) the momentum family")
     _contour_panel(axes[1], grp_b, "(b) the adaptive family")
+    fig.tight_layout(w_pad=1.8)
+    S.save(fig, "optimiser_compare")
 
-    ax = axes[2]
-    for lab, p, col in grp_a + grp_b:
+
+def _cost():
+    grp_a, grp_b = _runs()
+    allr = grp_a + grp_b
+    fig, axes = plt.subplots(1, 2, figsize=(11.6, 5.0))
+
+    ax = axes[0]
+    for lab, p, col in allr:
         E = quad_E(p[:, 0], p[:, 1], lam=LAM)
-        ax.semilogy(np.maximum(E, 1e-16), color=col, lw=2.0, label=lab)
+        ax.semilogy(np.maximum(E, 1e-16), color=col, lw=2.2, label=lab)
+    ax.axhline(TOL, color=S.GREY, lw=1.1, ls=(0, (4, 3)))
+    ax.annotate(r"$E = 10^{-6}$", xy=(1.5, TOL * 3.0), color=S.GREY,
+                fontsize=13, ha="left")
     ax.set_xlabel("iteration")
     ax.set_ylabel(r"$E(\mathbf{w})$")
     ax.set_xlim(0, N)
     ax.set_ylim(1e-10, 1e2)
-    ax.legend(loc="upper right", fontsize=11.5, handlelength=1.4,
-              borderpad=0.35, labelspacing=0.25)
-    ax.set_title("(c) all five, by error")
-    ax.set_box_aspect(0.62)
+    ax.legend(loc="upper right", fontsize=12.5, handlelength=1.4,
+              borderpad=0.35, labelspacing=0.28)
+    ax.set_title("(a) all five, by error")
+    S.square(ax)
 
-    fig.tight_layout(w_pad=1.5)
-    S.save(fig, NAME)
+    ax = axes[1]
+    labs, vals, cols, hits = [], [], [], []
+    for lab, p, col in allr:
+        E = quad_E(p[:, 0], p[:, 1], lam=LAM)
+        hit = np.flatnonzero(E < TOL)
+        labs.append(lab)
+        vals.append(int(hit[0]) if hit.size else N)
+        hits.append(bool(hit.size))
+        cols.append(col)
+    y = np.arange(len(labs))[::-1]
+    for yy, v, c, ok in zip(y, vals, cols, hits):
+        ax.barh(yy, v, color=c, height=0.58,
+                alpha=1.0 if ok else 0.30,
+                hatch=None if ok else "//",
+                edgecolor="none" if ok else c)
+        if ok:
+            ax.annotate("%d" % v, xy=(v + 1.0, yy), va="center",
+                        fontsize=13.5, color=S.GREY)
+        else:
+            ax.annotate("not reached in %d" % N, xy=(v - 1.5, yy),
+                        va="center", ha="right", fontsize=13, color=c)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labs, fontsize=14)
+    ax.set_xlim(0, N)
+    ax.set_xlabel(r"iterations to reach $E < 10^{-6}$")
+    ax.set_title("(b) the same runs, as a count")
+    ax.set_box_aspect(0.86)
+
+    fig.tight_layout(w_pad=2.0)
+    S.save(fig, "optimiser_cost")
+
+
+def build():
+    S.use()
+    _families()
+    _cost()
 
 
 if __name__ == "__main__":

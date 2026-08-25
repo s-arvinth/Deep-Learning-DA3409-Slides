@@ -31,10 +31,10 @@ def build():
     fig, axes = plt.subplots(1, 2, figsize=(11.6, 5.2))
 
     ax = axes[0]
-    for title, sub, p, col in runs():
+    for key in ("gd", "mom", "nes"):
+        title, sub, p, col = runs()[key]
         E = quad_E(p[:, 0], p[:, 1], lam=LAM)
-        ax.semilogy(np.maximum(E, 1e-14), color=col, lw=2.3,
-                    label=title[4:])
+        ax.semilogy(np.maximum(E, 1e-14), color=col, lw=2.3, label=title)
     ax.set_xlabel("iteration")
     ax.set_ylabel(r"$E(\mathbf{w})$")
     ax.set_ylim(1e-8, 1e2)

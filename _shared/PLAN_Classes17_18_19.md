@@ -116,10 +116,10 @@ Only one result used here is in neither set text: the eigenbasis shrinkage
 factor $\lambda_i/(\lambda_i+\alpha)$ and the effective-parameter count that
 follows from it, which Bishop §9.2 describes qualitatively and attributes to
 Bishop (2006) and Hastie et al. (2009). The **C variant** removes it, together
-with its proof slide; the Fig. 9.3 geometry survives with a caption confined
-to what the published figure shows.
+with its proof slide and the shrinkage-factor figure; the Fig. 9.3 geometry
+survives with a caption confined to what the published figure shows.
 
-**Built.** Class 18 ships as A (50 pages), B (48 pages) and C (42 pages).
+**Built.** Class 18 ships as A (50 pages), B (52 pages) and C (45 pages).
 Its narrative order is: why a preference is unavoidable, the penalty and what
 it does to each eigen-direction, the shape of the penalty, the preference the
 optimiser already has, then bias built into the architecture. Nothing in it

@@ -1,0 +1,204 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=0.72in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{listings}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Viva Question Set-3}
+\cfoot{\thepage}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=1.4em,itemsep=1pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=1pt,topsep=2pt}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.3pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+% Student copy: answers and marking rubrics are intentionally omitted
+% from the source, not merely hidden by a toggle.
+\newcounter{question}
+\newenvironment{question}{%
+  \refstepcounter{question}
+  \par\medskip
+  \noindent\textbf{Q\thequestion.}\par\smallskip
+}{\par\medskip}
+
+\newcommand{}{\textit{Student answers orally; no code writing required.}}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{DA3410 Viva Questions Set-3}}\\[4pt]
+\end{center}
+
+% Bank Q4
+\begin{question}
+A student wants to fit a scaler or PCA before evaluating on validation data.
+Which data should be used to fit the scaler/PCA?
+\end{question}
+
+% Bank Q8
+\begin{question}
+Give the activation output and local derivative for the input below.
+Use the convention that the ReLU derivative at zero is $0$.
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Activation and input & Required output \\
+\midrule
+Leaky ReLU, $x=-2$, $\alpha=0.1$ & $f(x)$ and $f'(x)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+
+% Bank Q11
+\begin{question}
+There is one bug in this implementation. What is it? 
+
+\begin{lstlisting}
+def sigmoid(x):
+    return 1 / 1 + torch.exp(-x)
+\end{lstlisting}
+\end{question}
+
+% Bank Q15
+\begin{question}
+Identify the problem in the code and explain what is wrong with the resulting
+validation measurement.
+
+\begin{verbatim}
+for xb, yb in val_loader:
+    pred = forward(xb, params)
+    loss = loss_fn(pred, yb)
+    backward(loss)
+    update(params, lr)
+\end{verbatim}
+\end{question}
+
+% Bank Q18
+\begin{question}
+A manual autodiff system performs the forward operation shown below.
+For the local backward function, assume the upstream gradient and only the
+quantities explicitly listed in \texttt{saved} are available.
+
+Is the saved information sufficient to compute the local backward pass?
+If not, state what additional forward quantity must be retained.
+
+\begin{verbatim}
+y = a * b
+saved = {"a": a}
+\end{verbatim}
+\end{question}
+
+% Bank Q20
+\begin{question}
+For the values below, give $\partial L/\partial a$ and
+$\partial L/\partial b$. 
+
+\begin{lstlisting}
+y = a * b
+# upstream gradient is g = dL/dy
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$a$ & $b$ & $g$ \\
+\midrule
+3 & 2 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+
+% Bank Q24
+\begin{question}
+For \texttt{z = x @ W}, which candidate correctly computes the gradient with
+respect to \texttt{x}? 
+
+\begin{lstlisting}
+# Candidate A
+grad_x = grad_z @ W.T
+
+# Candidate B
+grad_x = W.T @ grad_z
+
+# Candidate C
+grad_x = grad_z.T @ W
+\end{lstlisting}
+\end{question}
+
+% Bank Q26
+\begin{question}
+How many batches are produced and what is the size of the last batch?
+
+
+\begin{lstlisting}
+for i in range(0, N, batch_size):
+    xb = X[i:i + batch_size]
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+$N$ & \texttt{batch\_size} \\
+\midrule
+8 & 4 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+
+% Bank Q29
+\begin{question}
+The validation loss improves, but the supposedly saved ``best'' parameters
+keep changing during later training. Identify the bug. 
+
+\begin{lstlisting}
+if val_loss < best_loss:
+    best_loss = val_loss
+    best_params = params
+\end{lstlisting}
+\end{question}
+
+% Bank Q31
+\begin{question}
+The following code is used to initialize a deep network before measuring
+layerwise gradient magnitudes.
+
+State whether the setup is intended to produce \textbf{stable},
+\textbf{vanishing}, or \textbf{exploding} gradient behaviour.
+
+\begin{verbatim}
+for l in range(depth):
+    W[l] = he_init(fan_in, fan_out)
+activation = relu
+\end{verbatim}
+\end{question}
+
+
+\end{document}

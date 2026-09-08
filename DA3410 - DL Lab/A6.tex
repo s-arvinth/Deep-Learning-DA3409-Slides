@@ -1,0 +1,530 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.85in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\assignmentnumber}{6}
+\newcommand{\stageonedue}{TBA}
+\newcommand{\stagetwodue}{TBA}
+\newcommand{\stagethreedue}{TBA}
+\newcommand{\stagefourdue}{TBA}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Assignment \assignmentnumber}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.2em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.25em,topsep=0.25em}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    frame=single,
+    columns=fullflexible,
+    breaklines=true,
+    showstringspaces=false,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape
+}
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{DA3410: Assignment \assignmentnumber}}\\[0.25em]
+    {\large \textbf{Neural Network Training from Scratch: Optimizers, Learning Rate, Weight Initialization, and Weight Decay}}
+\end{center}
+
+\section{Learning Objectives}
+By the end of this assignment, you should be able to use your manually implemented neural-network training framework to:
+\begin{enumerate}
+    \item implement stateful optimization algorithms manually using PyTorch tensor primitives;
+    \item compare Momentum, Nesterov accelerated gradient, RMSProp, and Adam under controlled conditions;
+    \item analyze how the learning rate affects convergence, stability, and validation performance;
+    \item implement and compare multiple weight-initialization schemes;
+    \item implement weight decay manually and analyze its effect on parameter norms and generalization;
+    \item analyze how initialization affects layerwise activation and gradient magnitudes in a deep network;
+    \item compare the memory cost of optimizer state in addition to forward-pass and backward-pass memory; and
+    \item run an end-to-end training, validation, checkpointing, and test-prediction pipeline reproducibly.
+\end{enumerate}
+
+\section{Overview}
+In Assignment 5, you implemented neural-network training from scratch using PyTorch tensor primitives for enzyme classification. You implemented the architecture, forward pass, loss computation, a self-implemented automatic differentiation system, backpropagation, parameter updates, training and validation loops, checkpointing, and test prediction.
+
+In this assignment, the architecture is fixed. You will use the same implementation framework, dataset, learned input representation, loss function, random seed, activation function, data splits, validation metric, and checkpointing rule. Instead of varying network depth or using SGD, mini-batch gradient descent, and full-batch gradient descent as separate experimental regimes, you will use a \textbf{fixed mini-batch training regime} and study four training choices: \textbf{optimizer, learning rate, weight initialization, and weight decay}.
+
+The fixed network is \textbf{D10\_W128}: 10 hidden layers, each of width 128. This was the deepest architecture used in Assignment 5 and provides sufficient depth for optimization and initialization effects to be observable.
+
+Use the same train, validation, and test data and learned input representations from Assignment 3.
+
+\section{Dataset and Input Representation}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Dataset & Task & Input representation \\
+\midrule
+protein & Enzyme classification & ESM2 8M embeddings \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Required PyTorch-Primitive Implementation}
+Use the complete training framework that you implemented manually using PyTorch tensor primitives. Your implementation must include parameter initialization, forward propagation, activation functions, the classification loss function, a self-implemented automatic differentiation system, backpropagation, gradients for all weights and biases, optimizer state and parameter updates, training and validation loops, evaluation metrics, best-model checkpointing and restoration, and test prediction.
+
+Your automatic differentiation system must perform the forward and backward passes for every experiment. During the forward pass, it must retain the operations and intermediate quantities required for differentiation. During the backward pass, it must propagate gradients in reverse order using the chain rule. Do not hard-code a separate backward pass for any optimizer or experimental condition.
+
+You may use low-level PyTorch tensor creation, indexing, arithmetic, linear-algebra, reduction, shape, random-number, and elementary mathematical operations. You must implement the automatic differentiation system, neural-network operations, loss function, initialization procedures, optimizer updates, optimizer state, and weight decay yourself.
+
+Do \textbf{NOT} use \texttt{requires\_grad=True}, \texttt{torch.autograd}, \texttt{Tensor.backward()}, \texttt{torch.autograd.grad}, \texttt{torch.nn}, \texttt{torch.nn.functional}, \texttt{torch.nn.init}, \texttt{torch.optim}, or a library implementation of Momentum, Nesterov, RMSProp, Adam, or weight decay.
+
+You may use standard libraries such as Pandas for data loading and Matplotlib for figures.
+
+\section{Fixed Experimental Configuration}
+Unless a stage explicitly changes one of the entries below, every experiment must use:
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.43\linewidth} p{0.49\linewidth}}
+\toprule
+Hyperparameter / setting & Required value \\
+\midrule
+Framework & PyTorch tensor primitives \\
+Dataset & protein enzyme classification \\
+Architecture & D10\_W128 \\
+Hidden layers & 10 \\
+Hidden width & 128 \\
+Hidden activation & ReLU \\
+Epochs & 20 \\
+Random seed & 3410 \\
+Bias initialization & Zero \\
+Training regime & Fixed mini-batch training \\
+Reference optimizer & Momentum \\
+Reference learning rate & $5\times 10^{-4}$ \\
+Reference weight initialization & He initialization \\
+Reference weight decay & $\lambda=0$ \\
+Momentum coefficient & $\beta=0.9$ \\
+Primary validation metric & Multiclass MCC \\
+Checkpoint selection & Lowest validation loss \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Determine one mini-batch size before beginning the experiments and then \textbf{keep that batch size fixed for every run in this assignment}. Use the largest batch size that fits in the available Colab VRAM for the most memory-demanding required optimizer, Adam. Except for the final smaller batch when required, the same mini-batch size must then be used for Momentum, Nesterov, RMSProp, Adam, all learning-rate experiments, all initialization experiments, and all weight-decay experiments.
+
+Do not use learning-rate schedulers, gradient clipping, early stopping, or any optimizer modification that is not explicitly required below.
+
+\section{Reproducibility}
+Use the following function before parameter initialization and training:
+
+\begin{lstlisting}[language=Python]
+import os
+import random
+import torch
+
+def seed_all(seed: int = 3410):
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+SEED = 3410
+seed_all(SEED)
+\end{lstlisting}
+
+Do not change the seed. Reset the seed before each experimental run. Shuffle the training samples before constructing mini-batches in every epoch.
+
+For controlled comparisons, use the same mini-batch size and the same training-sample order across the compared runs. Initialize all optimizer-state tensors to zero at the start of each run.
+
+\section{Primary Validation Metric}
+The primary validation metric for enzyme classification is:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Dataset & Primary validation metric \\
+\midrule
+protein & Multiclass MCC \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Additional metrics may be reported, but use multiclass MCC as the primary validation metric for model evaluation.
+
+\section{Training and Checkpointing}
+Train every required run for 20 epochs. For each epoch, record the training loss, validation loss, and multiclass MCC.
+
+Keep the parameters from the epoch with the lowest validation loss. You may save the required tensors in a PyTorch \texttt{.pt} file.
+
+The loss reported in training and validation curves must be the \textbf{data loss}. Weight decay is applied only during the parameter update in Stage 4 and must not be added to the reported training or validation loss.
+
+If any run produces non-finite parameters, activations, loss values, or gradients, record the first point at which this occurs and stop that run. Do not silently change the learning rate or any other setting to rescue the run.
+
+\section{Fixed Architecture and Trainable Parameter Count}
+Use only the architecture D10\_W128. It contains 10 hidden layers of width 128. Your implementation must still support arbitrary depth and width; do not hard-code D10\_W128 into the automatic differentiation system or neural-network operations.
+
+Report the input dimension, output dimension, and total number of trainable parameters \textbf{once}. The parameter count is identical across all experiments in this assignment.
+
+For every experiment, report the experiment ID, optimizer, learning rate, initialization scheme, weight-decay coefficient, best epoch, best validation loss, and validation multiclass MCC.
+
+\section{Memory Cost of Forward, Backward, and Optimizer State}
+Analyze the memory required for one training update. Report the memory used by arrays required for:
+\begin{enumerate}
+    \item trainable parameters;
+    \item quantities retained by the automatic differentiation system during the forward pass;
+    \item backward-pass gradients and adjoints, including parameter gradients; and
+    \item persistent optimizer-state tensors.
+\end{enumerate}
+
+Report the forward-pass, backward-pass, and optimizer-state memory costs separately in bytes or MiB. Base the calculation on the actual tensor shapes and data type used by your implementation. Do not include storage required for the complete dataset.
+
+Because the architecture and mini-batch size are fixed, the tensor-shape memory cost of the network forward and backward passes should be the same across the optimizer experiments. The optimizer-state memory differs:
+\begin{itemize}
+    \item Momentum stores one velocity tensor per trainable parameter tensor;
+    \item Nesterov stores one velocity tensor per trainable parameter tensor;
+    \item RMSProp stores one running squared-gradient tensor per trainable parameter tensor;
+    \item Adam stores both first-moment and second-moment tensors per trainable parameter tensor.
+\end{itemize}
+
+Report these costs for all four optimizers in Stage 1. If your implementation allocates additional persistent or temporary tensors, identify them separately.
+
+\section{Experimental Design}
+Use a controlled one-factor-at-a-time design. The shared reference configuration is:
+
+\begin{center}
+\textbf{D10\_W128 + ReLU + fixed mini-batches + Momentum + $\eta=5\times10^{-4}$ + He initialization + $\lambda=0$.}
+\end{center}
+
+The reference run is shared across all four stages. Run it once and reuse its results; do not count it as a new experiment each time it appears in a comparison.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Stage & Conditions compared & New runs & Cumulative unique runs \\
+\midrule
+Optimizer & 4 & 4 & 4 \\
+Learning rate & 3 & 2 & 6 \\
+Weight initialization & 2 & 1 & 7 \\
+Weight decay & 2 & 1 & 8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Therefore, the complete assignment requires \textbf{8 unique main experiments}. Do not run the full Cartesian product of all settings.
+
+\section{Stage 1 -- Optimizer Experiments}
+\textbf{Due: \stageonedue}
+
+Use D10\_W128 with He initialization, learning rate $\eta=5\times10^{-4}$, and $\lambda=0$. Compare the following four optimizers using the same fixed mini-batch size and sample order.
+
+Let $g_t=\nabla_{\theta}L_t$ denote the gradient of the mean mini-batch loss with respect to parameter $\theta$ at update $t$. All elementwise squares, square roots, and divisions below are applied elementwise.
+
+\subsection*{Momentum}
+Use $\beta=0.9$. Initialize $v_0=0$ and update
+\[
+v_t = \beta v_{t-1}+g_t,
+\qquad
+\theta_t = \theta_{t-1}-\eta v_t.
+\]
+
+\subsection*{Nesterov Accelerated Gradient}
+Use $\beta=0.9$. Initialize $v_0=0$. Form the look-ahead parameters
+\[
+\widetilde{\theta}_t=\theta_{t-1}-\eta\beta v_{t-1},
+\]
+compute
+\[
+\widetilde{g}_t=\nabla_{\widetilde{\theta}_t}L_t,
+\]
+and then update
+\[
+v_t=\beta v_{t-1}+\widetilde{g}_t,
+\qquad
+\theta_t=\theta_{t-1}-\eta v_t.
+\]
+The forward and backward pass for that update must therefore use the look-ahead parameters.
+
+\subsection*{RMSProp}
+Use $\rho=0.9$ and $\epsilon=10^{-8}$. Initialize $s_0=0$ and update
+\[
+s_t=\rho s_{t-1}+(1-\rho)g_t^2,
+\qquad
+\theta_t=\theta_{t-1}-\eta\frac{g_t}{\sqrt{s_t}+\epsilon}.
+\]
+
+\subsection*{Adam}
+Use $\beta_1=0.9$, $\beta_2=0.999$, and $\epsilon=10^{-8}$. Initialize $m_0=0$ and $v_0=0$. Update
+\[
+m_t=\beta_1m_{t-1}+(1-\beta_1)g_t,
+\]
+\[
+v_t=\beta_2v_{t-1}+(1-\beta_2)g_t^2.
+\]
+Use bias correction
+\[
+\widehat{m}_t=\frac{m_t}{1-\beta_1^t},
+\qquad
+\widehat{v}_t=\frac{v_t}{1-\beta_2^t},
+\]
+and update
+\[
+\theta_t=\theta_{t-1}-\eta\frac{\widehat{m}_t}{\sqrt{\widehat{v}_t}+\epsilon}.
+\]
+
+Implement all optimizer state and updates manually using PyTorch tensor primitives. Apply the optimizer to both weights and biases. Do not use \texttt{torch.optim}.
+
+For each optimizer, report the standard performance details and the forward-pass, backward-pass, and optimizer-state memory costs.
+
+\section{Stage 2 -- Learning-Rate Experiments}
+\textbf{Due: \stagetwodue}
+
+Use D10\_W128 with Momentum, He initialization, and $\lambda=0$. Compare
+\[
+\eta \in \left\{10^{-4},\;5\times10^{-4},\;10^{-3}\right\}.
+\]
+
+Keep $\beta=0.9$ and all other applicable settings fixed. Use the same mini-batch size, parameter initialization, and training-sample order for all three learning-rate conditions.
+
+The $\eta=5\times10^{-4}$ condition is the shared reference run from Stage 1. Therefore, Stage 2 adds \textbf{2 new runs}.
+
+Compare how the learning rate affects early loss reduction, stability, the epoch of lowest validation loss, final training loss, validation loss, and validation MCC. A learning rate that produces non-finite values must be reported as unstable rather than replaced with another value.
+
+\section{Stage 3 -- Weight Initialization Experiments}
+\textbf{Due: \stagethreedue}
+
+Use D10\_W128 with Momentum, learning rate $\eta=5\times10^{-4}$, and $\lambda=0$. Compare the following two initialization schemes:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Initialization ID & Required scheme \\
+\midrule
+XAVIER & Xavier initialization \\
+HE & He initialization \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Use zero biases for both conditions. Apply the selected initialization scheme to every weight matrix. Implement Xavier and He initialization yourself using permitted PyTorch tensor primitives; do not use \texttt{torch.nn.init}. You are expected to determine the required scaling for these initialization schemes.
+
+Use the same mini-batch size and the same training-sample order for both initialization conditions.
+
+In addition to the standard training and validation results, measure layerwise activation and parameter-gradient magnitudes on the \textbf{first mini-batch before the first parameter update}. For hidden layer $l$, record the root-mean-square activation magnitude
+\[
+A_l = \frac{\lVert H_l\rVert_F}{\sqrt{\#H_l}},
+\]
+and for each weight matrix $W_l$, record the root-mean-square parameter-gradient magnitude
+\[
+G_l = \frac{\left\lVert \frac{\partial L}{\partial W_l}\right\rVert_F}{\sqrt{\#W_l}}.
+\]
+
+Plot $A_l$ and $\log_{10}G_l$ against layer index for both initialization schemes. Use these measurements together with the training curves to explain how initialization affects signal and gradient propagation in D10\_W128.
+
+The HE condition is the shared reference run. Therefore, Stage 3 adds \textbf{1 new run}.
+
+\section{Stage 4 -- Weight Decay Experiments}
+\textbf{Due: \stagefourdue}
+
+Use D10\_W128 with Momentum, learning rate $\eta=5\times10^{-4}$, and He initialization. Compare
+\[
+\lambda \in \left\{0,\;10^{-3}\right\}.
+\]
+
+Use \textbf{decoupled weight decay}. First compute the ordinary Momentum velocity from the data-loss gradient. For each weight matrix $W$,
+\[
+v_t=\beta v_{t-1}+\nabla_W L_t,
+\]
+and then update
+\[
+W_t=(1-\eta\lambda)W_{t-1}-\eta v_t.
+\]
+Do \textbf{not} apply weight decay to bias vectors. Biases use the ordinary Momentum update
+\[
+v^{(b)}_t=\beta v^{(b)}_{t-1}+\nabla_b L_t,
+\qquad
+b_t=b_{t-1}-\eta v^{(b)}_t.
+\]
+
+Do not add the decay term to the reported loss. Implement the decay directly in the weight update using PyTorch tensor primitives.
+
+For comparison across $\lambda$, report and plot the unregularized training and validation data loss. In addition, record the total weight norm after each epoch,
+\[
+\lVert W\rVert_{\mathrm{total}}
+= \sqrt{\sum_l \lVert W_l\rVert_F^2},
+\]
+where the sum is over all weight matrices.
+
+Use the weight-norm trajectory, training-validation gap, validation loss, and multiclass MCC to identify whether weight decay improves generalization or causes underfitting.
+
+The $\lambda=0$ condition is the shared reference run. Therefore, Stage 4 adds \textbf{1 new run}.
+
+\section{Required Figures}
+For every unique main experiment, produce:
+\begin{enumerate}
+    \item \textbf{Training and Validation Loss:} plot training and validation data loss across all 20 epochs.
+    \item \textbf{Validation Performance:} plot multiclass MCC across all 20 epochs and indicate the epoch selected using the lowest validation loss.
+\end{enumerate}
+
+In addition:
+\begin{enumerate}
+    \item For Stage 1, provide comparison plots showing training loss, validation loss, and validation MCC for all four optimizers on common axes.
+    \item For Stage 2, provide comparison plots for all three learning rates and a summary plot of best validation loss and best validation MCC against learning rate using a logarithmic learning-rate axis.
+    \item For Stage 3, provide the required layerwise $A_l$ and $\log_{10}G_l$ plots for XAVIER and HE initialization.
+    \item For Stage 4, plot total weight norm across epochs for both weight-decay coefficients on the same axes.
+\end{enumerate}
+
+Use appropriate labels, titles, legends, and axes.
+
+\section{Required Test Prediction Files}
+Generate one test-prediction CSV for every \textbf{unique main experiment} using the checkpoint with the lowest validation loss.
+
+Use the filename pattern:
+\begin{center}
+\texttt{submission\_protein\_D10\_W128\_<optimizer>\_<lr>\_<init>\_<wd>.csv}
+\end{center}
+
+Use the following identifiers:
+\begin{itemize}
+    \item optimizer: \texttt{MOM}, \texttt{NAG}, \texttt{RMSPROP}, \texttt{ADAM};
+    \item learning rate: \texttt{LR1e-4}, \texttt{LR5e-4}, \texttt{LR1e-3};
+    \item initialization: \texttt{XAVIER}, \texttt{HE};
+    \item weight decay: \texttt{WD0}, \texttt{WD1e-3}.
+\end{itemize}
+
+The 8 required files correspond to:
+\begin{enumerate}
+    \item \texttt{MOM\_LR5e-4\_HE\_WD0}
+    \item \texttt{NAG\_LR5e-4\_HE\_WD0}
+    \item \texttt{RMSPROP\_LR5e-4\_HE\_WD0}
+    \item \texttt{ADAM\_LR5e-4\_HE\_WD0}
+    \item \texttt{MOM\_LR1e-4\_HE\_WD0}
+    \item \texttt{MOM\_LR1e-3\_HE\_WD0}
+    \item \texttt{MOM\_LR5e-4\_XAVIER\_WD0}
+    \item \texttt{MOM\_LR5e-4\_HE\_WD1e-3}
+\end{enumerate}
+
+Use the following prediction column:
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Dataset & Required prediction column \\
+\midrule
+protein & \texttt{ec\_number} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Preserve the original test-sample order. Do not include a DataFrame index, extra columns, or unnecessary rounding.
+
+The complete assignment therefore produces \textbf{8 prediction CSV files}.
+
+\section{Required Final Analysis}
+Answer the following questions using evidence from your experiments.
+
+\subsection*{Part A -- Optimizers}
+\begin{enumerate}
+    \item How do Momentum, Nesterov, RMSProp, and Adam differ in training-loss reduction and validation-loss behavior?
+    \item Which optimizer obtains the lowest validation loss, and which obtains the highest validation MCC?
+    \item At which epoch is the lowest validation loss obtained for each optimizer?
+    \item How do Momentum and Nesterov differ in their use of velocity and the point at which the gradient is evaluated?
+    \item How do RMSProp and Adam use running gradient statistics to scale parameter updates?
+    \item How do the four optimizers differ in persistent optimizer-state memory?
+\end{enumerate}
+
+\subsection*{Part B -- Learning Rate}
+\begin{enumerate}
+    \item How does increasing the learning rate affect the speed at which training loss decreases?
+    \item Which learning rates produce stable training over all 20 epochs?
+    \item Which learning rate obtains the lowest validation loss and highest validation MCC?
+    \item Is there evidence that a learning rate is too small to make sufficient progress within 20 epochs?
+    \item Is there evidence that a learning rate is too large and causes oscillation, divergence, or non-finite values?
+    \item Why does the learning rate change the size of a parameter update without changing the gradient produced by backpropagation for the current mini-batch?
+\end{enumerate}
+
+\subsection*{Part C -- Weight Initialization}
+\begin{enumerate}
+    \item How do the initial layerwise activation magnitudes $A_l$ differ between XAVIER and HE initialization?
+    \item How does $\log_{10}G_l$ change across depth for each initialization scheme?
+    \item Which initialization produces the most stable early optimization behavior in D10\_W128?
+    \item How do the initialization schemes differ in convergence speed, lowest validation loss, and validation MCC?
+    \item Why can the effect of initialization become more pronounced as signals and gradients pass through many layers?
+\end{enumerate}
+
+\subsection*{Part D -- Weight Decay}
+\begin{enumerate}
+    \item How does increasing $\lambda$ affect the total weight norm during training?
+    \item How does weight decay affect training loss, validation loss, and the training-validation gap?
+    \item Which value of $\lambda$ gives the best validation performance in your experiments?
+    \item Is there evidence that too little weight decay leads to overfitting or that too much weight decay leads to underfitting?
+    \item Why is weight decay applied to weights but not biases in this assignment?
+    \item How does the multiplicative factor $(1-\eta\lambda)$ change as either the learning rate or weight-decay coefficient increases?
+\end{enumerate}
+
+\subsection*{Part E -- Automatic Differentiation, Backpropagation, and Memory}
+\begin{enumerate}
+    \item What quantities must be stored during the forward pass for automatic differentiation and backpropagation?
+    \item In what order are gradients computed during the backward pass, and how does the chain rule propagate them through the computation graph?
+    \item Why must gradients be computed before optimizer state and parameters are updated?
+    \item Why do the optimizer experiments have the same forward/backward tensor-shape memory cost but different optimizer-state memory costs?
+    \item Why does Adam require more persistent optimizer-state memory than Momentum, Nesterov, or RMSProp?
+\end{enumerate}
+
+\subsection*{Part F -- Controlled Experimentation and Enzyme Classification}
+\begin{enumerate}
+    \item Why is only one factor varied at a time in each stage?
+    \item Which of the 8 tested configurations gives the best validation MCC, and which gives the lowest validation loss?
+    \item Do these two criteria select the same run? Explain any difference.
+    \item How does the classification output operation affect the forward and backward passes?
+    \item How does the classification loss function affect the gradients propagated through the network?
+    \item What conclusions can be made from this one-factor-at-a-time design, and what interactions between optimizer, learning rate, initialization, and weight decay remain untested?
+\end{enumerate}
+
+\section{Final Results Table}
+Include one final table with one row for each of the 8 unique experiments. Use a format similar to:
+
+\begin{center}
+\small
+\begin{tabular}{cllllrrr}
+\toprule
+ID & Optimizer & $\eta$ & Init. & $\lambda$ & Best epoch & Best val. loss & Val. MCC \\
+\midrule
+1  & & & & & & & \\
+2  & & & & & & & \\
+3  & & & & & & & \\
+4  & & & & & & & \\
+5  & & & & & & & \\
+6  & & & & & & & \\
+7  & & & & & & & \\
+8  & & & & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Report the fixed architecture, fixed mini-batch size, input dimension, output dimension, and total number of trainable parameters immediately above or below this table.
+
+\section{Final Submission}
+Submit:
+\begin{enumerate}
+    \item complete executable PyTorch-primitive code/notebook(s);
+    \item all required results tables;
+    \item all required figures;
+    \item all 8 test-prediction CSV files; and
+    \item report.
+\end{enumerate}
+
+Your code must allow the TAs to identify the dataset, fixed architecture, parameter initialization, automatic-differentiation forward pass, loss computation, backward pass, optimizer state and update, learning rate, weight-decay update, training history, best validation epoch, and final test predictions.
+
+All neural-network training operations and all optimizer updates must use PyTorch tensor primitives. All experiments must use \texttt{seed = 3410}.
+
+\end{document}

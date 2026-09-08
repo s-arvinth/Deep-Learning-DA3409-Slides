@@ -1,0 +1,224 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=0.72in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{listings}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Viva Question Set-1}
+\cfoot{\thepage}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=1.4em,itemsep=1pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=1pt,topsep=2pt}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.3pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+% Student copy: answers and marking rubrics are intentionally omitted
+% from the source, not merely hidden by a toggle.
+\newcounter{question}
+\newenvironment{question}{%
+  \refstepcounter{question}
+  \par\medskip
+  \noindent\textbf{Q\thequestion.}\par\smallskip
+}{\par\medskip}
+
+\newcommand{}{\textit{Student answers orally; no code writing required.}}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{DA3410 Viva Questions Set-1}}\\[4pt]
+\end{center}
+
+% Bank Q7
+\begin{question}
+What changes if \texttt{mean()} is replaced by \texttt{sum()} in this loss? 
+
+\begin{lstlisting}
+per_sample = (pred - target) ** 2
+loss = per_sample.mean()
+\end{lstlisting}
+\end{question}
+
+% Bank Q8
+\begin{question}
+Give the activation output and local derivative for the input below.
+Use the convention that the ReLU derivative at zero is $0$.
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Activation and input & Required output \\
+\midrule
+ReLU, $x=3$ & $f(x)$ and $f'(x)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+
+% Bank Q10
+\begin{question}
+Consider the implementation below.
+
+\begin{verbatim}
+h = x @ W1 + b1
+y = h @ W2 + b2
+\end{verbatim}
+
+Can the complete mapping from \texttt{x} to \texttt{y} always be replaced by
+a single affine layer of the form
+
+\begin{verbatim}
+y = x @ W + b
+\end{verbatim}
+
+without changing the function? Explain briefly.
+\end{question}
+
+% Bank Q12
+\begin{question}
+The second line is replaced by \texttt{exp\_z = torch.exp(z)}. What changes? 
+
+\begin{lstlisting}
+z = torch.tensor([1000.0, 1001.0])
+exp_z = torch.exp(z - z.max())
+p = exp_z / exp_z.sum()
+\end{lstlisting}
+\end{question}
+
+% Bank Q14
+\begin{question}
+Is the checkpointing code correct? If not, identify the problem and state the
+fix conceptually.
+
+\begin{verbatim}
+for epoch in range(epochs):
+    best_loss = float("inf")
+    ...
+    if val_loss < best_loss:
+        best_loss = val_loss
+        best_params = clone_params(params)
+\end{verbatim}
+\end{question}
+
+% Bank Q19
+\begin{question}
+Consider the following manual autodiff forward pass:
+
+\begin{verbatim}
+a = multiply(x, w)
+b = relu(a)
+loss = square(b)
+\end{verbatim}
+
+The operations are recorded during the forward pass as
+
+\begin{verbatim}
+ops = [multiply_op, relu_op, square_op]
+\end{verbatim}
+
+Is the proposed backward implementation correct? If not, state the required
+change.
+
+\begin{verbatim}
+for op in reversed(ops):
+    op.backward()
+\end{verbatim}
+\end{question}
+
+% Bank Q22
+\begin{question}
+What is the shape of \texttt{grad\_W}? 
+
+\begin{lstlisting}
+x = torch.randn(16, 10)
+grad_z = torch.randn(16, 7)
+grad_W = x.T @ grad_z
+\end{lstlisting}
+\end{question}
+
+% Bank Q25
+\begin{question}
+Consider the following code for one training epoch:
+
+\begin{verbatim}
+updates = 0
+
+for start in range(0, N, batch_size):
+    xb = X[start:start + batch_size]
+    update(params, xb)
+    updates += 1
+
+print(updates, len(xb))
+\end{verbatim}
+
+For the values below, what does the final \texttt{print} output?
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+\texttt{N} & \texttt{batch\_size} \\
+\midrule
+300 & 300 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+
+% Bank Q29
+\begin{question}
+The validation loss improves, but the supposedly saved ``best'' parameters
+keep changing during later training. Identify the bug. 
+
+\begin{lstlisting}
+if val_loss < best_loss:
+    best_loss = val_loss
+    best_params = params
+\end{lstlisting}
+\end{question}
+
+% Bank Q32
+\begin{question}
+Suppose \texttt{group\_id[i]} identifies which related group sample
+\texttt{i} belongs to. Samples with the same \texttt{group\_id} should not
+appear in both training and validation.
+
+Does the code guarantee this? If not, explain the problem.
+
+\begin{verbatim}
+groups = torch.unique(group_id)
+groups = groups[torch.randperm(len(groups))]
+cut = int(0.8 * len(groups))
+
+train_groups = groups[:cut]
+val_groups   = groups[cut:]
+\end{verbatim}
+
+The corresponding samples are then selected according to their group.
+\end{question}
+
+
+\end{document}

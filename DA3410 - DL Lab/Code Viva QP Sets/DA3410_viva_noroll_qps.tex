@@ -1,0 +1,538 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=0.72in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{listings}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Roll No: \rule{1.35in}{0.4pt}}
+\cfoot{\thepage}
+\setlength{\headheight}{14pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=1.4em,itemsep=1pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=1pt,topsep=2pt}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.3pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\newcounter{question}
+\newenvironment{question}{%
+  \refstepcounter{question}
+  \par\medskip
+  \noindent\textbf{Q\thequestion.}\par\smallskip
+}{\par\medskip}
+
+% Blank handwriting area after each question. The stretch component expands
+% to use the remaining page height while retaining a non-zero minimum space.
+\newcommand{\answerspace}{\par\vskip 0.28in plus 1fill\relax}
+
+\begin{document}
+% Emergency paper 1: Set 5
+\setcounter{question}{0}
+\setcounter{page}{1}
+\begin{center}
+    {\LARGE \textbf{DA3410 Viva Questions Set-5}}\\[4pt]
+\end{center}
+
+\begin{question}
+What changes if \texttt{mean()} is replaced by \texttt{sum()} in this loss?
+
+\begin{lstlisting}
+per_sample = (pred - target) ** 2
+loss = per_sample.mean()
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Consider the following code:
+
+\begin{verbatim}
+logits = torch.tensor([-3., -3., -3., -3.], dtype=torch.float32)
+p = torch.softmax(logits, dim=0)
+print(p)
+\end{verbatim}
+
+What does \texttt{p} contain?
+\end{question}
+\answerspace
+\begin{question}
+What shape does \texttt{pred} have? What would change if \texttt{dim=1}
+were replaced by \texttt{dim=0}?
+
+\begin{lstlisting}
+logits = torch.randn(8, 7)
+pred = logits.argmax(dim=1)
+\end{lstlisting}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+Identify the problem in the code and explain what is wrong with the resulting
+validation measurement.
+
+\begin{verbatim}
+for xb, yb in train_loader:
+    train_step(xb, yb)
+
+val_loss = evaluate(train_loader, params)
+\end{verbatim}
+\end{question}
+\answerspace
+\begin{question}
+A manual autodiff system performs the forward operation shown below.
+For the local backward function, assume the upstream gradient and only the
+quantities explicitly listed in \texttt{saved} are available.
+
+Is the saved information sufficient to compute the local backward pass?
+If not, state what additional forward quantity must be retained.
+
+\begin{verbatim}
+s = torch.sigmoid(z)
+saved = {"s": s}
+\end{verbatim}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+For the values below, give $\partial L/\partial a$ and
+$\partial L/\partial b$.
+
+\begin{lstlisting}
+y = a * b
+# upstream gradient is g = dL/dy
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$a$ & $b$ & $g$ \\
+\midrule
+-2 & 3 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\begin{question}
+What is the shape of \texttt{grad\_W}?
+
+\begin{lstlisting}
+x = torch.randn(16, 10)
+grad_z = torch.randn(16, 7)
+grad_W = x.T @ grad_z
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Consider the following code for one training epoch:
+
+\begin{verbatim}
+updates = 0
+
+for start in range(0, N, batch_size):
+    xb = X[start:start + batch_size]
+    update(params, xb)
+    updates += 1
+
+print(updates, len(xb))
+\end{verbatim}
+
+For the values below, what does the final \texttt{print} output?
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+\texttt{N} & \texttt{batch\_size} \\
+\midrule
+256 & 128 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+The code creates a random permutation, but the data are still processed in
+their original order. Where is the bug?
+
+\begin{lstlisting}
+perm = torch.randperm(len(X))
+for i in range(0, len(X), batch_size):
+    xb = X[i:i + batch_size]
+    yb = y[i:i + batch_size]
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+The following code is used to initialize a deep network before measuring
+layerwise gradient magnitudes.
+
+State whether the setup is intended to produce \textbf{stable},
+\textbf{vanishing}, or \textbf{exploding} gradient behaviour.
+
+\begin{verbatim}
+for l in range(depth):
+    W[l] = 2 * he_init(fan_in, fan_out)
+activation = relu
+\end{verbatim}
+\end{question}
+\answerspace
+\clearpage
+% Emergency paper 2: Set 6
+\setcounter{question}{0}
+\setcounter{page}{1}
+\begin{center}
+    {\LARGE \textbf{DA3410 Viva Questions Set-6}}\\[4pt]
+\end{center}
+
+\begin{question}
+There is one evaluation bug in the code. Identify it.
+
+\begin{lstlisting}
+X = scaler.fit_transform(X)
+X_train, X_val, y_train, y_val = train_test_split(X, y)
+model.fit(X_train, y_train)
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Give the activation output and local derivative for the input below.
+Use the convention that the ReLU derivative at zero is $0$.
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Activation and input & Required output \\
+\midrule
+ReLU, $x=-2$ & $f(x)$ and $f'(x)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\begin{question}
+Consider the following code:
+
+\begin{verbatim}
+logits = torch.tensor([-2., -2., -2.], dtype=torch.float32)
+p = torch.softmax(logits, dim=0)
+print(p)
+\end{verbatim}
+
+What does \texttt{p} contain?
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+Is the checkpointing code correct? If not, identify the problem and state the
+fix conceptually.
+
+\begin{verbatim}
+best_loss = float("inf")
+
+for epoch in range(epochs):
+    ...
+    if val_loss < best_loss:
+        best_loss = val_loss
+        best_params = params
+\end{verbatim}
+\end{question}
+\answerspace
+\begin{question}
+What is the shape of \texttt{z}?
+
+\begin{lstlisting}
+x = torch.randn(B, D)
+W = torch.randn(D, H)
+b = torch.randn(H)
+z = x @ W + b
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$B$ & $D$ & $H$ \\
+\midrule
+4 & 3 & 5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+Consider the following manual autodiff forward pass:
+
+\begin{verbatim}
+a = multiply(x, w)
+b = relu(a)
+loss = square(b)
+\end{verbatim}
+
+The operations are recorded during the forward pass as
+
+\begin{verbatim}
+ops = [multiply_op, relu_op, square_op]
+\end{verbatim}
+
+Is the proposed backward implementation correct? If not, state the required
+change.
+
+\begin{verbatim}
+for op in ops:
+    op.backward()
+\end{verbatim}
+\end{question}
+\answerspace
+\begin{question}
+There is a bug in the backward code. Identify it.
+
+\begin{lstlisting}
+a = x * x
+L = a + x
+
+grad_x = 1.0          # path L -> x
+grad_x = 2 * x        # path L -> a -> x
+\end{lstlisting}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+Consider the following code for one training epoch:
+
+\begin{verbatim}
+updates = 0
+
+for start in range(0, N, batch_size):
+    xb = X[start:start + batch_size]
+    update(params, xb)
+    updates += 1
+
+print(updates, len(xb))
+\end{verbatim}
+
+For the values below, what does the final \texttt{print} output?
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+\texttt{N} & \texttt{batch\_size} \\
+\midrule
+300 & 128 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\begin{question}
+Rank SGD, mini-batch gradient descent, and full-batch gradient descent from
+most update noise to least update noise.
+\end{question}
+\answerspace
+\begin{question}
+Suppose \texttt{group\_id[i]} identifies which related group sample
+\texttt{i} belongs to. Samples with the same \texttt{group\_id} should not
+appear in both training and validation.
+
+Does the code guarantee this? If not, explain the problem.
+
+\begin{verbatim}
+perm = torch.randperm(len(X))
+cut = int(0.8 * len(X))
+
+train_idx = perm[:cut]
+val_idx   = perm[cut:]
+\end{verbatim}
+\end{question}
+\answerspace
+\clearpage
+% Emergency paper 3: Set 1
+\setcounter{question}{0}
+\setcounter{page}{1}
+\begin{center}
+    {\LARGE \textbf{DA3410 Viva Questions Set-1}}\\[4pt]
+\end{center}
+
+\begin{question}
+What changes if \texttt{mean()} is replaced by \texttt{sum()} in this loss?
+
+\begin{lstlisting}
+per_sample = (pred - target) ** 2
+loss = per_sample.mean()
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Give the activation output and local derivative for the input below.
+Use the convention that the ReLU derivative at zero is $0$.
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Activation and input & Required output \\
+\midrule
+ReLU, $x=3$ & $f(x)$ and $f'(x)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\begin{question}
+Consider the implementation below.
+
+\begin{verbatim}
+h = x @ W1 + b1
+y = h @ W2 + b2
+\end{verbatim}
+
+Can the complete mapping from \texttt{x} to \texttt{y} always be replaced by
+a single affine layer of the form
+
+\begin{verbatim}
+y = x @ W + b
+\end{verbatim}
+
+without changing the function? Explain briefly.
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+The second line is replaced by \texttt{exp\_z = torch.exp(z)}. What changes?
+
+\begin{lstlisting}
+z = torch.tensor([1000.0, 1001.0])
+exp_z = torch.exp(z - z.max())
+p = exp_z / exp_z.sum()
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Is the checkpointing code correct? If not, identify the problem and state the
+fix conceptually.
+
+\begin{verbatim}
+for epoch in range(epochs):
+    best_loss = float("inf")
+    ...
+    if val_loss < best_loss:
+        best_loss = val_loss
+        best_params = clone_params(params)
+\end{verbatim}
+\end{question}
+\answerspace
+\begin{question}
+Consider the following manual autodiff forward pass:
+
+\begin{verbatim}
+a = multiply(x, w)
+b = relu(a)
+loss = square(b)
+\end{verbatim}
+
+The operations are recorded during the forward pass as
+
+\begin{verbatim}
+ops = [multiply_op, relu_op, square_op]
+\end{verbatim}
+
+Is the proposed backward implementation correct? If not, state the required
+change.
+
+\begin{verbatim}
+for op in reversed(ops):
+    op.backward()
+\end{verbatim}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+What is the shape of \texttt{grad\_W}?
+
+\begin{lstlisting}
+x = torch.randn(16, 10)
+grad_z = torch.randn(16, 7)
+grad_W = x.T @ grad_z
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Consider the following code for one training epoch:
+
+\begin{verbatim}
+updates = 0
+
+for start in range(0, N, batch_size):
+    xb = X[start:start + batch_size]
+    update(params, xb)
+    updates += 1
+
+print(updates, len(xb))
+\end{verbatim}
+
+For the values below, what does the final \texttt{print} output?
+
+\begin{center}
+\begin{tabular}{cc}
+\toprule
+\texttt{N} & \texttt{batch\_size} \\
+\midrule
+300 & 300 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{question}
+\answerspace
+\newpage
+\begin{question}
+The validation loss improves, but the supposedly saved ``best'' parameters
+keep changing during later training. Identify the bug.
+
+\begin{lstlisting}
+if val_loss < best_loss:
+    best_loss = val_loss
+    best_params = params
+\end{lstlisting}
+\end{question}
+\answerspace
+\begin{question}
+Suppose \texttt{group\_id[i]} identifies which related group sample
+\texttt{i} belongs to. Samples with the same \texttt{group\_id} should not
+appear in both training and validation.
+
+Does the code guarantee this? If not, explain the problem.
+
+\begin{verbatim}
+groups = torch.unique(group_id)
+groups = groups[torch.randperm(len(groups))]
+cut = int(0.8 * len(groups))
+
+train_groups = groups[:cut]
+val_groups   = groups[cut:]
+\end{verbatim}
+
+The corresponding samples are then selected according to their group.
+\end{question}
+\answerspace
+\end{document}

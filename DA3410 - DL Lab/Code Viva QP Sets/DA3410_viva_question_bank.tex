@@ -1,0 +1,803 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=0.72in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{fancyhdr}
+\usepackage{listings}
+
+% -----------------------------------------------------------------------------
+% Answer toggle
+% Set \showanswersfalse for a student/question-only copy.
+% Set \showanswerstrue  for the TA answer-key copy.
+% -----------------------------------------------------------------------------
+\newif\ifshowanswers
+\showanswerstrue
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Viva Question Bank}
+\cfoot{\thepage}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\setlist[itemize]{leftmargin=1.4em,itemsep=1pt,topsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,itemsep=1pt,topsep=2pt}
+
+\lstset{
+  language=Python,
+  basicstyle=\ttfamily\small,
+  columns=fullflexible,
+  keepspaces=true,
+  showstringspaces=false,
+  frame=single,
+  framerule=0.3pt,
+  aboveskip=4pt,
+  belowskip=4pt,
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
+
+\newenvironment{question}[3]{%
+  \par\medskip
+  \noindent\textbf{Q#1. #2}\hfill\textit{#3}\par\smallskip
+}{\par\medskip}
+
+\newcommand{\answer}[1]{%
+  \ifshowanswers
+    \begin{quote}\small\textbf{Expected answer:} #1\end{quote}
+  \fi
+}
+
+\newcommand{\marking}[1]{%
+  \ifshowanswers
+    \begin{quote}\small\textbf{1 mark:} #1\end{quote}
+  \fi
+}
+
+\newcommand{\casesnote}{\textit{TA: choose one case only.}}
+\newcommand{\oralnote}{\textit{Student answers orally; no code writing required.}}
+
+\begin{document}
+
+\begin{center}
+    {\LARGE \textbf{DA3410 Viva Question Bank}}\\[4pt]
+\end{center}
+
+\section*{A. Representations, Preprocessing, and Evaluation}
+
+\begin{question}{1}{Token frequencies and order}{Core}
+A normalized character-frequency representation is built for each sequence. Can it distinguish the two sequences in the chosen case? \casesnote
+
+\begin{center}
+\begin{tabular}{cll}
+\toprule
+Case & Sequence 1 & Sequence 2 \\
+\midrule
+A & \texttt{AAAACCCC} & \texttt{ACACACAC} \\
+B & \texttt{AABB} & \texttt{ABAB} \\
+C & \texttt{ABCABC} & \texttt{CBAABC} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{No in all three cases. The sequences have the same character counts, so normalized token frequencies are identical even though their order differs.}
+\marking{Student states that token-frequency features are order-invariant and therefore cannot distinguish the pair.}
+\end{question}
+
+\begin{question}{2}{Extracting $k$-mers}{Core}
+List the contiguous $k$-mers for the chosen case. \casesnote
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+Case & Sequence & $k$ \\
+\midrule
+A & \texttt{ABCD} & 2 \\
+B & \texttt{AABA} & 2 \\
+C & \texttt{ABCDE} & 3 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{A: \texttt{AB, BC, CD}. B: \texttt{AA, AB, BA}. C: \texttt{ABC, BCD, CDE}.}
+\marking{All contiguous $k$-mers for the chosen case are listed correctly.}
+\end{question}
+
+\begin{question}{3}{Why use $\log_{10}(k_{cat})$?}{Intermediate}
+The raw $k_{cat}$ target spans many orders of magnitude. Why is training directly with squared error on the raw target problematic, and why does the log target help?
+
+\answer{Very large raw values dominate squared error. Taking $\log_{10}$ compresses the range so extreme values do not dominate the loss to the same extent.}
+\marking{Student connects orders-of-magnitude variation to domination of raw squared error and explains the role of the log transform.}
+\end{question}
+
+\begin{question}{4}{Train-only preprocessing}{Core}
+A student wants to fit a scaler or PCA before evaluating on validation data. Which data should be used to fit the scaler/PCA?
+
+\answer{Training data only; the fitted transform is then applied unchanged to validation and test data.}
+\marking{Student says training split only.}
+\end{question}
+
+\begin{question}{5}{ROC-AUC and thresholds}{Intermediate}
+For the image classification task, why can ROC-AUC be reported without choosing a classification threshold, while sensitivity and specificity depend on a threshold?
+
+\answer{ROC-AUC evaluates the ranking of scores across thresholds. Sensitivity and specificity are computed after converting scores to class decisions at a chosen threshold.}
+\marking{Student distinguishes threshold-independent ranking evaluation from threshold-dependent class decisions.}
+\end{question}
+
+\begin{question}{6}{Preprocessing-order bug}{Intermediate}
+There is one evaluation bug in the code. Identify it. \oralnote
+
+\begin{lstlisting}
+X = scaler.fit_transform(X)
+X_train, X_val, y_train, y_val = train_test_split(X, y)
+model.fit(X_train, y_train)
+\end{lstlisting}
+
+\answer{The scaler is fitted before the train/validation split, so validation information leaks into preprocessing. Split first, fit the scaler on $X_{train}$ only, then transform validation data using that fitted scaler.}
+\marking{Student identifies train--validation leakage caused by fitting preprocessing before the split.}
+\end{question}
+
+\begin{question}{7}{Reduction: mean versus sum}{Intermediate}
+What changes if \texttt{mean()} is replaced by \texttt{sum()} in this loss? \oralnote
+
+\begin{lstlisting}
+per_sample = (pred - target) ** 2
+loss = per_sample.mean()
+\end{lstlisting}
+
+\answer{The loss and gradients become proportional to the batch size instead of being averaged per sample. With \texttt{sum()}, larger batches generally produce larger gradient magnitudes.}
+\marking{Student explains that summation changes gradient scale with batch size; the required comparison uses a mean loss.}
+\end{question}
+
+\section*{B. Activation Functions and Tensor Operations}
+
+\begin{question}{8}{ReLU and Leaky ReLU}{Core}
+Give the activation output and local derivative for the chosen case. Use the convention that the ReLU derivative at zero is $0$. \casesnote
+
+\begin{center}
+\begin{tabular}{clc}
+\toprule
+Case & Activation and input & Required output \\
+\midrule
+A & ReLU, $x=-2$ & $f(x)$ and $f'(x)$ \\
+B & ReLU, $x=3$ & $f(x)$ and $f'(x)$ \\
+C & ReLU, $x=0$ & $f(x)$ and $f'(x)$ \\
+D & Leaky ReLU, $x=-2$, $\alpha=0.1$ & $f(x)$ and $f'(x)$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{A: $(0,0)$. B: $(3,1)$. C: $(0,0)$. D: $(-0.2,0.1)$.}
+\marking{Correct activation and derivative for the chosen case.}
+\end{question}
+
+\begin{question}{9}{Softmax output}{Core}
+Consider the following code:
+
+\begin{verbatim}
+logits = torch.tensor(CASE, dtype=torch.float32)
+p = torch.softmax(logits, dim=0)
+print(p)
+\end{verbatim}
+
+What does \texttt{p} contain for the chosen case? \casesnote
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+Case & \texttt{CASE} \\
+\midrule
+A & \texttt{[0., 0.]} \\
+B & \texttt{[2., 2., 2.]} \\
+C & \texttt{[-3., -3., -3., -3.]} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{
+A: approximately \texttt{[0.5, 0.5]}. \\
+B: approximately \texttt{[0.333, 0.333, 0.333]}. \\
+C: approximately \texttt{[0.25, 0.25, 0.25, 0.25]}. \\
+When all logits are equal, softmax assigns equal probability to every class.
+}
+\marking{Correct output for the chosen case.}
+\end{question}
+
+\begin{question}{10}{Stacking linear layers}{Intermediate}
+The TA chooses one of the following implementations.
+
+\textbf{Case A}
+\begin{verbatim}
+h = x @ W1 + b1
+y = h @ W2 + b2
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+h = torch.relu(x @ W1 + b1)
+y = h @ W2 + b2
+\end{verbatim}
+
+For the chosen case, can the complete mapping from \texttt{x} to \texttt{y}
+always be replaced by a single affine layer of the form
+
+\begin{verbatim}
+y = x @ W + b
+\end{verbatim}
+
+without changing the function? Explain briefly.
+
+\answer{
+Case A: Yes. The two affine transformations can be combined into one affine
+transformation.
+
+Case B: No, in general. ReLU introduces a nonlinear operation between the
+layers, so the overall function cannot generally be collapsed into one affine
+layer.
+}
+\marking{Correct yes/no answer for the chosen case and identifies the presence
+or absence of the nonlinear activation as the reason.}
+\end{question}
+
+\begin{question}{11}{Sigmoid implementation bug}{Core}
+There is one bug in this implementation. What is it? \oralnote
+
+\begin{lstlisting}
+def sigmoid(x):
+    return 1 / 1 + torch.exp(-x)
+\end{lstlisting}
+
+\answer{The denominator needs parentheses: mathematically it should be $1/(1+e^{-x})$. As written, Python evaluates \texttt{1 / 1} first and then adds \texttt{exp(-x)}.}
+\marking{Student identifies the missing parentheses/operator-precedence error.}
+\end{question}
+
+\begin{question}{12}{Stable softmax}{Intermediate}
+The second line is replaced by \texttt{$exp_z$ = torch.exp(z)}. What changes? \oralnote
+
+\begin{lstlisting}
+z = torch.tensor([1000.0, 1001.0])
+exp_z = torch.exp(z - z.max())
+p = exp_z / exp_z.sum()
+\end{lstlisting}
+
+\answer{In exact mathematics the probabilities are unchanged by subtracting the same maximum from all logits, but removing the subtraction can cause overflow and non-finite values.}
+\marking{Student explains numerical stability and that subtracting the maximum does not change the mathematical softmax probabilities.}
+\end{question}
+
+\begin{question}{13}{Argmax dimension}{Intermediate}
+What shape does \texttt{pred} have? What would change if \texttt{dim=1} were replaced by \texttt{dim=0}? \oralnote
+
+\begin{lstlisting}
+logits = torch.randn(8, 7)
+pred = logits.argmax(dim=1)
+\end{lstlisting}
+
+\answer{With \texttt{dim=1}, \texttt{pred} has shape $(8,)$: one predicted class per sample. With \texttt{dim=0}, the result has shape $(7,)$ and chooses one row/sample index for each class column, which is not the intended prediction operation.}
+\marking{Student gives the correct shapes and understands which axis corresponds to classes.}
+\end{question}
+
+\section*{C. Assignment 3: Width, Depth, Capacity, and Model Selection}
+
+\begin{question}{14}{Checkpointing implementation}{Intermediate}
+The TA chooses one case. Is the checkpointing code correct? If not, identify the
+problem and state the fix conceptually. \casesnote
+
+\textbf{Case A}
+\begin{verbatim}
+best_loss = float("inf")
+
+for epoch in range(epochs):
+    ...
+    if val_loss < best_loss:
+        best_loss = val_loss
+        best_params = params
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+for epoch in range(epochs):
+    best_loss = float("inf")
+    ...
+    if val_loss < best_loss:
+        best_loss = val_loss
+        best_params = clone_params(params)
+\end{verbatim}
+
+\textbf{Case C}
+\begin{verbatim}
+best_loss = float("inf")
+
+for epoch in range(epochs):
+    ...
+    if train_loss < best_loss:
+        best_loss = train_loss
+        best_params = clone_params(params)
+\end{verbatim}
+
+\answer{
+Case A: Incorrect if \texttt{best\_params = params} only stores references to
+the live tensors. Later updates may also change what is considered the saved
+checkpoint. Store independent copies/clones of the parameter values.
+
+Case B: Incorrect. \texttt{best\_loss} is reset at the start of every epoch, so
+almost every epoch can overwrite the previous checkpoint. Initialize it once
+before the training loop.
+
+Case C: Incorrect for the required checkpointing rule. The model is being
+selected using training loss rather than validation loss. Compare
+\texttt{val\_loss} against the best validation loss.
+}
+
+\marking{Student correctly identifies the error in the chosen case and gives
+the conceptual correction.}
+\end{question}
+
+\begin{question}{15}{Validation-loop bugs}{Intermediate}
+The TA chooses one case. Identify the problem in the code and explain what is
+wrong with the resulting validation measurement. \casesnote
+
+\textbf{Case A}
+\begin{verbatim}
+for xb, yb in val_loader:
+    pred = forward(xb, params)
+    loss = loss_fn(pred, yb)
+    backward(loss)
+    update(params, lr)
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+for xb, yb in val_loader:
+    pred = forward(xb, params)
+    loss = loss_fn(pred, yb)
+
+val_loss = train_loss
+\end{verbatim}
+
+\textbf{Case C}
+\begin{verbatim}
+for xb, yb in train_loader:
+    train_step(xb, yb)
+
+val_loss = evaluate(train_loader, params)
+\end{verbatim}
+
+\answer{
+Case A: The model is being updated using validation samples. Validation data
+must only be used for evaluation, not parameter updates. This leaks validation
+information into training.
+
+Case B: The validation predictions may be computed, but the reported
+\texttt{val\_loss} is actually the training loss. The validation losses must be
+accumulated/averaged separately.
+
+Case C: The so-called validation loss is being evaluated on the training
+loader. It therefore measures training performance, not generalization to the
+validation set.
+}
+
+\marking{Student identifies the error in the chosen case and explains why the
+reported validation performance is invalid or misleading.}
+\end{question}
+
+\begin{question}{16}{Linear-layer output shape}{Core}
+What is the shape of \texttt{z}? \casesnote \ \oralnote
+
+\begin{lstlisting}
+x = torch.randn(B, D)
+W = torch.randn(D, H)
+b = torch.randn(H)
+z = x @ W + b
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+Case & $B$ & $D$ & $H$ \\
+\midrule
+A & 4 & 3 & 5 \\
+B & 8 & 10 & 2 \\
+C & 1 & 6 & 7 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{The shape is always $(B,H)$. A: $(4,5)$. B: $(8,2)$. C: $(1,7)$.}
+\marking{Correct output shape for the chosen case.}
+\end{question}
+
+\section*{D. Assignment 4: Manual Training, Autodiff, Optimization, and Checkpointing}
+
+\begin{question}{18}{What must be saved for backward?}{Intermediate}
+A manual autodiff system performs the forward operation shown below. Assume the
+computation graph already records the operation and its parent tensors.
+
+For the chosen case, is the saved information sufficient to compute the local
+backward pass? If not, state what additional quantity must be retained.
+\casesnote
+
+\textbf{Case A}
+\begin{verbatim}
+y = a * b
+saved = {"a": a}
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+h = torch.maximum(z, torch.tensor(0.0))
+saved = {"mask": z > 0}
+\end{verbatim}
+
+\textbf{Case C}
+\begin{verbatim}
+s = torch.sigmoid(z)
+saved = {"s": s}
+\end{verbatim}
+
+\answer{
+Case A: Not sufficient. To compute both local gradients,
+$\partial y/\partial a=b$ and $\partial y/\partial b=a$, the backward operation
+also needs \texttt{b} (or equivalent retained information).
+
+Case B: Sufficient. The ReLU mask contains the information needed to multiply
+the upstream gradient by $1$ where $z>0$ and $0$ elsewhere.
+
+Case C: Sufficient. The sigmoid output is enough because its derivative can be
+computed as $s(1-s)$.
+}
+
+\marking{Student correctly determines whether the saved information is
+sufficient and, when necessary, identifies the missing quantity.}
+\end{question}
+
+\begin{question}{19}{Backward traversal of the computation graph}{Intermediate}
+Consider the following manual autodiff forward pass:
+
+\begin{verbatim}
+a = multiply(x, w)
+b = relu(a)
+loss = square(b)
+\end{verbatim}
+
+The operations are recorded during the forward pass as
+
+\begin{verbatim}
+ops = [multiply_op, relu_op, square_op]
+\end{verbatim}
+
+The TA chooses one proposed backward implementation. Is it correct? If not,
+state the required change. \casesnote
+
+\textbf{Case A}
+\begin{verbatim}
+for op in ops:
+    op.backward()
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+for op in reversed(ops):
+    op.backward()
+\end{verbatim}
+
+\textbf{Case C}
+\begin{verbatim}
+for op in reversed(ops):
+    op.backward()
+    op.parents[0].grad = op.grad
+\end{verbatim}
+
+\answer{
+Case A: Incorrect. The operations are being differentiated in forward order.
+Backward must begin at the loss and traverse the recorded operations in reverse
+order.
+
+Case B: Correct, assuming each operation's backward function propagates and
+accumulates its gradients into its parents.
+
+Case C: Potentially incorrect. A parent's gradient should generally be
+accumulated rather than blindly overwritten, because the same tensor may
+contribute to the loss through multiple paths in the computation graph.
+}
+
+\marking{Student correctly judges the chosen implementation and identifies
+reverse traversal and, for Case C, gradient accumulation as the key issue.}
+\end{question}
+
+\begin{question}{20}{One-operation backward: multiplication}{Core}
+For the chosen case, give $\partial L/\partial a$ and $\partial L/\partial b$. \casesnote \ \oralnote
+
+\begin{lstlisting}
+y = a * b
+# upstream gradient is g = dL/dy
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+Case & $a$ & $b$ & $g$ \\
+\midrule
+A & 3 & 2 & 1 \\
+B & 4 & 5 & 2 \\
+C & -2 & 3 & 1 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{Use $\partial L/\partial a=g\,b$ and $\partial L/\partial b=g\,a$. A: $(2,3)$. B: $(10,8)$. C: $(3,-2)$.}
+\marking{Correct two gradients for the chosen case.}
+\end{question}
+
+\begin{question}{21}{Gradient accumulation at a branch}{Intermediate}
+There is one bug in the backward code. Identify it. \oralnote
+
+\begin{lstlisting}
+a = x * x
+L = a + x
+
+grad_x = 1.0          # path L -> x
+grad_x = 2 * x        # path L -> a -> x
+\end{lstlisting}
+
+\answer{The second assignment overwrites the gradient from the first path. Because $x$ influences $L$ through two paths, the contributions must be added: $dL/dx = 1 + 2x$.}
+\marking{Student identifies that gradients from multiple graph paths must accumulate rather than overwrite one another.}
+\end{question}
+
+\begin{question}{22}{Linear backward: weight-gradient shape}{Intermediate}
+What is the shape of \texttt{grad\_W}? \oralnote
+
+\begin{lstlisting}
+x = torch.randn(16, 10)
+grad_z = torch.randn(16, 7)
+grad_W = x.T @ grad_z
+\end{lstlisting}
+
+\answer{\texttt{x.T} has shape $(10,16)$ and \texttt{grad\_z} has shape $(16,7)$, so \texttt{grad\_W} has shape $(10,7)$, matching the weight matrix shape.}
+\marking{Student gives $(10,7)$.}
+\end{question}
+
+\begin{question}{23}{Linear backward: bias reduction}{Intermediate}
+Why is the bias gradient reduced with \texttt{sum(dim=0)} rather than \texttt{sum(dim=1)}? What shape does it have? \oralnote
+
+\begin{lstlisting}
+grad_z = torch.randn(32, 128)
+grad_b = grad_z.sum(dim=0)
+\end{lstlisting}
+
+\answer{Each of the 128 bias entries is shared across all 32 samples, so gradient contributions must be summed over the batch dimension. The resulting shape is $(128,)$.}
+\marking{Student identifies the batch dimension and gives shape $(128,)$.}
+\end{question}
+
+\begin{question}{24}{Which input-gradient implementation is correct?}{Core}
+For \texttt{z = x @ W}, which candidate correctly computes the gradient with respect to \texttt{x}? \oralnote
+
+\begin{lstlisting}
+# Candidate A
+ grad_x = grad_z @ W.T
+
+# Candidate B
+ grad_x = W.T @ grad_z
+
+# Candidate C
+ grad_x = grad_z.T @ W
+\end{lstlisting}
+
+\answer{Candidate A. If $x$ is $(B,D)$, $W$ is $(D,H)$, and $grad\_z$ is $(B,H)$, then $grad\_z W^T$ has shape $(B,D)$, matching $x$.}
+\marking{Student chooses A and can justify it by the operation/shape.}
+\end{question}
+
+\begin{question}{25}{Updates and mini-batch construction}{Intermediate}
+Consider the following code for one training epoch:
+
+\begin{verbatim}
+updates = 0
+
+for start in range(0, N, batch_size):
+    xb = X[start:start + batch_size]
+    update(params, xb)
+    updates += 1
+
+print(updates, len(xb))
+\end{verbatim}
+
+For the chosen case, what does the final \texttt{print} output? \casesnote
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+Case & \texttt{N} & \texttt{batch\_size} \\
+\midrule
+A & 128 & 1 \\
+B & 256 & 128 \\
+C & 300 & 128 \\
+D & 300 & 300 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{
+A: \texttt{128 1}. There are 128 SGD updates. \\
+B: \texttt{2 128}. There are two complete mini-batches. \\
+C: \texttt{3 44}. The first two batches contain 128 samples and the final
+batch contains 44. \\
+D: \texttt{1 300}. This is one full-batch update.
+}
+
+\marking{Student gives both the correct number of updates and the size of the
+final batch for the chosen case.}
+\end{question}
+
+\begin{question}{26}{Mini-batch construction}{Core}
+For the chosen case, how many batches are produced and what is the size of the last batch? \casesnote \ \oralnote
+
+\begin{lstlisting}
+for i in range(0, N, batch_size):
+    xb = X[i:i + batch_size]
+\end{lstlisting}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+Case & $N$ & \texttt{batch\_size} \\
+\midrule
+A & 10 & 4 \\
+B & 8 & 4 \\
+C & 9 & 8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\answer{A: 3 batches, last size 2. B: 2 batches, last size 4. C: 2 batches, last size 1.}
+\marking{Correct number of batches and final-batch size.}
+\end{question}
+
+\begin{question}{27}{Shuffling bug}{Intermediate}
+The code creates a random permutation, but the data are still processed in their original order. Where is the bug? \oralnote
+
+\begin{lstlisting}
+perm = torch.randperm(len(X))
+for i in range(0, len(X), batch_size):
+    xb = X[i:i + batch_size]
+    yb = y[i:i + batch_size]
+\end{lstlisting}
+
+\answer{\texttt{perm} is never used. The batches must index the shuffled sample indices, for example by first applying the permutation to $X$ and $y$, or by using the appropriate slice of \texttt{perm} for indexing.}
+\marking{Student identifies that generating a permutation alone does not shuffle the training samples.}
+\end{question}
+
+\begin{question}{28}{Noise across optimization regimes}{Core}
+Rank SGD, mini-batch gradient descent, and full-batch gradient descent from most update noise to least update noise.
+
+\answer{SGD is most noisy, mini-batch is intermediate, and full-batch is least noisy because each update uses the complete training set.}
+\marking{Correct ordering.}
+\end{question}
+
+\begin{question}{29}{Checkpoint aliasing bug}{Intermediate}
+The validation loss improves, but the supposedly saved ``best'' parameters keep changing during later training. Identify the bug. \oralnote
+
+\begin{lstlisting}
+if val_loss < best_loss:
+    best_loss = val_loss
+    best_params = params
+
+# later: parameters are updated in place
+\end{lstlisting}
+
+\answer{\texttt{best\_params} refers to the same mutable parameter objects as \texttt{params}, so later in-place updates also change the saved checkpoint. The tensors must be copied/cloned when the checkpoint is stored.}
+\marking{Student identifies reference/aliasing of mutable tensors and the need to store independent copies.}
+\end{question}
+
+\begin{question}{30}{Debugging an incorrect backward update}{Intermediate}
+A student computes the gradient for the last layer, immediately updates that layer's weights, and then uses the \emph{updated} weights to propagate gradients into earlier layers. What is wrong with this procedure?
+
+\answer{The backward pass is no longer computing gradients for the same parameter state used in the forward pass. Gradients should be computed first, then parameters should be updated.}
+\marking{Student identifies that all gradients must correspond to the original forward-pass parameters before any update is applied.}
+\end{question}
+
+\section*{E. Gradient Diagnostics and Generalization}
+
+\begin{question}{31}{Gradient-propagation diagnostic code}{Intermediate}
+The following code is used to initialize a deep network before measuring
+layerwise gradient magnitudes.
+
+For the chosen case, state whether the setup is intended to produce
+\textbf{stable}, \textbf{vanishing}, or \textbf{exploding} gradient behaviour.
+\casesnote
+
+\textbf{Case A}
+\begin{verbatim}
+for l in range(depth):
+    W[l] = he_init(fan_in, fan_out)
+activation = relu
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+for l in range(depth):
+    W[l] = xavier_init(fan_in, fan_out)
+activation = sigmoid
+\end{verbatim}
+
+\textbf{Case C}
+\begin{verbatim}
+for l in range(depth):
+    W[l] = 2 * he_init(fan_in, fan_out)
+activation = relu
+\end{verbatim}
+
+\answer{
+Case A: Stable reference. ReLU with He initialization is intended to maintain
+reasonable activation and gradient magnitudes through depth.
+
+Case B: Vanishing-gradient condition. Repeated sigmoid derivatives can reduce
+the gradient as it propagates through many layers.
+
+Case C: Exploding-gradient condition. Doubling the He-initialized weights
+amplifies signals repeatedly through the deep network and is intended to
+produce growing gradients.
+}
+
+\marking{Student correctly identifies the intended gradient behaviour for the
+chosen code and gives the relevant reason.}
+\end{question}
+
+\begin{question}{32}{Group leakage in train--validation splitting}{Intermediate}
+Suppose \texttt{group\_id[i]} identifies which related group sample
+\texttt{i} belongs to. Samples with the same \texttt{group\_id} should not
+appear in both training and validation.
+
+For the chosen implementation, does the code guarantee this? If not, explain
+the problem. \casesnote
+
+\textbf{Case A}
+\begin{verbatim}
+perm = torch.randperm(len(X))
+cut = int(0.8 * len(X))
+
+train_idx = perm[:cut]
+val_idx   = perm[cut:]
+\end{verbatim}
+
+\textbf{Case B}
+\begin{verbatim}
+groups = torch.unique(group_id)
+groups = groups[torch.randperm(len(groups))]
+cut = int(0.8 * len(groups))
+
+train_groups = groups[:cut]
+val_groups   = groups[cut:]
+\end{verbatim}
+
+The corresponding samples are then selected according to their group.
+
+\textbf{Case C}
+\begin{verbatim}
+train_idx = torch.where(group_id != 5)[0]
+val_idx   = torch.where(group_id == 5)[0]
+\end{verbatim}
+
+\answer{
+Case A: No. It randomly splits individual samples, so samples belonging to the
+same group may appear in both training and validation. This can give an
+overly optimistic validation result.
+
+Case B: Yes. The split is performed on unique groups first, so an entire group
+is assigned to only one split.
+
+Case C: There is no group overlap between the two sets, so it avoids that
+specific leakage. However, it uses only one group for validation and therefore
+may be a poor or unrepresentative validation split.
+}
+
+\marking{Student correctly judges whether the chosen implementation separates
+related groups and explains the consequence of any problem.}
+\end{question}
+
+\end{document}

@@ -78,7 +78,7 @@
 % =====================================================================
 \title{Deep Networks}
 \subtitle{Convergence}
-\author{Introduction to Deep Learning \ \textperiodcentered\ Class 14}
+\author{Introduction to Deep Learning \ \textperiodcentered\ }
 \institute{}
 \date{}
 
@@ -95,17 +95,17 @@
 \end{frame}
 
 % =====================================================================
-\section{What Convergence Means}
+\section{What Convergence Means?}
 % =====================================================================
 
-\begin{frame}{From a safe step to a fast one}
-  \bridge{Class 13 established that a step with $\eta < 2/L$ lowers the
-  error. It said nothing about how long that takes.}
+\begin{frame}{Convergence}
+  \bridge{Established that a step with $\eta < 2/L$ lowers the
+  error. How long that takes?}
   \vspace{0.35em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.36}
   \begin{tabular}{@{}l@{\hspace{1.6em}}l@{}}
-    \textbf{Settled in Class 13} & \textbf{Open today}\\
+    \textbf{Settled in Previous Classes} & \textbf{Open today}\\
     $-\nabla E$ is the steepest direction & how many steps to reach the
       minimum\\
     $\eta < 2/L$ guarantees a decrease & which $\eta$ is best, not merely
@@ -123,7 +123,7 @@
   \end{redhighlight}
 \end{frame}
 
-\begin{frame}{Notation added today}
+\begin{frame}{Notations}
   \vspace{0.4em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.34}
@@ -153,7 +153,7 @@
   \end{itemize}
 \end{frame}
 
-\begin{frame}{What it means for an iteration to converge}
+\begin{frame}{An iteration to converge}
   \begin{block}{Definition (rate of convergence)}
     Write $\delta_T = E(\mathbf{w}^{(T)}) - E(\mathbf{w}^\star)$. The iteration converges
     \alert{linearly} (or geometrically) with factor $\rho \in (0,1)$ if
@@ -166,7 +166,7 @@
     \item ``Linear'' is about the \emph{logarithm}: each step multiplies
           the error by a constant
     \item The number of steps to reach accuracy $\epsilon$ is then
-          $\log(1/\epsilon) / \log(1/\rho)$
+          $\log(\delta_0/\epsilon) / \log(1/\rho)$
     \item Everything today is a fight to make $\rho$ smaller
   \end{itemize}
 \end{frame}
@@ -181,7 +181,7 @@
 \end{frame}
 
 \begin{frame}{The tool: the quadratic model, again}
-  \bridge{Class 13 used the local quadratic model to say what a minimum
+  \bridge{The local quadratic model to say what a minimum
   looks like. The same model now says how the iterate moves on it.}
   \vspace{-0.2em}
   \[
@@ -220,12 +220,12 @@
   \begin{itemize}\itemsep0.26em
     \item \focus{1}{Differentiating the model gives
           $\nabla E = \sum_i \lambda_i \alpha_i \mathbf{u}_i$.}
-    \item \focus{2}{Write the update in the same basis,
+    \item \focus{1}{Write the update in the same basis,
           $\Delta \mathbf{w} = \sum_i \Delta\alpha_i \mathbf{u}_i$.}
-    \item \focus{3}{Matching coefficients in
+    \item \focus{1}{Matching coefficients in
           $\Delta \mathbf{w} = -\eta\nabla E$ and using $\mathbf{u}_i^{\mathsf T}\mathbf{u}_j =
           \delta_{ij}$ gives $\Delta\alpha_i = -\eta\lambda_i\alpha_i$.}
-    \item \focus{4}{Iterating that one-line recursion $T$ times gives
+    \item \focus{1}{Iterating that one-line recursion $T$ times gives
           the stated power. \hfill $\square$}
   \end{itemize}}
   \vspace{-0.3em}
@@ -238,7 +238,7 @@
   \end{center}
   \figcap[0.97]{(a) the four contraction factors a single $\eta$
   produces on four curvatures. (b) $|1 - \eta\lambda|$ must stay below
-  one for \emph{every} eigenvalue, so the largest one binds.}
+  one for \emph{every} eigenvalue}
 \end{frame}
 
 \begin{frame}{What that recursion already tells us}
@@ -249,11 +249,11 @@
     The iteration reaches $\mathbf{w}^\star$ if and only if
     $|1 - \eta\lambda_i| < 1$ for every $i$, that is
     $0 < \eta < 2/\lambda_{\max}$, and it then converges
-    \alert{linearly} with $\rho = \max_i |1 - \eta\lambda_i|$.
+    \alert{linearly} with $\rho = \max_i |1 - \eta\lambda_i|$ in the neighborhood of $\mathbf{w}^\star$.
   \end{corx}
   \vspace{0.3em}
   \begin{itemize}\itemsep0.35em
-    \item Class 13 obtained $\eta < 2/L$ from smoothness; on a quadratic
+    \item  $\eta < 2/L$ from smoothness; on a quadratic
           $L = \lambda_{\max}$, and the two agree exactly
     \item $1 - \eta\lambda_i$ may go \alert{negative}: that is
           oscillation, harmless while the magnitude stays below one
@@ -267,29 +267,30 @@
   \begin{center}
     \includegraphics[width=0.98\linewidth]{well_conditioned}
   \end{center}
-  \figcap[0.98]{With $\lambda_1 = \lambda_2$ the contours are circles,
+  \figcap[0.98]{With $\lambda_1 = \lambda_2,\,
+      \kappa \;=\; \frac{\lambda_{\max}}{\lambda_{\min}}$ the contours are circles,
   the negative gradient points straight at the minimum, and
   $\eta = 1/\lambda$ arrives in a single step. The last panel shows what
   a modest spread of curvature already costs.}
 \end{frame}
 
-\begin{frame}{The best case, stated}
-  \vspace{0.3em}
-  \begin{itemize}\itemsep0.45em
-    \item If all $\lambda_i$ are equal then $\eta = 1/\lambda$ makes
-          every factor $1 - \eta\lambda_i$ exactly zero
-    \item One step. $\rho = 0$. No method in the rest of this class
-          improves on it
-    \item The reason is that $\mathbf{H} = \lambda I$, so $-\nabla E$ points
-          \alert{exactly} at the minimum from everywhere
-  \end{itemize}
-  \vspace{0.6em}
-  \begin{redhighlight}
-    Everything that follows exists because real error surfaces do not
-    have equal curvature in every direction. The rest of this class
-    measures that failure and repairs it.
-  \end{redhighlight}
-\end{frame}
+% \begin{frame}{The best case, stated}
+%   \vspace{0.3em}
+%   \begin{itemize}\itemsep0.45em
+%     \item If all $\lambda_i$ are equal then $\eta = 1/\lambda$ makes
+%           every factor $1 - \eta\lambda_i$ exactly zero
+%     \item One step. $\rho = 0$. No method in the rest of this class
+%           improves on it
+%     \item The reason is that $\mathbf{H} = \lambda I$, so $-\nabla E$ points
+%           \alert{exactly} at the minimum from everywhere
+%   \end{itemize}
+%   \vspace{0.6em}
+%   \begin{redhighlight}
+%     Everything that follows exists because real error surfaces do not
+%     have equal curvature in every direction. The rest of this class
+%     measures that failure and repairs it.
+%   \end{redhighlight}
+% \end{frame}
 
 % =====================================================================
 \section{Ill-conditioning}
@@ -330,8 +331,8 @@
   \]
   \vspace{-0.4em}
   \begin{itemize}\itemsep0.35em
-    \item The steeply curving direction gives the \emph{short} axis:
-          large $\lambda$, small $\lambda^{-1/2}$
+    \item  Large $\lambda$, small $\lambda^{-1/2}$ gives the \emph{short} axis
+          
     \item $\kappa$ is therefore the elongation of the contour, squared
   \end{itemize}
   \srcline{Bishop \& Bishop (2024), Eqs.~7.10--7.14.}
@@ -348,23 +349,22 @@
   rather than travelling along it.}
 \end{frame}
 
-\begin{frame}{What ill-conditioning costs}
-  \begin{center}
-    \includegraphics[height=0.58\textheight]{condition_number}
-  \end{center}
-  \figcap[0.97]{(a) one contour of the same bowl at four condition
-  numbers. (b) steps needed to reduce the error by six orders of
-  magnitude, at the largest safe learning rate, against $\kappa$: the
-  count grows in proportion to $\kappa$.}
-\end{frame}
+% \begin{frame}{What ill-conditioning costs}
+%   \begin{center}
+%     \includegraphics[height=0.58\textheight]{condition_number}
+%   \end{center}
+%   \figcap[0.97]{(a) Four condition
+%   numbers and minimum. (b) steps needed to reduce the error by six orders of
+%   magnitude, at the largest safe learning rate, against $\kappa$: the
+%   count grows in proportion to $\kappa$.}
+% \end{frame}
 
 \begin{frame}{The slowest direction sets the pace}
   \vspace{-0.2em}
   \begin{propx}[The rate at the stability limit]\label{th:slow}
     \small
     Take $\eta$ as large as stability allows,
-    $\eta \to 2/\lambda_{\max}$. The fastest direction then barely
-    contracts at all, and the slowest contracts by
+    $\eta \to 2/\lambda_{\max}$. Then, the rate of convergence is dominated by $\lambda_{min}$ and
     \[
       \Big| 1 - \frac{2\lambda_{\min}}{\lambda_{\max}} \Big|
       \;=\; \Big| 1 - \frac{2}{\kappa} \Big|
@@ -382,27 +382,27 @@
   \srcline{Bishop \& Bishop (2024), Eq.~7.30.}
 \end{frame}
 
-\begin{frame}{The best a fixed step size can do}
+\begin{frame}{Optimal learning rate for a quadratic}
   \vspace{-0.2em}
   \begin{propx}[The optimal learning rate for a quadratic]\label{th:opt}
     \small
-    The choice $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$
-    minimises $\rho = \max_i |1 - \eta\lambda_i|$, giving
-    $\rho^\star = (\kappa - 1)/(\kappa + 1)$.
+        The choice $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$
+        minimises $\rho = \max_i |1 - \eta\lambda_i|$, giving
+        $\rho^\star = (\kappa - 1)/(\kappa + 1)$.
   \end{propx}
   \vspace{0.05em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.26em
-    \item \focus{1}{$\rho(\eta) = \max\big(|1-\eta\lambda_{\min}|,\,
-          |1-\eta\lambda_{\max}|\big)$: only the extremes can attain the
-          maximum.}
-    \item \focus{2}{The first term falls in $\eta$, the second rises, so
-          the maximum is smallest where they are equal.}
-    \item \focus{3}{$1 - \eta\lambda_{\min} = \eta\lambda_{\max} - 1$
-          gives $\eta^\star = 2/(\lambda_{\min}+\lambda_{\max})$.}
-    \item \focus{4}{Substituting back gives the stated factor.
-          \hfill $\square$}
-  \end{itemize}}
+  % {\footnotesize
+  % \begin{itemize}\itemsep0.26em
+  %   \item \focus{1}{$\rho(\eta) = \max\big(|1-\eta\lambda_{\min}|,\,
+  %         |1-\eta\lambda_{\max}|\big)$: only the extremes can attain the
+  %         maximum.}
+  %   \item \focus{1}{The first term falls in $\eta$, the second rises, so
+  %         the maximum is smallest where they are equal.}
+  %   \item \focus{1}{$1 - \eta\lambda_{\min} = \eta\lambda_{\max} - 1$
+  %         gives $\eta^\star = 2/(\lambda_{\min}+\lambda_{\max})$.}
+  %   \item \focus{1}{Substituting back gives the stated factor.
+  %         \hfill $\square$}
+  % \end{itemize}}
   \vspace{-0.4em}
   \begin{redhighlight}
     Accuracy $\epsilon$ then needs about
@@ -421,7 +421,7 @@
   them is still slow.}
 \end{frame}
 
-\begin{frame}{Where the condition number comes from}
+\begin{frame}{Possible Origin of Condition Number}
   \vspace{0.1em}
   \begin{itemize}\itemsep0.3em
     \item \alert{Input scale}: a feature measured in millimetres and one
@@ -609,14 +609,35 @@
   settles near $1/(1+\mu)$ --- below one, not above.}
 \end{frame}
 
-\begin{frame}{Momentum on the valley}
-  \begin{center}
-    \includegraphics[width=0.94\linewidth]{momentum_paths}
-  \end{center}
-  \figcap[0.97]{The same surface and start, each method at the constants
-  that are optimal for it; the first twenty iterates are marked. Momentum
-  crosses the valley fewer times and travels much further along it per
-  step, and the contraction factor falls from $0.818$ to $0.519$.}
+% \begin{frame}{Momentum on the valley}
+%   \begin{center}
+%     \includegraphics[width=0.94\linewidth]{momentum_paths}
+%   \end{center}
+%   \figcap[0.97]{The same surface and start, each method at the constants
+%   that are optimal for it; the first twenty iterates are marked. Momentum
+%   crosses the valley fewer times and travels much further along it per
+%   step, and the contraction factor falls from $0.818$ to $0.519$.}
+% \end{frame}
+\begin{frame}{Nesterov momentum}
+  \vspace{-0.9em}
+  \[
+    \Delta \mathbf{w}^{(\tau-1)}
+      = -\eta\,\nabla E\!\left(\mathbf{w}^{(\tau-1)}
+                              + \mu\,\Delta \mathbf{w}^{(\tau-2)}\right)
+        + \mu\,\Delta \mathbf{w}^{(\tau-2)}
+  \]
+  \vspace{-0.2em}
+  \begin{itemize}\itemsep0.4em
+    \item The two ingredients are unchanged: a momentum carry
+          $\mu\,\Delta \mathbf{w}^{(\tau-2)}$ and a gradient step $-\eta\nabla E$
+    \item Only the \alert{order} changes. Classical momentum measures
+          the slope where the iterate is; Nesterov carries first and
+          measures the slope where it is about to be
+    \item Because the look-ahead point is already past the turn, the
+          gradient measured there points back, and the overshoot is
+          corrected within the same step
+  \end{itemize}
+  \srcline{Bishop \& Bishop (2024), Eq.~7.34; Prince (2023), Eq.~6.12.}
 \end{frame}
 
 \begin{frame}{Nesterov on the same valley}
@@ -639,17 +660,23 @@
   momentum only $\sqrt{\kappa}$.}
 \end{frame}
 
-\begin{frame}{What momentum buys, precisely}
+\begin{frame}{Momentum: }
   \vspace{-0.2em}
   \begin{propx}[Heavy-ball acceleration on a quadratic]\label{th:hb}
     \small
-    On a quadratic with condition number $\kappa$, the choices
+    On a quadratic function with condition number $\kappa$, the choices
     $\mu^\star = \big((\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)\big)^{2}$ and
     $\eta^\star = 4/(\sqrt{\lambda_{\max}}+\sqrt{\lambda_{\min}})^{2}$
     give a contraction factor
     $\rho = (\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$.
   \end{propx}
   \vspace{0.3em}
+  \begin{propx}[The optimal learning rate for a quadratic]\label{th:opt}
+    \small
+        The choice $\eta^\star = 2/(\lambda_{\min} + \lambda_{\max})$
+        minimises $\rho = \max_i |1 - \eta\lambda_i|$, giving
+        $\rho^\star = (\kappa - 1)/(\kappa + 1)$.
+  \end{propx}
   \begin{itemize}\itemsep0.3em
     \item Compare Proposition~\ref{th:opt}: $\kappa$ has become
           $\sqrt{\kappa}$, so $\kappa = 10^4$ needs $100$ times fewer
@@ -660,27 +687,6 @@
   \srcline{Polyak (1964).}
 \end{frame}
 
-\begin{frame}{Nesterov momentum}
-  \vspace{-0.9em}
-  \[
-    \Delta \mathbf{w}^{(\tau-1)}
-      = -\eta\,\nabla E\!\left(\mathbf{w}^{(\tau-1)}
-                              + \mu\,\Delta \mathbf{w}^{(\tau-2)}\right)
-        + \mu\,\Delta \mathbf{w}^{(\tau-2)}
-  \]
-  \vspace{-0.2em}
-  \begin{itemize}\itemsep0.4em
-    \item The two ingredients are unchanged: a momentum carry
-          $\mu\,\Delta \mathbf{w}^{(\tau-2)}$ and a gradient step $-\eta\nabla E$
-    \item Only the \alert{order} changes. Classical momentum measures
-          the slope where the iterate is; Nesterov carries first and
-          measures the slope where it is about to be
-    \item Because the look-ahead point is already past the turn, the
-          gradient measured there points back, and the overshoot is
-          corrected within the same step
-  \end{itemize}
-  \srcline{Bishop \& Bishop (2024), Eq.~7.34; Prince (2023), Eq.~6.12.}
-\end{frame}
 
 \begin{frame}{Nesterov momentum, one step drawn}
   \vspace{-0.7em}
@@ -781,25 +787,25 @@
   al.~(2013).}
 \end{frame}
 
-\begin{frame}{Stochastic gradient descent with momentum}
-  \vspace{0.2em}
-  \begin{algox}[SGD with momentum]\label{th:algmom}
-    \small
-    \textbf{Input:} data indexed by $n$; batch size $B$; per-batch error
-    $E_{n:n+B-1}$; learning rate $\eta$; momentum $\mu$; initial $\mathbf{w}$\\[0.35em]
-    $n \leftarrow 1$; \quad $\Delta \mathbf{w} \leftarrow 0$\\
-    \textbf{repeat}\\
-    \hspace{1.4em} $\Delta \mathbf{w} \leftarrow -\eta \nabla E_{n:n+B-1}(\mathbf{w})
-      + \mu \Delta \mathbf{w}$ \hfill \textcolor{mcMuted}{// update term}\\
-    \hspace{1.4em} $\mathbf{w} \leftarrow \mathbf{w} + \Delta \mathbf{w}$
-      \hfill \textcolor{mcMuted}{// weight vector update}\\
-    \hspace{1.4em} $n \leftarrow n + B$\\
-    \hspace{1.4em} \textbf{if} $n > N$ \textbf{then}
-      \; shuffle data; \; $n \leftarrow 1$ \; \textbf{end if}\\
-    \textbf{until} convergence; \quad \textbf{return} $\mathbf{w}$
-  \end{algox}
-  \srcline{Bishop \& Bishop (2024), Algorithm 7.3.}
-\end{frame}
+% \begin{frame}{Stochastic gradient descent with momentum}
+%   \vspace{0.2em}
+%   \begin{algox}[SGD with momentum]\label{th:algmom}
+%     \small
+%     \textbf{Input:} data indexed by $n$; batch size $B$; per-batch error
+%     $E_{n:n+B-1}$; learning rate $\eta$; momentum $\mu$; initial $\mathbf{w}$\\[0.35em]
+%     $n \leftarrow 1$; \quad $\Delta \mathbf{w} \leftarrow 0$\\
+%     \textbf{repeat}\\
+%     \hspace{1.4em} $\Delta \mathbf{w} \leftarrow -\eta \nabla E_{n:n+B-1}(\mathbf{w})
+%       + \mu \Delta \mathbf{w}$ \hfill \textcolor{mcMuted}{// update term}\\
+%     \hspace{1.4em} $\mathbf{w} \leftarrow \mathbf{w} + \Delta \mathbf{w}$
+%       \hfill \textcolor{mcMuted}{// weight vector update}\\
+%     \hspace{1.4em} $n \leftarrow n + B$\\
+%     \hspace{1.4em} \textbf{if} $n > N$ \textbf{then}
+%       \; shuffle data; \; $n \leftarrow 1$ \; \textbf{end if}\\
+%     \textbf{until} convergence; \quad \textbf{return} $\mathbf{w}$
+%   \end{algox}
+%   \srcline{Bishop \& Bishop (2024), Algorithm 7.3.}
+% \end{frame}
 
 % =====================================================================
 \section{Learning-rate Schedules}
@@ -840,7 +846,7 @@
   \vspace{-0.35em}
   \begin{propx}[Robbins--Monro conditions]\label{th:rm}
     \small
-    For stochastic approximation with unbiased, bounded-variance
+    For stochastic (gradient descent) approximation with unbiased, bounded-variance
     gradients, the iterates converge to a stationary point provided
     $\sum_{\tau} \eta^{(\tau)} = \infty$ and
     $\sum_{\tau} \big(\eta^{(\tau)}\big)^{2} < \infty$.
@@ -932,16 +938,7 @@
   \srcline{Prince (2023), \S6.4; Bishop \& Bishop (2024), \S7.3.3.}
 \end{frame}
 
-\begin{frame}{The problem, and three responses}
-  \begin{center}
-    \includegraphics[width=0.99\linewidth]{per_parameter}
-  \end{center}
-  \figcap[0.98]{(a) an $\eta$ chosen for the steep direction leaves the
-  flat one barely moving. (b) an $\eta$ chosen for the flat direction is
-  unstable. (c) using only the sign of each component moves a fixed
-  distance along each axis, and makes progress in both, but cannot
-  settle. (d) Adam smooths both quantities and does settle.}
-\end{frame}
+
 
 \begin{frame}{Normalising the gradient to its sign}
   \vspace{-0.3em}
@@ -1042,7 +1039,7 @@
   \begin{itemize}\itemsep0.3em
     \item RMSProp with momentum: an exponential average of the gradient
           \emph{and} of its square. The name is short for
-          \alert{adaptive moments}
+          \alert{adaptive moment estimation}
     \item Typical values are $\beta_1 = 0.9$ and $\beta_2 = 0.99$
     \item The most widely used training algorithm in deep learning
   \end{itemize}
@@ -1050,9 +1047,9 @@
   Eqs.~7.43--7.47.}
 \end{frame}
 
-\begin{frame}{Why the bias correction is there}
+\begin{frame}{Why the bias correction is required?}
   \vspace{-0.25em}
-  \begin{propx}[The averages start too small]\label{th:bias}
+  \begin{propx}[Biased Estimates]\label{th:bias}
     \small
     With $\mathbf{s}^{(0)} = 0$ and a gradient $\mathbf{g}$ that is constant in
     expectation,
@@ -1070,9 +1067,9 @@
     \item \focus{1}{Unrolling gives
           $\mathbf{s}^{(\tau)} = (1-\beta_1)\sum_{k=0}^{\tau-1}\beta_1^{k}
           \mathbf{g}^{(\tau-k)}$.}
-    \item \focus{2}{Taking expectations and summing the geometric series
+    \item \focus{1}{Taking expectations and summing the geometric series
           gives $(1-\beta_1)\frac{1-\beta_1^{\tau}}{1-\beta_1} \mathbf{g}$.}
-    \item \focus{3}{Dividing by $1-\beta_1^{\tau}$ therefore returns $\mathbf{g}$
+    \item \focus{1}{Dividing by $1-\beta_1^{\tau}$ therefore returns $\mathbf{g}$
           exactly; the same argument applies to $r$ with $\beta_2$.
           \hfill $\square$}
   \end{itemize}}
@@ -1090,31 +1087,31 @@
   the iteration, for both decay parameters.}
 \end{frame}
 
-\begin{frame}{Adam, as an algorithm}
-  \vspace{0.15em}
-  \begin{algox}[Adam optimization]\label{th:algadam}
-    \small
-    \textbf{Input:} batch size $B$; per-batch error $E_{n:n+B-1}$;
-    learning rate $\eta$; decay parameters $\beta_1, \beta_2$;
-    stabilizer $\varepsilon$\\[0.3em]
-    $\mathbf{s} \leftarrow 0$; \quad $\mathbf{r} \leftarrow 0$; \quad $\tau \leftarrow 0$\\
-    \textbf{repeat}\\
-    \hspace{1.2em} choose a mini-batch at random; \quad
-      $\mathbf{g} \leftarrow \nabla E_{n:n+B-1}(\mathbf{w})$; \quad
-      $\tau \leftarrow \tau + 1$\\
-    \hspace{1.2em} $\mathbf{s} \leftarrow \beta_1 \mathbf{s} + (1-\beta_1) \mathbf{g}$; \quad
-      $\mathbf{r} \leftarrow \beta_2 \mathbf{r} + (1-\beta_2)\, \mathbf{g} \odot \mathbf{g}$
-      \hfill \textcolor{mcMuted}{// element-wise}\\
-    \hspace{1.2em} $\hat{\mathbf{s}} \leftarrow \mathbf{s}/(1-\beta_1^{\tau})$; \quad
-      $\hat{\mathbf{r}} \leftarrow \mathbf{r}/(1-\beta_2^{\tau})$
-      \hfill \textcolor{mcMuted}{// bias correction}\\
-    \hspace{1.2em} $\mathbf{w} \leftarrow \mathbf{w}
-      - \eta\,\hat{\mathbf{s}} / (\sqrt{\hat{\mathbf{r}}} + \varepsilon)$
-      \hfill \textcolor{mcMuted}{// element-wise}\\
-    \textbf{until} convergence; \quad \textbf{return} $\mathbf{w}$
-  \end{algox}
-  \srcline{Bishop \& Bishop (2024), Algorithm 7.4.}
-\end{frame}
+% \begin{frame}{Adam, as an algorithm}
+%   \vspace{0.15em}
+%   \begin{algox}[Adam optimization]\label{th:algadam}
+%     \small
+%     \textbf{Input:} batch size $B$; per-batch error $E_{n:n+B-1}$;
+%     learning rate $\eta$; decay parameters $\beta_1, \beta_2$;
+%     stabilizer $\varepsilon$\\[0.3em]
+%     $\mathbf{s} \leftarrow 0$; \quad $\mathbf{r} \leftarrow 0$; \quad $\tau \leftarrow 0$\\
+%     \textbf{repeat}\\
+%     \hspace{1.2em} choose a mini-batch at random; \quad
+%       $\mathbf{g} \leftarrow \nabla E_{n:n+B-1}(\mathbf{w})$; \quad
+%       $\tau \leftarrow \tau + 1$\\
+%     \hspace{1.2em} $\mathbf{s} \leftarrow \beta_1 \mathbf{s} + (1-\beta_1) \mathbf{g}$; \quad
+%       $\mathbf{r} \leftarrow \beta_2 \mathbf{r} + (1-\beta_2)\, \mathbf{g} \odot \mathbf{g}$
+%       \hfill \textcolor{mcMuted}{// element-wise}\\
+%     \hspace{1.2em} $\hat{\mathbf{s}} \leftarrow \mathbf{s}/(1-\beta_1^{\tau})$; \quad
+%       $\hat{\mathbf{r}} \leftarrow \mathbf{r}/(1-\beta_2^{\tau})$
+%       \hfill \textcolor{mcMuted}{// bias correction}\\
+%     \hspace{1.2em} $\mathbf{w} \leftarrow \mathbf{w}
+%       - \eta\,\hat{\mathbf{s}} / (\sqrt{\hat{\mathbf{r}}} + \varepsilon)$
+%       \hfill \textcolor{mcMuted}{// element-wise}\\
+%     \textbf{until} convergence; \quad \textbf{return} $\mathbf{w}$
+%   \end{algox}
+%   \srcline{Bishop \& Bishop (2024), Algorithm 7.4.}
+% \end{frame}
 
 \begin{frame}{Five update rules, by family}
   \begin{center}
@@ -1127,14 +1124,14 @@
   turns along the floor rather than across it.}
 \end{frame}
 
-\begin{frame}{What the five cost}
-  \begin{center}
-    \includegraphics[width=0.80\linewidth]{optimiser_cost}
-  \end{center}
-  \figcap[0.97]{(a) the same five runs by error. (b) iterations needed to
-  reach $E < 10^{-6}$; Adam does not get there inside the budget. Why the
-  families differ matters more than the ordering on any one surface.}
-\end{frame}
+% \begin{frame}{What the five cost}
+%   \begin{center}
+%     \includegraphics[width=0.80\linewidth]{optimiser_cost}
+%   \end{center}
+%   \figcap[0.97]{(a) the same five runs by error. (b) iterations needed to
+%   reach $E < 10^{-6}$; Adam does not get there inside the budget. Why the
+%   families differ matters more than the ordering on any one surface.}
+% \end{frame}
 
 \begin{frame}{Four honest caveats}
   \begin{itemize}\itemsep0.3em
@@ -1262,5 +1259,14 @@
 \begin{frame}[standout]
   Questions?
 \end{frame}
-
+\begin{frame}{The problem, and three responses}
+  \begin{center}
+    \includegraphics[width=0.99\linewidth]{per_parameter}
+  \end{center}
+  \figcap[0.98]{(a) an $\eta$ chosen for the steep direction leaves the
+  flat one barely moving. (b) an $\eta$ chosen for the flat direction is
+  unstable. (c) using only the sign of each component moves a fixed
+  distance along each axis, and makes progress in both, but cannot
+  settle. (d) Adam smooths both quantities and does settle.}
+\end{frame}
 \end{document}

@@ -146,7 +146,7 @@ leaves the algebra to Exercise 9.6 and Bishop (1995a), and its ridge half
 was already removed from the Class 18 C variant. The correspondence itself
 survives, restated as Bishop gives it.
 
-**Built.** Class 19 ships as A (43 pages), B (42 pages) and C (36 pages).
+**Built.** Class 19 ships as A (43 pages), B (46 pages) and C (40 pages).
 Its narrative order is: stop the run, average many runs, average implicitly
 with dropout, perturb the inputs, then borrow other data. Every claim is
 measured, because every method in the class is a heuristic.

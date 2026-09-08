@@ -1,0 +1,637 @@
+% =====================================================================
+%  Introduction to Deep Learning — Class 19
+%  Topic (course plan): Deep Networks
+%  Subtopic (course plan): Regularization: Heuristic Methods, Early
+%    stopping, Drop outs, Model averaging, Applying Noise
+%  Sources (course plan): Prince Chapter 9, Bishop Chapter 9
+%
+%  Class 18 changed the objective and read off what the optimiser was
+%  already doing.  This class changes the PROCEDURE and the DATA, and
+%  leaves the objective alone.  Every method here is a heuristic, so
+%  every claim is measured rather than asserted.
+%
+%  Order: stop the run, average many runs, average implicitly with
+%  dropout, perturb the inputs, then borrow other data.
+%
+%  A variant: every figure is the published one, reproduced as printed
+%  and cited on the slide.  See _shared/PLAN_Classes17_18_19.md.
+%
+%  Compile:  xelatex main.tex   (run twice)
+% =====================================================================
+\documentclass[aspectratio=169, 11pt]{beamer}
+
+\usetheme{metropoliscustom}
+
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\graphicspath{{figs_official/}{Class19_Regularization_Heuristics/A_Textbook_Figures/figs_official/}}
+\usepackage{amsmath, amssymb}
+\usepackage{bm}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing,
+                shapes.geometric, fit, backgrounds}
+\tcbuselibrary{skins}
+
+\definecolor{shc}{HTML}{341651}
+\definecolor{tealc}{HTML}{1C7293}
+\definecolor{dpc}{HTML}{800000}
+\definecolor{accc}{HTML}{B8860B}
+
+% ---- theorem environments -------------------------------------------
+\setbeamertemplate{theorems}[numbered]
+\usepackage{remreset}
+\makeatletter\@removefromreset{theorem}{section}\makeatother
+\renewcommand{\thetheorem}{\arabic{theorem}}
+\newtheorem{lemmax}[theorem]{Lemma}
+\newtheorem{propx}[theorem]{Proposition}
+\newtheorem{corx}[theorem]{Corollary}
+\newtheorem{defx}[theorem]{Definition}
+\newtheorem{thmx}[theorem]{Theorem}
+
+\newcommand{\bridge}[1]{%
+  {\scriptsize\itshape\color{mcMuted} #1\par}\vspace{0.35em}}
+
+\newcommand{\srcline}[1]{%
+  \par\vspace{0.25em}%
+  {\scriptsize\color{mcMuted}\hfill #1\par}}
+
+\newcommand{\figsource}[1]{{\scriptsize\color{mcMuted} #1}}
+\newcommand{\figcap}[2][0.90]{%
+  \begin{center}\begin{minipage}{#1\textwidth}\centering
+    {\scriptsize\color{mcMuted} #2}
+  \end{minipage}\end{center}}
+
+% =====================================================================
+\title{Deep Networks}
+\subtitle{Regularization: Heuristic Methods}
+\author{Introduction to Deep Learning \ \textperiodcentered\ Class 19}
+\institute{}
+\date{}
+
+\footleft{Introduction to Deep Learning}
+\footright{Heuristic Regularization}
+\titlelogos{}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% =====================================================================
+\section{What Is Left to Change}
+% =====================================================================
+
+\begin{frame}{From the objective to the procedure}
+  \bridge{Class 18 added a term to the objective and read off the
+  preference the optimiser already had; neither touched the procedure or
+  the data.}
+  \vspace{0.05em}
+  {\scriptsize
+  \renewcommand{\arraystretch}{1.22}
+  \begin{tabular}{@{}l@{\hspace{1.4em}}l@{\hspace{1.4em}}l@{}}
+    \textbf{Where the bias goes} & \textbf{Mechanism} & \textbf{Class}\\
+    the objective & $\lambda\|\mathbf{w}\|^2$, the lasso & 18\\
+    the optimiser & step size, batch size & 18\\
+    the architecture & sharing, residual paths & 18\\
+    \textbf{the stopping rule} & \textbf{early stopping} & \textbf{today}\\
+    \textbf{the number of runs} & \textbf{ensembles, dropout} & \textbf{today}\\
+    \textbf{the data} & \textbf{noise, augmentation} & \textbf{today}\\
+  \end{tabular}}
+  \vspace{0.4em}
+
+  \begin{redhighlight}
+    Everything today is a heuristic: justified by measurement, not by a
+    guarantee. So everything today is measured.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{Notation for today}
+  \vspace{0.4em}
+  {\footnotesize
+  \renewcommand{\arraystretch}{1.32}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.49\textwidth}
+      \begin{tabular}{@{}l@{\hspace{1.5em}}l@{}}
+        $\tau$ & the iteration index\\
+        $\eta$ & the step size, as in Class 13\\
+        $\alpha$ & the weight-decay strength\\
+        $\lambda_i$ & eigenvalues of $\mathbf{H}$, as in Class 13\\
+      \end{tabular}
+    \end{column}
+    \begin{column}{0.49\textwidth}
+      \begin{tabular}{@{}l@{\hspace{1.5em}}l@{}}
+        $M$ & members of a committee\\
+        $y_m(\mathbf{x})$ & the prediction of member $m$\\
+        $\rho$ & the dropout probability\\
+        $\sigma_x^2$ & variance of noise added to inputs\\
+      \end{tabular}
+    \end{column}
+  \end{columns}}
+  \vspace{0.6em}
+
+  \begin{itemize}\itemsep0.26em
+    \item Bishop writes the dropout \emph{keep} probability and Prince
+          writes the \emph{drop} probability; the two are $1-\rho$ and
+          $\rho$
+    \item $h(\mathbf{x})$ is still the regression function of Class 17
+  \end{itemize}
+  \srcline{Bishop \& Bishop (2024), \S9.3.1, \S9.6; Prince (2023), \S9.3.}
+\end{frame}
+
+% =====================================================================
+\section{Early Stopping}
+% =====================================================================
+
+\begin{frame}{The learning curve is a measurement, not a prediction}
+  \vspace{0.2em}
+  \begin{center}
+    \includegraphics[height=0.315\textheight]{Bishop9_7a}\hspace{1.8em}%
+    \includegraphics[height=0.315\textheight]{Bishop9_7b}%
+  \end{center}
+  \figcap[0.97]{Training set error (left) and validation set error
+  (right) against iteration for one training run. The dashed lines mark
+  the minimum of the validation error, which is where training should
+  stop. Bishop \& Bishop (2024), Fig.~9.7.}
+\end{frame}
+
+\begin{frame}{Stopping early, in practice}
+  \vspace{0.15em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.30em
+    \item One hyperparameter: how many steps. Unlike every other
+          hyperparameter, it does \alert{not} need repeated training
+    \item Train once, evaluate on the validation set every $T$ steps,
+          keep the parameters whenever the validation error improves,
+          and return the best set at the end
+    \item So the cost is one run plus the evaluations, against one run
+          \emph{per value} for a penalty coefficient
+    \item In the language of Class 17: increasing $\tau$ increases the
+          effective model complexity, so stopping early moves back down
+          the curve rather than changing the model
+  \end{itemize}}
+  \srcline{Prince (2023), \S9.3.1; Bishop \& Bishop (2024), \S9.3.1.}
+\end{frame}
+
+\begin{frame}{Stopping early is weight decay in disguise}
+  \vspace{-0.25em}
+  \begin{thmx}[Early stopping and weight decay]\label{th:early}
+    \small
+    On a quadratic error with Hessian eigenvalues $\lambda_i$, gradient
+    descent started from $\mathbf{w} = \mathbf{0}$ returns, after $\tau$ steps,
+    \[
+      w_i^{(\tau)} = \big(1 - (1-\eta\lambda_i)^{\tau}\big)\, w_i^\star ,
+      \qquad\text{against}\qquad
+      \hat w_i = \frac{\lambda_i}{\lambda_i + \alpha}\, w_i^\star
+    \]
+    for weight decay of strength $\alpha$. Both retain the stiff
+    directions and discard the flat ones, and they change over at the
+    same curvature once $\alpha = 1/(\eta\tau)$.
+  \end{thmx}
+  \vspace{0.25em}
+  \begin{itemize}\itemsep0.26em
+    \item So $\eta\tau$ acts as the reciprocal of a regularization
+          coefficient: training longer is regularising less
+  \end{itemize}
+  \srcline{Bishop \& Bishop (2024), \S9.3.1, Fig.~9.8; Bishop (1995a).}
+\end{frame}
+
+\begin{frame}{Where that comes from}
+  \vspace{-0.25em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.30em
+    \item \focus{1}{In the eigenbasis the quadratic separates, so each
+          coordinate evolves on its own:
+          $w_i^{(\tau)} - w_i^\star = (1-\eta\lambda_i)\,
+          (w_i^{(\tau-1)} - w_i^\star)$.}
+    \item \focus{2}{Starting from $w_i^{(0)} = 0$ and iterating gives
+          $w_i^{(\tau)} - w_i^\star = -(1-\eta\lambda_i)^{\tau} w_i^\star$,
+          which rearranges to the stated filter.}
+    \item \focus{3}{For small $\eta\lambda_i$ that filter is
+          $\approx 1 - e^{-\eta\tau\lambda_i}$, a function of the single
+          combination $\eta\tau\lambda_i$.}
+    \item \focus{4}{Weight decay's filter is
+          $\lambda_i/(\lambda_i+\alpha) = u/(1+u)$ with
+          $u = \lambda_i/\alpha$.}
+    \item \focus{5}{Both are $0$ at $u = 0$, both tend to $1$, and both
+          pass their halfway point at $u \approx 1$. Setting
+          $\alpha = 1/(\eta\tau)$ makes the two $u$'s the same number.
+          \hfill $\square$}
+  \end{itemize}}
+  \vspace{-0.2em}
+  \begin{redhighlight}
+    Directions with $\lambda_i \gg 1/(\eta\tau)$ have been learned;
+    those with $\lambda_i \ll 1/(\eta\tau)$ have not been reached yet.
+    The clock is doing what the penalty would have done.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{The two filters, measured}
+  \begin{center}
+    \includegraphics[height=0.455\textheight]{Bishop9_8}
+  \end{center}
+  \figcap[0.97]{Contours of the unregularised error with the axes on the
+  eigenvectors of the Hessian. Starting from the origin, descent moves
+  first along $w_2$, the direction of high curvature, which converges
+  fastest, and only later along $w_1$ towards $\mathbf{w}^\star$. Stopping at $\hat{\mathbf{w}}$ gives what a
+  weight-decay penalty would have given.
+  Bishop \& Bishop (2024), Fig.~9.8.}
+\end{frame}
+
+% =====================================================================
+\section{Averaging Models}
+% =====================================================================
+
+\begin{frame}{Committees}
+  \vspace{-0.2em}
+  \[
+    y_{\mathrm{COM}}(\mathbf{x}) = \frac{1}{M}\sum_{m=1}^{M} y_m(\mathbf{x}),
+    \qquad
+    p(y \mid \mathbf{x}) = \frac{1}{M}\sum_{m=1}^{M} p_m(y \mid \mathbf{x}) .
+  \]
+  \vspace{-0.5em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.26em
+    \item Rather than select the best of several models, keep all of
+          them and average
+    \item Class 17 showed why this should help: the \alert{variance}
+          term is what differs between models fitted to different
+          samples, and averaging cancels it
+    \item The members must differ. Different initializations, different
+          architectures, or --- most simply --- different data
+    \item \alert{Bagging}: draw $N$ points from the training set
+          \emph{with replacement}, $M$ times over, and fit one model to
+          each resample
+  \end{itemize}}
+  \srcline{Bishop \& Bishop (2024), Eqs.~9.42--9.43; Breiman (1996);
+  Prince (2023), \S9.3.2.}
+\end{frame}
+
+\begin{frame}{What averaging is worth}
+  \vspace{-0.3em}
+  \begin{thmx}[Committee error]\label{th:com}
+    \small
+    Write $y_m(\mathbf{x}) = h(\mathbf{x}) + \epsilon_m(\mathbf{x})$ and let
+    $E_{\mathrm{AV}} = \frac{1}{M}\sum_m \mathbb{E}_{\mathbf{x}}[\epsilon_m^2]$.
+    If the errors have zero mean and are uncorrelated,
+    $\mathbb{E}_{\mathbf{x}}[\epsilon_m \epsilon_l] = 0$ for $m \neq l$, then
+    \[
+      E_{\mathrm{COM}} = \frac{1}{M}\, E_{\mathrm{AV}} .
+    \]
+    Without any assumption at all,
+    $E_{\mathrm{COM}} \leq E_{\mathrm{AV}}$.
+  \end{thmx}
+  \vspace{0.2em}
+  \begin{itemize}\itemsep0.24em
+    \item The first statement is spectacular and its hypothesis is
+          almost never true: members trained on resamples of one data
+          set make \alert{correlated} errors
+    \item The second needs nothing and is the one to rely on: averaging
+          never hurts
+  \end{itemize}
+  \srcline{Bishop \& Bishop (2024), Eqs.~9.44--9.50 and Exercise 9.15.}
+\end{frame}
+
+\begin{frame}{Proof of both halves}
+  \vspace{-0.25em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.30em
+    \item \focus{1}{By definition
+          $E_{\mathrm{COM}} = \mathbb{E}_{\mathbf{x}}\big[(\tfrac1M\sum_m
+          \epsilon_m)^2\big]$.}
+    \item \focus{2}{Expanding the square gives
+          $\tfrac{1}{M^2}\sum_m \mathbb{E}[\epsilon_m^2]
+           + \tfrac{1}{M^2}\sum_{m \neq l} \mathbb{E}[\epsilon_m\epsilon_l]$.}
+    \item \focus{3}{If the cross terms vanish, only the first sum
+          survives: $\tfrac{1}{M^2}\cdot M E_{\mathrm{AV}}
+          = E_{\mathrm{AV}}/M$. \hfill $\square$}
+    \item \focus{4}{For the bound, apply Jensen's inequality to the
+          convex function $t \mapsto t^2$:
+          $(\tfrac1M\sum_m \epsilon_m)^2 \leq
+          \tfrac1M\sum_m \epsilon_m^2$ pointwise in $\mathbf{x}$.}
+    \item \focus{5}{Taking $\mathbb{E}_{\mathbf{x}}$ of both sides gives
+          $E_{\mathrm{COM}} \leq E_{\mathrm{AV}}$, with no assumption on
+          the correlations. \hfill $\square$}
+  \end{itemize}}
+  \vspace{-0.2em}
+  \begin{redhighlight}
+    The factor $M$ is a best case that requires independence. The
+    inequality is free.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{The promise, and what arrives}
+  \begin{center}
+    \includegraphics[height=0.50\textheight]{P_RegEnsemble}
+  \end{center}
+  \figcap[0.97]{(a) one model fitted to the whole data set.
+  (b--e) four models, each fitted to a resample drawn with replacement;
+  the marker size shows how often a point was drawn. (f) their average
+  is smoother than (a). Prince (2023), Fig.~9.7.}
+\end{frame}
+
+% =====================================================================
+\section{Dropout}
+% =====================================================================
+
+\begin{frame}{An ensemble you do not have to train}
+  \vspace{-0.35em}
+  \begin{center}
+    \includegraphics[width=0.76\linewidth]{Bishop9_17}
+  \end{center}
+  \vspace{-0.35em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.22em
+    \item At every step a fresh random mask deletes each non-output node
+          with probability $\rho$, and the update is computed on what is
+          left
+    \item With $M$ non-output nodes there are $2^{M}$ thinned networks,
+          almost none visited twice, and they \alert{share} their weights
+  \end{itemize}}
+  \srcline{Srivastava et al.\ (2014); Bishop \& Bishop (2024), Fig.~9.17.}
+\end{frame}
+
+\begin{frame}{How to predict with $2^M$ networks}
+  \vspace{-0.2em}
+  \begin{propx}[The weight-scaling inference rule]\label{th:wsr}
+    \small
+    A node kept with probability $1-\rho$ contributes, in expectation
+    over masks, $(1-\rho)$ times what it contributes when always
+    present. Multiplying its outgoing weights by $(1-\rho)$ at test time
+    therefore matches the expected input to the next node, and lets one
+    deterministic pass stand in for the average over masks.
+  \end{propx}
+  \vspace{0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.22em
+    \item The exact rule would be
+          $p(y\mid\mathbf{x}) = \sum_{\mathbf{R}} p(\mathbf{R})\,p(y\mid\mathbf{x},\mathbf{R})$,
+          a sum over exponentially many masks
+    \item \alert{Monte Carlo dropout} instead samples $10$ or $20$ masks
+          and averages, which also gives a spread and so an uncertainty
+    \item Typical rates: $\rho \approx 0.5$ for hidden nodes,
+          $\rho \approx 0.2$ for inputs
+  \end{itemize}}
+  \srcline{Bishop \& Bishop (2024), Eq.~9.51; Prince (2023), \S9.3.3.}
+\end{frame}
+
+\begin{frame}{Dropout, measured}
+  \begin{center}
+    \includegraphics[width=0.92\linewidth]{P_RegDropout}
+  \end{center}
+  \figcap[0.97]{(a) three units conspire to produce a kink that costs
+  nothing on the training set. (b) removing one of them, as dropout
+  does, changes the output over a whole half-space, and the next
+  gradient step reacts. (c) after $2000$ such steps the kink is gone.
+  Prince (2023), Fig.~9.9.}
+\end{frame}
+
+\begin{frame}{Why removing a unit removes a kink}
+  \vspace{0.15em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.28em
+    \item Suppose three units conspire: one raises the slope, the next
+          lowers it, the third restores it. The net effect is a local
+          wiggle between two training points
+    \item That wiggle costs nothing on the training set, so no amount of
+          further training removes it
+    \item Delete one of the three --- which is what dropout does --- and
+          the compensation fails, the output changes over a whole
+          half-space, and the loss notices
+    \item The next gradient step then repairs it, and over many steps
+          the conspiracy is dismantled
+  \end{itemize}}
+  \vspace{0.1em}
+  \begin{redhighlight}
+    Dropout reaches structure that the loss alone cannot see, because it
+    changes which parameters are asked to explain the data.
+  \end{redhighlight}
+  \srcline{Prince (2023), \S9.3.3 and Fig.~9.9.}
+\end{frame}
+
+% =====================================================================
+\section{Applying Noise}
+% =====================================================================
+
+\begin{frame}{Noise on the inputs is a penalty}
+  \vspace{-0.25em}
+  \begin{thmx}[Input noise and weight decay]\label{th:noise}
+    \small
+    Let the model be linear, $\hat y = \mathbf{x}^{\mathsf T}\mathbf{w}$, and add
+    noise $\bm{\epsilon}$ with mean $\mathbf{0}$ and covariance
+    $\sigma_x^2 \mathbf{I}$ to every input. Then
+    \[
+      \mathbb{E}_{\bm{\epsilon}}\big[((\mathbf{x}+\bm{\epsilon})^{\mathsf T}\mathbf{w} - Y)^2\big]
+      \;=\; (\mathbf{x}^{\mathsf T}\mathbf{w} - Y)^2 \;+\; \sigma_x^2 \|\mathbf{w}\|^2 ,
+    \]
+    so training on noisy inputs is exactly weight decay with
+    $\lambda = \sigma_x^2$. For a nonlinear model the same expansion
+    leaves a penalty on $\partial \hat y / \partial \mathbf{x}$ instead.
+  \end{thmx}
+  \vspace{0.05em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.20em
+    \item The proof is one line: expand the square and use
+          $\mathbb{E}[\bm{\epsilon}] = \mathbf{0}$ and
+          $\mathbb{E}[\bm{\epsilon}\bm{\epsilon}^{\mathsf T}] = \sigma_x^2\mathbf{I}$
+    \item The nonlinear version penalises \alert{sensitivity of the
+          output to the input}, which is what smoothness means
+  \end{itemize}}
+  \srcline{Bishop (1995b); Prince (2023), \S9.3.4.}
+\end{frame}
+
+\begin{frame}{The equivalence, checked}
+  \begin{center}
+    \includegraphics[width=0.92\linewidth]{P_RegNoise}
+  \end{center}
+  \figcap[0.97]{Noise of variance $\sigma_x^2$ added to the batch inputs
+  at every step of SGD, at three levels; the small dots are ten samples
+  of the perturbed data. More noise gives a smoother fit.
+  Prince (2023), Fig.~9.10.}
+\end{frame}
+
+\begin{frame}{Three places to put noise}
+  \vspace{0.1em}
+  {\scriptsize
+  \renewcommand{\arraystretch}{1.34}
+  \begin{tabular}{@{}l@{\hspace{1.1em}}l@{\hspace{1.1em}}l@{}}
+    \textbf{Noise on} & \textbf{Effect} & \textbf{Known as}\\
+    the inputs & penalises $\partial\hat y/\partial\mathbf{x}$ & ---\\
+    the inputs, worst case & robustness to the worst perturbation &
+      adversarial training\\
+    the weights & prefers wide flat minima & ---\\
+    the labels & discourages certainty & label smoothing\\
+    the activations & multiplicative Bernoulli noise & dropout\\
+  \end{tabular}}
+  \vspace{0.6em}
+
+  {\footnotesize
+  \begin{itemize}\itemsep0.24em
+    \item Label smoothing assumes a fraction $\rho$ of the labels are
+          wrong and belong equally to the other classes, which stops the
+          pre-softmax activations running away
+    \item Dropout is the same idea applied to activations, which is why
+          it sits in this list as well as the previous section
+  \end{itemize}}
+  \srcline{Prince (2023), \S9.3.4.}
+\end{frame}
+
+% =====================================================================
+\section{Borrowing Other Data}
+% =====================================================================
+
+\begin{frame}{When the data set is the constraint}
+  \begin{center}
+    \includegraphics[height=0.505\textheight]{P_RegTransferMultiC}
+  \end{center}
+  \figcap[0.97]{(a) transfer learning: train on a secondary task with
+  plentiful labels, then replace the head. (b) multi-task learning: one
+  trunk, several outputs. (c) generative self-supervision: hide part of
+  the input and train the network to restore it, so no labels are needed
+  at all. Prince (2023), Fig.~9.12.}
+\end{frame}
+
+\begin{frame}{Augmentation}
+  \begin{center}
+    \includegraphics[height=0.50\textheight]{Bishop9_1}
+  \end{center}
+  \figcap[0.97]{(a) the original image, then (b) horizontal inversion,
+  (c) scaling, (d) translation, (e) rotation, (f) brightness and
+  contrast, (g) additive noise, (h) colour shift. Every one still has
+  the same label. Bishop \& Bishop (2024), Fig.~9.1.}
+\end{frame}
+
+\begin{frame}{The Bayesian view: an infinite committee}
+  \vspace{-0.5em}
+  \begin{defx}[Bayesian prediction]\label{th:bayes}
+    \small
+    Instead of one parameter vector, keep a posterior over all of them,
+    \[
+      p(\mathbf{w} \mid \mathcal{D}) \propto
+        \Big[\textstyle\prod_n p(Y_n \mid \mathbf{x}_n, \mathbf{w})\Big] p(\mathbf{w}),
+      \qquad
+      p(y \mid \mathbf{x}, \mathcal{D}) = \int p(y \mid \mathbf{x}, \mathbf{w})\,
+        p(\mathbf{w} \mid \mathcal{D})\, \mathrm{d}\mathbf{w} .
+    \]
+  \end{defx}
+  \vspace{0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.22em
+    \item This is a committee with one member per parameter vector,
+          weighted by how well it fits and how plausible it was
+    \item Class 18's penalty was the same prior $p(\mathbf{w})$, used to pick
+          the single most probable member instead of averaging
+    \item For a network the integral is intractable, so every practical
+          method approximates it --- and Monte Carlo dropout is one such
+          approximation
+  \end{itemize}}
+  \srcline{Prince (2023), \S9.3.5, Eqs.~9.11--9.12.}
+\end{frame}
+
+\begin{frame}{The posterior, drawn}
+  \begin{center}
+    \includegraphics[height=0.50\textheight]{P_RegBayesian}
+  \end{center}
+  \figcap[0.97]{(a--c) two parameter sets drawn from the posterior under
+  priors of three different variances: a tighter prior gives smaller
+  parameters and smoother functions. (d--f) the weighted average over
+  all parameter values, with two standard deviations shaded.
+  Prince (2023), Fig.~9.11.}
+\end{frame}
+
+% =====================================================================
+\section{Putting It Together}
+% =====================================================================
+
+\begin{frame}{The whole toolbox, across three classes}
+  \vspace{-0.1em}
+  {\scriptsize
+  \renewcommand{\arraystretch}{1.20}
+  \begin{tabular}{@{}l@{\hspace{0.9em}}l@{\hspace{0.9em}}l@{\hspace{0.9em}}l@{}}
+    \textbf{Method} & \textbf{Acts on} & \textbf{Costs} & \textbf{Class}\\
+    weight decay, lasso & the objective & one run per $\lambda$ & 18\\
+    step size, batch size & the optimiser & nothing extra & 18\\
+    sharing, residual paths & the architecture & must know the symmetry & 18\\
+    early stopping & the stopping rule & one run, plus validation & 19\\
+    ensembling, bagging & the number of models & $M$ trainings, $M$ inferences & 19\\
+    dropout & the activations & slower convergence & 19\\
+    input, weight, label noise & the data & one hyperparameter each & 19\\
+    augmentation & the data & more compute per epoch & 19\\
+    transfer, self-supervision & other data & a second training stage & 19\\
+  \end{tabular}}
+  \vspace{0.4em}
+
+  \begin{redhighlight}
+    Every row buys the same thing --- less variance --- and each pays in
+    a different currency: compute, hyperparameters, or knowledge about
+    the task.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{Takeaways}
+  \vspace{-0.15em}
+  {\scriptsize
+  \begin{enumerate}\itemsep0.24em
+    \item Early stopping is the cheapest regularizer there is: one run,
+          and the hyperparameter is read off a curve you were plotting
+          anyway
+    \item On a quadratic it is weight decay with
+          $\alpha = 1/(\eta\tau)$, so training longer regularises less
+          (Theorem~\ref{th:early})
+    \item Averaging $M$ models divides the error by $M$ only if their
+          errors are uncorrelated; what always holds is
+          $E_{\mathrm{COM}} \leq E_{\mathrm{AV}}$ (Theorem~\ref{th:com})
+    \item In practice the members are correlated, and the measured gain
+          was a factor of $4.5$ where $1/M$ promised $64$
+    \item Dropout approximates an ensemble over $2^M$ weight-sharing
+          networks; at test time one scaled pass stands in for it
+          (Proposition~\ref{th:wsr})
+    \item Noise on the inputs is weight decay exactly, for a linear
+          model, and a penalty on $\partial\hat y/\partial\mathbf{x}$ in
+          general (Theorem~\ref{th:noise})
+    \item These are heuristics. Every one of the numbers above was
+          measured on one small problem, and the defaults that circulate
+          were calibrated on much larger ones
+  \end{enumerate}}
+  \bridge{Class 20 turns from how to train a network to what to build:
+  the tutorials, and then convolutional networks.}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+  \vspace{0.3em}
+  {\scriptsize
+  \begin{enumerate}\itemsep0.30em
+    \item C.\ M.\ Bishop \& H.\ Bishop, \emph{Deep Learning: Foundations
+          and Concepts}, Springer, 2024. \S9.3.1 (Figs.~9.7--9.8);
+          \S9.6 (Eqs.~9.42--9.51, Fig.~9.17); Exercises 9.6, 9.14, 9.15.
+    \item S.\ J.\ D.\ Prince, \emph{Understanding Deep Learning}, MIT
+          Press, 2023. \S9.3 (Eqs.~9.11--9.12, Figs.~9.5--9.13).
+    \item C.\ M.\ Bishop, ``Regularization and complexity control in
+          feed-forward networks'', ICANN 1995.
+    \item C.\ M.\ Bishop, ``Training with noise is equivalent to
+          Tikhonov regularization'', \emph{Neural Computation} 7(1),
+          1995.
+    \item L.\ Breiman, ``Bagging predictors'', \emph{Machine Learning}
+          24(2), 1996.
+    \item N.\ Srivastava, G.\ Hinton, A.\ Krizhevsky, I.\ Sutskever \&
+          R.\ Salakhutdinov, ``Dropout: a simple way to prevent neural
+          networks from overfitting'', \emph{JMLR} 15, 2014.
+    \item Y.\ Gal \& Z.\ Ghahramani, ``Dropout as a Bayesian
+          approximation'', ICML 2016.
+    \item C.\ Szegedy, V.\ Vanhoucke, S.\ Ioffe, J.\ Shlens \&
+          Z.\ Wojna, ``Rethinking the Inception architecture'',
+          CVPR 2016. (label smoothing)
+    \item I.\ J.\ Goodfellow, J.\ Shlens \& C.\ Szegedy, ``Explaining
+          and harnessing adversarial examples'', ICLR 2015.
+    \item Y.\ Freund \& R.\ E.\ Schapire, ``Experiments with a new
+          boosting algorithm'', ICML 1996.
+  \end{enumerate}}
+\end{frame}
+
+\begin{frame}[standout]
+  Questions?
+\end{frame}
+
+\end{document}

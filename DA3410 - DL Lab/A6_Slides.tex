@@ -201,6 +201,93 @@ second-moment buffer, or both. That state lives in the optimizer, not in the mod
 \end{block}
 \end{frame}
 
+
+\begin{frame}{AdaGrad}
+  \vspace{-0.3em}
+  \[
+    r^{(\tau)}_i = r^{(\tau-1)}_i
+      + \left(\frac{\partial E}{\partial w_i}\right)^{2} ,
+    \qquad
+    \mathbf{w}^{(\tau)}_i = \mathbf{w}^{(\tau-1)}_i
+      - \frac{\eta}{\sqrt{r_i} + \varepsilon}
+        \left(\frac{\partial E}{\partial w_i}\right)
+  \]
+  \vspace{-0.6em}
+  \begin{itemize}\itemsep0.3em
+    \item Each parameter accumulates the sum of its own squared
+          gradients, from $r^{(0)}_i = 0$
+    \item Parameters that have seen large gradients --- high curvature
+          --- have their rates reduced most
+    \item \alert{The flaw}: $r_i$ accumulates from the first step and
+          never forgets, so the steps eventually become too small and
+          learning stalls
+  \end{itemize}
+  \srcline{Duchi, Hazan \& Singer (2011); Bishop \& Bishop (2024),
+  Eqs.~7.39--7.40.}
+\end{frame}
+
+\begin{frame}{RMSProp}
+  \vspace{-0.3em}
+  \[
+    r^{(\tau)}_i = \beta\, r^{(\tau-1)}_i
+      + (1-\beta)\left(\frac{\partial E}{\partial w_i}\right)^{2} ,
+    \qquad
+    \mathbf{w}^{(\tau)}_i = \mathbf{w}^{(\tau-1)}_i
+      - \frac{\eta}{\sqrt{r_i} + \varepsilon}
+        \left(\frac{\partial E}{\partial w_i}\right)
+  \]
+  \vspace{-0.5em}
+  \begin{itemize}\itemsep0.4em
+    \item One change from AdaGrad: the running \emph{sum} becomes a
+          running \emph{average}, with $0 < \beta < 1$ and typically
+          $\beta = 0.9$
+    \item The estimate now forgets on a timescale of about
+          $1/(1-\beta)$ steps, so it tracks the curvature the iterate is
+          currently in
+    \item The learning rate can go back up when the surface flattens,
+          which is exactly what AdaGrad could not do
+  \end{itemize}
+  \srcline{Hinton (2012); Bishop \& Bishop (2024), Eqs.~7.41--7.42.}
+\end{frame}
+
+\begin{frame}{Adam}
+  \vspace{-0.55em}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.485\textwidth}
+      \[ s^{(\tau)}_i = \beta_1 s^{(\tau-1)}_i
+         + (1-\beta_1)\frac{\partial E}{\partial w_i} \]
+    \end{column}
+    \begin{column}{0.50\textwidth}
+      \[ r^{(\tau)}_i = \beta_2 r^{(\tau-1)}_i
+         + (1-\beta_2)\left(\frac{\partial E}{\partial w_i}\right)^{2} \]
+    \end{column}
+  \end{columns}
+  \vspace{-0.55em}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.30\textwidth}
+      \[ \hat s_i = \frac{s^{(\tau)}_i}{1-\beta_1^{\tau}} \]
+    \end{column}
+    \begin{column}{0.30\textwidth}
+      \[ \hat r_i = \frac{r^{(\tau)}_i}{1-\beta_2^{\tau}} \]
+    \end{column}
+    \begin{column}{0.38\textwidth}
+      \[ \mathbf{w}^{(\tau)}_i = \mathbf{w}^{(\tau-1)}_i
+         - \frac{\eta\,\hat s_i}{\sqrt{\hat r_i} + \varepsilon} \]
+    \end{column}
+  \end{columns}
+  \vspace{0.1em}
+  \begin{itemize}\itemsep0.3em
+    \item RMSProp with momentum: an exponential average of the gradient
+          \emph{and} of its square. The name is short for
+          \alert{adaptive moment estimation}
+    \item Typical values are $\beta_1 = 0.9$ and $\beta_2 = 0.99$
+    \item The most widely used training algorithm in deep learning
+  \end{itemize}
+  \srcline{Kingma \& Ba (2015); Bishop \& Bishop (2024),
+  Eqs.~7.43--7.47.}
+\end{frame}
+
+
 % ------------------------------------------------------------------
 \begin{frame}{Choosing an optimizer}
 \begin{center}
@@ -324,15 +411,17 @@ optim.AdamW(model.parameters(), lr=1e-3,
 optim.RMSprop(model.parameters(), lr=1e-2, alpha=0.99)
 optim.Adagrad(model.parameters(), lr=1e-2)
 
-# LBFGS re-evaluates the loss, so it needs a closure
-opt = optim.LBFGS(model.parameters(), lr=0.1)
-def closure():
-    opt.zero_grad()
-    loss = crit(model(x), y)
-    loss.backward()
-    return loss
-opt.step(closure)
+
 \end{lstlisting}
+
+% # LBFGS re-evaluates the loss, so it needs a closure
+% opt =   optim.LBFGS(model.parameters(), lr=0.1)
+% def closure():
+%     opt.zero_grad()
+%     loss = crit(model(x), y)
+%     loss.backward()
+%     return loss
+% opt.step(closure)
 On CUDA, \texttt{fused=True} fuses the update into one kernel and is noticeably faster for large
 models.
 \end{frame}
@@ -687,62 +776,62 @@ for name, p in model.named_parameters():
 \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}[fragile]{Checking activation statistics}
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
-def layer_stats(model, x):
-    acts, hooks = {}, []
-    for name, m in model.named_modules():
-        if isinstance(m, nn.Linear):
-            hooks.append(m.register_forward_hook(
-                lambda mod, inp, out, n=name:
-                    acts.__setitem__(n, out.detach())))
-    model.eval()
-    with torch.no_grad():
-        model(x)
-    for h in hooks:
-        h.remove()
-    for n, a in acts.items():
-        print(f"{n:6s} mean={a.mean():+.4f} std={a.std():.4f}")
+% \begin{frame}[fragile]{Checking activation statistics}
+% \begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+% def layer_stats(model, x):
+%     acts, hooks = {}, []
+%     for name, m in model.named_modules():
+%         if isinstance(m, nn.Linear):
+%             hooks.append(m.register_forward_hook(
+%                 lambda mod, inp, out, n=name:
+%                     acts.__setitem__(n, out.detach())))
+%     model.eval()
+%     with torch.no_grad():
+%         model(x)
+%     for h in hooks:
+%         h.remove()
+%     for n, a in acts.items():
+%         print(f"{n:6s} mean={a.mean():+.4f} std={a.std():.4f}")
 
-layer_stats(model, x)
-# healthy : std stays O(1) as depth grows
-# std->0  : vanishing -- gain too small
-# std huge: exploding -- gain too large, expect nan soon
-\end{lstlisting}
-On a 10-layer ReLU MLP, \texttt{normal\_(std=0.01)} drives the activation std toward zero within a
-few layers, while \texttt{kaiming\_normal\_} holds it roughly constant.
-\end{frame}
+% layer_stats(model, x)
+% # healthy : std stays O(1) as depth grows
+% # std->0  : vanishing -- gain too small
+% # std huge: exploding -- gain too large, expect nan soon
+% \end{lstlisting}
+% On a 10-layer ReLU MLP, \texttt{normal\_(std=0.01)} drives the activation std toward zero within a
+% few layers, while \texttt{kaiming\_normal\_} holds it roughly constant.
+% \end{frame}
 
 % ------------------------------------------------------------------
-\begin{frame}[fragile]{Do's and don'ts}
-\begin{columns}[T]
-\begin{column}{0.49\textwidth}
-\textbf{Do}
-\begin{itemize}\small
-    \item Use the in-place \texttt{\_} functions on \texttt{m.weight}.
-    \item Zero the biases; set BN/LN $\gamma=1$, $\beta=0$.
-    \item Match \texttt{nonlinearity} and \texttt{gain} to the activation you actually use.
-    \item Print one \texttt{.std()} to confirm.
-\end{itemize}
-\end{column}
-\begin{column}{0.49\textwidth}
-\textbf{Do not}
-\begin{itemize}\small
-    \item Write \texttt{p = p * 2} --- it rebinds a local name, the model is untouched.
-    \item Reach for \texttt{.data}; use \texttt{torch.no\_grad()}.
-    \item Zero-initialize weight matrices.
-    \item Re-initialize after loading a checkpoint.
-\end{itemize}
-\end{column}
-\end{columns}
-\vspace{0.3cm}
-\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
-p = model.fc1.weight
-p = p * 2                          # WRONG: no effect on model
-with torch.no_grad(): p.mul_(2)    # right
-init.normal_(p, std=0.02)          # right, and clearer
-\end{lstlisting}
-\end{frame}
+% \begin{frame}[fragile]{Do's and don'ts}
+% \begin{columns}[T]
+% \begin{column}{0.49\textwidth}
+% \textbf{Do}
+% \begin{itemize}\small
+%     \item Use the in-place \texttt{\_} functions on \texttt{m.weight}.
+%     \item Zero the biases; set BN/LN $\gamma=1$, $\beta=0$.
+%     \item Match \texttt{nonlinearity} and \texttt{gain} to the activation you actually use.
+%     \item Print one \texttt{.std()} to confirm.
+% \end{itemize}
+% \end{column}
+% \begin{column}{0.49\textwidth}
+% \textbf{Do not}
+% \begin{itemize}\small
+%     \item Write \texttt{p = p * 2} --- it rebinds a local name, the model is untouched.
+%     \item Reach for \texttt{.data}; use \texttt{torch.no\_grad()}.
+%     \item Zero-initialize weight matrices.
+%     \item Re-initialize after loading a checkpoint.
+% \end{itemize}
+% \end{column}
+% \end{columns}
+% \vspace{0.3cm}
+% \begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+% p = model.fc1.weight
+% p = p * 2                          # WRONG: no effect on model
+% with torch.no_grad(): p.mul_(2)    # right
+% init.normal_(p, std=0.02)          # right, and clearer
+% \end{lstlisting}
+% \end{frame}
 
 % ==================================================================
 \section{Weight Decay}

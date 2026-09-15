@@ -304,7 +304,7 @@
 \section{The Classical Trade-off}
 % =====================================================================
 
-\begin{frame}{Two ways to spend capacity}
+\begin{frame}{Bias-variance Trade-off}
   \begin{center}
     \includegraphics[width=0.78\linewidth]{capacity_fits}
   \end{center}
@@ -451,7 +451,7 @@
     Let $Y = \mathbf{X}\mathbf{w} + \varepsilon$ with rows of $\mathbf{X}$ drawn from
     $\mathcal{N}(\mathbf{0}, \mathbf{I}_p)$ and $\varepsilon \sim \mathcal{N}(0, \sigma^2)$,
     and let $\hat{\mathbf{w}}$ be the minimum-norm least-squares solution.
-    As $N, p \to \infty$ with $p/N \to \gamma$, the excess risk tends to
+    As $N, p \to \infty$ with $ \gamma:=p/N$ (Overparamterization ratio), the excess risk tends to
     \[
       R(\gamma) =
       \begin{cases}
@@ -476,17 +476,17 @@
     \item \focus{1}{Below the threshold there is one least-squares
           solution and it must absorb the noise in $N - p$ fewer degrees
           of freedom than it has observations; the risk
-          $\sigma^2\gamma/(1-\gamma)$ grows as that slack disappears.}
-    \item \focus{2}{At $\gamma = 1$ the design is square and almost
+          $\sigma^2\gamma/(1-\gamma)$ grows as $\gamma\rightarrow 1$ .}
+    \item \focus{1}{At $\gamma = 1$ the design is square and almost
           singular. Exactly one vector interpolates, and it is forced to
           be enormous.}
-    \item \focus{3}{Above the threshold the interpolating set is an
+    \item \focus{1}{Above the threshold the interpolating set is an
           affine subspace of dimension $p - N$, and minimum norm picks
           one point of it.}
-    \item \focus{4}{Growing $\gamma$ enlarges that subspace, so the
+    \item \focus{1}{Growing $\gamma$ increases that subspace, so the
           chosen point can be smaller: the noise term
           $\sigma^2/(\gamma-1)$ falls.}
-    \item \focus{5}{The price is the bias term
+    \item \focus{1}{The price is the bias term
           $\|\mathbf{w}\|^2(1 - 1/\gamma)$, which rises to $\|\mathbf{w}\|^2$.
           The second descent is the race between the two.}
   \end{itemize}}
@@ -502,11 +502,11 @@
     \includegraphics[width=0.78\linewidth]{minnorm_theory}
   \end{center}
   \figcap[0.97]{(a) the closed form against simulation at $n = 200$,
-  over four decades and on both sides of the pole. (b) the squared norm
+ and on both sides of the pole. (b) the squared norm
   of the fitted vector, which peaks at exactly the same place.}
 \end{frame}
 
-\begin{frame}{Smoothness is what extra capacity buys}
+\begin{frame}{Smoothness and Extra Capacity}
   \begin{center}
     \includegraphics[width=0.97\linewidth]{smooth_interpolants}
   \end{center}
@@ -521,7 +521,7 @@
 \begin{frame}{Why sparse data makes this matter}
   \vspace{-0.1em}
   \begin{itemize}\itemsep0.3em
-    \item Past the threshold the data are fitted exactly, so extra
+    \item Past the threshold, the data are fitted exactly, so extra
           capacity can only change the model \alert{between} the
           training points
     \item In high dimensions almost everything is between them:
@@ -533,8 +533,8 @@
           \alert{inductive bias}; here, a preference for small norm and
           so for smoothness
   \end{itemize}
-  \bridge{What produces that preference, and how to install one
-  deliberately, is the subject of Class 18.}
+%  \bridge{What produces that preference, and how to install one
+  %deliberately, is the subject of Class 18.}
   \srcline{Prince (2023), \S8.4.1.}
 \end{frame}
 
@@ -685,3 +685,4 @@
 \end{frame}
 
 \end{document}
+This intuition explains why model variance shrinks as the parameter-to-sample ratio $\gamma = p/N$ grows in the overparameterized regime ($\gamma > 1$).Geometric Subspace ExpansionWhen $p > N$, the system $\mathbf{X} \hat{\mathbf{w}} = \mathbf{Y}$ is underdetermined. The set of all parameter vectors that perfectly interpolate the training data forms an affine subspace of dimension $p - N$.Higher Dimensions, Larger Subspace: As $\gamma$ increases for a fixed $N$, $p$ grows larger, expanding the dimension $p - N = N(\gamma - 1)$ of this solution subspace.Shorter Distance to the Origin: The minimum-norm estimator $\hat{\mathbf{w}} = \mathbf{X}^+ \mathbf{Y}$ selects the single vector in this interpolating subspace that lies closest to the origin. Because higher-dimensional subspaces have more directions to pass near the origin, the Euclidean norm $\Vert{}\hat{\mathbf{w}}\Vert{}_2$ required to fit the data becomes smaller on average.Noise Dilution Across CoordinatesThe residual label noise $\mathbf{\varepsilon} \sim \mathcal{N}(0, \sigma^2 \mathbf{I}_N)$ is a fixed $N$-dimensional vector that must be perfectly fit by the model:$$\mathbf{X} \hat{\mathbf{w}} = \mathbf{X} \mathbf{w} + \mathbf{\varepsilon}$$Spreading the Noise: In an isotropic setting with $p \gg N$, the estimator spreads the responsibility of fitting this $N$-dimensional noise vector across all $p$ available orthogonal directions.Reduced Per-Coordinate Variance: Because the noise variance is shared over vastly more feature dimensions, each individual component of $\hat{\mathbf{w}}$ undergoes smaller random fluctuations from dataset to dataset.As $\gamma \to \infty$, the noise energy per parameter dimension vanishes, causing the integrated variance term $\frac{\sigma^2}{\gamma - 1}$ to drop toward zero.

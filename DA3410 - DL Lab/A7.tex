@@ -1,0 +1,374 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.85in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\assignmentnumber}{7}
+\newcommand{\stagedue}{Monday, 14 September 2026, 5:00 PM IST}
+\newcommand{\finaldue}{Monday, 21 September 2026, 11:59 PM IST}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Assignment \assignmentnumber}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.2em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.25em,topsep=0.25em}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    frame=single,
+    columns=fullflexible,
+    breaklines=true,
+    showstringspaces=false,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape
+}
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{DA3410: Assignment \assignmentnumber}}\\[0.25em]
+    {\large \textbf{Normalization and Regularization: Dropout, Noise, Early Stopping, and Model Averaging}}
+\end{center}
+
+\section{Learning Objectives}
+
+\begin{enumerate}
+    \item implement input normalization, batch normalization, and layer normalization, including their backward passes, inside your own automatic differentiation system;
+    \item implement dropout and noise injection, and maintain a correct distinction between training and evaluation behaviour;
+    \item apply early stopping and model averaging, and measure what each contributes; and
+    \item distinguish explicit from implicit regularization using evidence from your own runs.
+\end{enumerate}
+
+\section{Overview}
+In Assignment 6 you fixed the architecture at \texttt{D10\_W128} and studied optimizer, learning rate, initialization, and weight decay. Weight decay was your first \emph{explicit} regularizer.
+
+Here the architecture, optimizer, learning rate, and initialization are all fixed. You will study input normalization, add batch normalization, layer normalization, dropout, and input noise to your framework, and then apply early stopping and model averaging to the runs you have already trained.
+
+Use the same dataset, splits, learned input representations, autodiff system, loss function, seed, and checkpointing rule as in Assignments 5 and 6.
+
+\section{Dataset and Input Representation}
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Dataset & Task & Input representation \\
+\midrule
+protein & Enzyme classification & ESM2 8M embeddings \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% \section{Notation}
+% Class notation is used throughout. Index $n$ runs over the samples of a mini-batch and $i$ over the units of a layer.
+
+% \begin{center}
+% \begin{tabular}{@{}ll@{\hspace{3em}}ll@{}}
+% \toprule
+% $K$ & mini-batch size & $\gamma_i,\ \beta_i$ & learnable scale and shift \\
+% $M$ & units in a layer & $\rho$ & dropout probability \\
+% $D$ & fan-in of a layer & $\sigma_x^2$ & variance of noise added to inputs \\
+% $\mu_i,\ \sigma_i^2$ & mean and variance of quantity $i$ & $E(\mathbf{w})$ & training error \\
+% $\tilde{x}_{ni}$ & a normalized input & $\Omega(\mathbf{w})$ & regularization term \\
+% $\hat{a}_{ni}$ & a normalized pre-activation & $\widetilde{E}(\mathbf{w})$ & $E(\mathbf{w})+\lambda\,\Omega(\mathbf{w})$ \\
+% $\eta$ & step size & $\alpha$ & weight-decay strength \\
+% $\tau$ & iteration index & $y_m(\mathbf{x})$ & prediction of committee member $m$ \\
+% \bottomrule
+% \end{tabular}
+% \end{center}
+
+% As in class, $M$ denotes units in a layer in Stages 1--3 and committee members in Stage 4. Here $M=128$ and $K=512$. Note that $\gamma_i$ and $\beta_i$ are learned by gradient descent alongside the weights, exactly like any other parameter.
+
+\section{Implementation Requirements}
+Extend your automatic differentiation system with the operations required below. Each new operation needs a forward implementation that retains what its backward needs, and a backward implementation that participates in the same reverse-mode traversal as every other operation. Do not hard-code a backward pass for any experimental condition.
+
+Your framework must have an explicit \textbf{training mode} and \textbf{evaluation mode}. Dropout, noise injection, and batch-normalization batch statistics apply in training mode only. Validation, checkpoint selection, and test prediction run in evaluation mode.
+
+Implement normalization, dropout, noise injection, and their gradients yourself. Do \textbf{NOT} use \texttt{requires\_grad=True}, \texttt{torch.autograd}, \texttt{Tensor.backward()}, \texttt{torch.nn}, \texttt{torch.nn.functional}, \texttt{torch.nn.init}, \texttt{torch.optim}, or any library implementation of normalization, dropout, or regularization. Pandas and Matplotlib are permitted.
+
+\section{Fixed Experimental Configuration}
+Unless a stage explicitly changes an entry below, every run must use:
+
+\begin{center}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.43\linewidth} p{0.49\linewidth}}
+\toprule
+Hyperparameter / setting & Required value \\
+\midrule
+Framework & PyTorch tensor primitives \\
+Architecture & D10\_W128 \\
+Hidden activation & ReLU \\
+Optimizer & Adam ($\beta_1=0.9$, $\beta_2=0.999$, $\epsilon=10^{-8}$) \\
+Step size $\eta$ & $5\times10^{-4}$ \\
+Weight initialization & He initialization \\
+Bias initialization & Zero \\
+Weight decay $\alpha$ & $0$ \\
+Mini-batch size $K$ & 512 \\
+Epochs & 30 \\
+Random seed & 3410 \\
+Input preprocessing & Per-feature normalization (varied in Stage 1) \\
+Primary validation metric & Multiclass MCC \\
+Checkpoint selection & Lowest validation loss \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Adam and 30 epochs are used because the regularization effects are only visible once the reference run reaches the overfitting regime.
+
+Do not use learning-rate schedulers or gradient clipping.
+
+\section{Reproducibility}
+\begin{lstlisting}[language=Python]
+import os
+import random
+import torch
+
+def seed_all(seed: int = 3410):
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
+SEED = 3410
+seed_all(SEED)
+\end{lstlisting}
+
+Reset the seed before each run. Shuffle the training samples each epoch. All compared runs must use the same mini-batch size and training-sample order. Dropout masks and noise are drawn from the same seeded generator, so those runs diverge from the reference after the first stochastic draw; this is expected.
+
+\section{Experimental Design}
+One factor is varied at a time from the shared reference configuration:
+
+\begin{center}
+\textbf{D10\_W128 + ReLU + Adam + $\eta=5\times10^{-4}$ + He + normalized inputs + no hidden normalization + $\rho=0$ + $\sigma_x^2=0$.}
+\end{center}
+
+The reference run (\texttt{BASE}) is shared across Stages 1--3. Run it once and reuse it.
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Stage & Conditions & New runs & Cumulative \\
+\midrule
+1. Normalization & 4 & 3 & 4 \\
+2. Dropout & 3 & 2 & 6 \\
+3. Noise & 3 & 2 & 8 \\
+4. Early stopping, model averaging & --- & 0 & 8 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The assignment requires \textbf{8 training runs}. Stage 4 reuses their histories and checkpoints and requires no new training.
+
+\section{Training and Checkpointing}
+Train every run for 30 epochs, recording training error, validation error, and multiclass MCC per epoch, and retain the parameters from the epoch with the lowest validation error. Reported curves are the unregularized data loss.
+
+Save a parameter snapshot at the end of \textbf{every} epoch for the \texttt{BASE} run; Stage 4 needs them. One \texttt{.pt} file per run is sufficient.
+
+If a run produces non-finite values, record where this first occurs and stop that run.
+
+\section{Stage 1 -- Normalization}
+Four conditions, covering normalization of the \emph{inputs} and of the \emph{hidden pre-activations}:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+ID & Input preprocessing & Hidden normalization \\
+\midrule
+RAW  & Raw embeddings & None \\
+BASE & Per-feature normalization & None \\
+BN   & Per-feature normalization & Batch normalization \\
+LN   & Per-feature normalization & Layer normalization \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Input normalization}
+\texttt{RAW} uses the ESM2 embeddings as supplied. \texttt{BASE} normalizes each input feature $i$ using $\mu_i$ and $\sigma_i$ computed on the \textbf{training split only},
+\[
+\tilde{x}_{ni}=\frac{x_{ni}-\mu_i}{\sigma_i+\epsilon},
+\]
+and applies the same $\mu_i,\sigma_i$ unchanged to validation and test. Report the minimum, maximum, and median of $\mu_i$ and $\sigma_i$ over the input dimensions, and explain why these statistics must not be recomputed on validation or test data.
+
+\texttt{BASE} is the reference for Stages 2 and 3, so all later runs use normalized inputs.
+
+\subsection*{Hidden normalization}
+Normalize between the affine transform and the ReLU: $a \rightarrow \text{Norm} \rightarrow \text{ReLU}$. Use learnable $\gamma_i,\beta_i$ per hidden unit, initialized to $\gamma_i=1$, $\beta_i=0$, updated by Adam. Use $\epsilon=10^{-5}$.
+
+\textbf{Batch normalization.} Over a mini-batch of size $K$, for each unit $i$,
+\[
+\mu_i=\frac{1}{K}\sum_{n=1}^{K} a_{ni},\qquad
+\sigma_i^2=\frac{1}{K}\sum_{n=1}^{K}(a_{ni}-\mu_i)^2,\qquad
+\hat{a}_{ni}=\frac{a_{ni}-\mu_i}{\sqrt{\sigma_i^2+\epsilon}},\qquad
+\gamma_i\hat{a}_{ni}+\beta_i.
+\]
+Maintain running estimates $r \leftarrow 0.9\,r + 0.1\,\hat{s}$, where $\hat{s}$ is the current batch mean or variance, initialized to $0$ and $1$. Evaluation mode uses the running estimates, never batch statistics. The backward pass must differentiate through $\mu_i$ and $\sigma_i^2$; running estimates are not differentiated.
+
+\textbf{Layer normalization.} Identical in form, but $\mu$ and $\sigma^2$ are taken over the $M$ units within each sample $n$. There are no running estimates, so training and evaluation behave identically.
+
+\subsection*{Required measurements}
+Both hidden-normalization schemes add $2M$ parameters per hidden layer. Report the trainable parameter count for RAW/BASE and for BN/LN.
+
+On the \textbf{first mini-batch before the first parameter update}, record for each hidden layer $l$ the RMS pre-activation magnitude and RMS parameter-gradient magnitude
+\[
+A_l = \frac{\lVert \mathbf{a}_l\rVert_F}{\sqrt{\#\mathbf{a}_l}},
+\qquad
+G_l = \frac{\left\lVert \partial E/\partial \mathbf{W}_l\right\rVert_F}{\sqrt{\#\mathbf{W}_l}},
+\]
+and plot $A_l$ and $\log_{10}G_l$ against layer index for all four conditions. RAW and BASE share an initialization and differ only in input scale, so their profiles isolate the effect of input scale alone.
+
+\section{Stage 2 -- Dropout}
+Compare $\rho \in \{0,\;0.2,\;0.5\}$, where $\rho$ is the probability of dropping a unit. Use inverted dropout on the ReLU output of every hidden layer: draw an independent mask $m_{ni}\sim\text{Bernoulli}(1-\rho)$ per unit per sample and compute
+\[
+h_{ni} \leftarrow h_{ni}\,\frac{m_{ni}}{1-\rho}.
+\]
+Do not apply dropout to the inputs or the output layer. The same mask must be used in the forward and backward pass of an update. Dropout is disabled in evaluation mode, with no rescaling there.
+
+$\rho=0$ is \texttt{BASE}, so Stage 2 adds \textbf{2 runs}. Report the training--validation error gap at epoch 30 for each $\rho$.
+
+\section{Stage 3 -- Applying Noise}
+Compare additive Gaussian input noise with $\sigma_x \in \{0,\;0.05,\;0.2\}$. In training mode only,
+\[
+\tilde{x}_{ni} \leftarrow \tilde{x}_{ni} + \varepsilon_{ni},
+\qquad \varepsilon_{ni}\sim\mathcal{N}(0,\sigma_x^2),
+\]
+with fresh noise for every mini-batch in every epoch. Noise is not applied during validation or test prediction. Since inputs are normalized, $\sigma_x$ is a fraction of a feature standard deviation.
+
+$\sigma_x=0$ is \texttt{BASE}, so Stage 3 adds \textbf{2 runs}.
+
+\section{Stage 4 -- Early Stopping and Model Averaging}
+This stage uses only the 8 completed runs.
+
+\subsection*{Early stopping}
+Apply early stopping retrospectively to each recorded validation-error history with patience $k \in \{3,\;5\}$: stop at the first epoch after which the validation error fails to improve on the running minimum for $k$ consecutive epochs. Report per run and per $k$ the stopping epoch, the epoch it selects, the epoch of the global minimum over all 30 epochs, and the validation error and MCC at each.
+
+\subsection*{Checkpoint averaging (\texttt{SWA})}
+Using the per-epoch snapshots of \texttt{BASE}, average the parameters of the last 5 epochs,
+\[
+\bar{\mathbf{w}} = \frac{1}{5}\sum_{\tau=26}^{30}\mathbf{w}_\tau ,
+\]
+evaluate $\bar{\mathbf{w}}$ on the validation set, and compare with the best single checkpoint of the same run.
+
+\subsection*{Committee averaging (\texttt{ENS})}
+Form a committee from the best checkpoints of all $M=8$ runs and average their predicted class probabilities,
+\[
+\bar{y}(\mathbf{x}) = \frac{1}{M}\sum_{m=1}^{M} y_m(\mathbf{x}),
+\]
+taking the arg-max as the predicted class. Report validation error and MCC and compare with the best individual run.
+
+\section{Required Figures}
+For each of the 8 runs: training and validation error across 30 epochs, and validation MCC across 30 epochs with the selected epoch marked.
+
+In addition:
+\begin{enumerate}
+    \item Stage 1: validation error and MCC for RAW, BASE, BN, LN on common axes, plus the layerwise $A_l$ and $\log_{10}G_l$ plots.
+    \item Stage 2: training and validation error for all three $\rho$ on common axes, and the training--validation gap against $\rho$.
+    \item Stage 3: training and validation error for all three $\sigma_x$ on common axes.
+    \item Stage 4: the validation-error curve of one run with the $k=3$ and $k=5$ stopping epochs and the global minimum marked; and a bar chart of validation MCC for the 8 runs, \texttt{SWA}, and \texttt{ENS}.
+\end{enumerate}
+
+\section{Required Test Prediction Files}
+One CSV per run from its lowest-validation-error checkpoint, plus one for \texttt{SWA} and one for \texttt{ENS}:
+\begin{center}
+\texttt{submission\_protein\_D10\_W128\_<tag>.csv}
+\end{center}
+with tags \texttt{RAW}, \texttt{BASE}, \texttt{BN}, \texttt{LN}, \texttt{DROP0.2}, \texttt{DROP0.5}, \texttt{NOISE0.05}, \texttt{NOISE0.2}, \texttt{SWA}, \texttt{ENS} --- \textbf{10 files}.
+
+The prediction column is \texttt{ec\_number}. Preserve the test-sample order; no index, extra columns, or rounding.
+
+\section{Required Final Analysis}
+
+\subsection*{Part A -- Normalization}
+\begin{enumerate}
+    \item How do the $A_l$ and $\log_{10}G_l$ profiles differ across RAW, BASE, BN, and LN before the first update?
+    \item He initialization sets $\sigma_w^2$ from the fan-in $D$, not from the data scale. Why then does input normalization still matter, and what does the RAW--BASE comparison show?
+    \item Batch normalization couples the $K$ samples of a mini-batch. Where does this coupling appear in the backward pass, and why does layer normalization avoid it?
+    \item Why must batch normalization behave differently in training and evaluation mode, and what breaks if it does not?
+    \item Is normalization acting here as an optimization aid or as a regularizer? Use the training--validation gap.
+\end{enumerate}
+
+\subsection*{Part B -- Dropout and Noise}
+\begin{enumerate}
+    \item How do increasing $\rho$ and increasing $\sigma_x$ each affect training error, validation error, and the gap between them?
+    \item Which $\rho$ and which $\sigma_x$ give the best validation MCC, and is there evidence of underfitting at the largest setting?
+    \item Why does inverted dropout rescale by $1/(1-\rho)$ during training rather than scaling at evaluation time?
+    \item In what sense are dropout and input noise related? Identify what each perturbs and where in the forward pass.
+\end{enumerate}
+
+\subsection*{Part C -- Early Stopping and Model Averaging}
+\begin{enumerate}
+    \item Does patience $k=3$ select the global validation minimum for each run? Where does it differ, in which direction, and how many epochs would each $k$ have saved?
+    \item Early stopping adds no term to $E(\mathbf{w})$. What constrains the model instead?
+    \item Does checkpoint averaging improve on the best single checkpoint of \texttt{BASE}? Why might averaging parameters be reasonable across late epochs but not early ones?
+    \item Does the committee beat its best member? What property of the members determines how much averaging can help?
+    \item Contrast \texttt{SWA} and \texttt{ENS} in what is averaged, the cost at prediction time, and when each applies.
+\end{enumerate}
+
+\subsection*{Part D -- Explicit and Implicit Regularization}
+\begin{enumerate}
+    \item Classify weight decay, batch/layer normalization, dropout, input noise, early stopping, and model averaging as explicit or implicit regularization, and justify each.
+    \item Which of them can be written as a $\lambda\,\Omega(\mathbf{w})$ term in $\widetilde{E}(\mathbf{w})$, and which change only the optimization path or the prediction rule?
+    \item Which method gave the largest reduction in the training--validation gap, and which gave the best validation MCC? Are they the same method?
+    \item Which interactions between normalization, dropout, and noise remain untested in this design, and name one you would expect to be non-additive.
+\end{enumerate}
+
+\section{Final Results Table}
+One row per run, plus \texttt{SWA} and \texttt{ENS}:
+
+\begin{center}
+\small
+\begin{tabular}{cllrrrr}
+\toprule
+ID & Tag & Condition & Params & Best epoch & Best val. error & Val. MCC \\
+\midrule
+1 & RAW        & Unnormalized inputs & & & & \\
+2 & BASE       & Reference & & & & \\
+3 & BN         & & & & & \\
+4 & LN         & & & & & \\
+5 & DROP0.2    & & & & & \\
+6 & DROP0.5    & & & & & \\
+7 & NOISE0.05  & & & & & \\
+8 & NOISE0.2   & & & & & \\
+\midrule
+9  & SWA       & & & & & \\
+10 & ENS       & & & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Include a second table for early stopping with one row per run and, for each $k$, the stopping epoch, selected epoch, validation error, validation MCC, and epochs saved.
+
+State the input dimension, output dimension, $K$, and the trainable parameter count once above the table.
+
+\section{Final Submission}
+Submit executable code/notebook(s), all results tables, all required figures, all 10 prediction CSV files, and the report.
+
+Your code must let the TAs identify the input-normalization statistics and where they are computed, the normalization forward and backward implementations, the dropout mask and its reuse in the backward pass, the noise injection point, the training/evaluation mode switch, the early-stopping computation, and both averaging procedures. All runs must use \texttt{seed = 3410}.
+
+\section{Deadlines}
+
+\textbf{Lab checkpoint --- \stagedue}
+
+Submit the two Stage 1 input-normalization experiments, \texttt{RAW} and \texttt{BASE}:
+\begin{enumerate}
+    \item the code used to run them, including the input-normalization statistics computed on the training split; and
+    \item \texttt{submission\_protein\_D10\_W128\_RAW.csv} and \texttt{submission\_protein\_D10\_W128\_BASE.csv}.
+\end{enumerate}
+No report or figures are required at this checkpoint.
+
+\textbf{Final submission --- \finaldue}
+
+Everything listed in the Final Submission section, including the \texttt{RAW} and \texttt{BASE} runs again.
+
+\end{document}

@@ -151,7 +151,7 @@ exact composition of two linear kernels into one, the ε‖w‖₁ arithmetic
 behind the fast gradient sign method, and the translation invariance of
 the style matrix. The C deck keeps Bishop's own statements in their place.
 
-**Built.** Class 25 ships as A (44 pages), B (48 pages) and C (44 pages).
+**Built.** Class 25 ships as A (44 pages), B (47 pages) and C (43 pages).
 Its narrative order is: stacking filters (parameters, reach, composition,
 the 1×1 convolution); a standard architecture (VGG-16 layer by layer,
 parameters against connections, ImageNet); what a filter responds to (the

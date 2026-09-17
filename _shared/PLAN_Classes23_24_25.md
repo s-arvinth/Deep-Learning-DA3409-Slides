@@ -110,6 +110,27 @@ The organising idea is that the three tasks differ only in what the network
 must emit — one label, a set of boxes with scores, or one label per pixel —
 and that each output structure forces a different treatment of resolution.
 
+Publications supplying results neither book states formally: Krizhevsky et
+al. (2012) and Simonyan & Zisserman (2015) for the architectures whose
+numbers are quoted; Sermanet et al. (2013); Redmon et al. (2016); Girshick
+(2015) and Ren et al. (2015); Long et al. (2015); Noh et al. (2015);
+Badrinarayanan et al. (2015); Ronneberger et al. (2015); Dumoulin & Visin
+(2016).
+
+Two results are in neither textbook, so Class 24 has a **C variant**: the
+properties of IoU beyond its range (equality to one exactly at coincidence,
+invariance under common rescaling) and the rank bound showing a linear
+decoder from the bottleneck cannot place every pixel. The C deck keeps
+Bishop's own statements in their place.
+
+**Built.** Class 24 ships as A (54 pages), B (55 pages) and C (52 pages).
+Its narrative order is: the three output structures; classification and the
+trunk that shrinks; detection — boxes, IoU, sliding windows as convolution,
+scales, suppression, direct grid prediction, region proposals;
+segmentation — a label per pixel, down and back up, unpooling, transpose
+convolution, fully convolutional networks, the U-net. The trunk is treated
+as given throughout; what it learns is Class 25.
+
 ### Class 25 — Convolution Filters: what they learn
 
 Bishop: §10.2.7 Multilayer convolutions; §10.2.8 Example network
@@ -119,6 +140,25 @@ cortex, §10.3.2, §10.3.3 Saliency maps, §10.3.4 Adversarial attacks,
 
 Prince: the architectural detail of §10.5.1 that concerns the *trunk* rather
 than the task, and Fig. 10.14.
+
+Publications supplying results neither book states formally: Hubel &
+Wiesel (1959); Fukushima (1980); Zeiler & Fergus (2013); Yosinski et al.
+(2015); Selvaraju et al. (2016); Goodfellow et al. (2014); Eykholt et al.
+(2018); Mordvintsev et al. (2015); Gatys et al. (2015).
+
+Three results are in neither textbook, so Class 25 has a **C variant**: the
+exact composition of two linear kernels into one, the ε‖w‖₁ arithmetic
+behind the fast gradient sign method, and the translation invariance of
+the style matrix. The C deck keeps Bishop's own statements in their place.
+
+**Built.** Class 25 ships as A (44 pages), B (48 pages) and C (44 pages).
+Its narrative order is: stacking filters (parameters, reach, composition,
+the 1×1 convolution); a standard architecture (VGG-16 layer by layer,
+parameters against connections, ImageNet); what a filter responds to (the
+visual cortex, Gabor filters, learned first layers, patches that excite
+deeper units, synthetic images); reading and fooling a network (Grad-CAM,
+the fast gradient sign method, DeepDream); style transfer. The recurring
+tool is the gradient with respect to the input.
 
 ---
 

@@ -1,0 +1,171 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=0.85in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\assignmentnumber}{8}
+\newcommand{\stagedue}{Monday, 14 September 2026, 5:00 PM IST}
+\newcommand{\finaldue}{Monday, 21 September 2026, 11:59 PM IST}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{DA3410}
+\rhead{Assignment \assignmentnumber}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.2em,topsep=0.25em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.25em,topsep=0.25em}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    frame=single,
+    columns=fullflexible,
+    breaklines=true,
+    showstringspaces=false,
+    keywordstyle=\bfseries,
+    commentstyle=\itshape
+}
+
+\begin{document}
+
+\begin{center}
+    {\Large \textbf{DA3410: Assignment \assignmentnumber}}
+\end{center}
+
+
+\section{Objectives}
+\label{sec:objectives}
+ 
+\begin{itemize}
+  \item Use the PatchCamelyon dataset in this lab. The dataset contains about
+        327680 color patches. Each patch is 96 by 96 pixels. Each patch has a
+        binary label. The label shows if the center region contains tumor tissue.
+        The two classes are balanced.
+  \item Reproduce a set of published results from the assigned paper on this data.
+  \item Design controlled experiments and change one factor at a time.
+  \item Measure the results, plot them, and compare them with the results in the
+        papers.
+  \item Explain the results in clear and simple terms. State where your results
+        agree with the papers and where they differ.
+\end{itemize}
+
+
+
+\section{Deep Double Descent: Where Bigger Models and More Data Hurt}
+\label{sec:double-descent}
+
+\subsection*{Summary of Paper}
+The classical bias-variance trade-off states that test error first goes down and
+then goes up as a model becomes larger. This paper shows that modern networks do
+not follow this rule. As the model becomes larger, the test error first goes down,
+then goes up, and then goes down again. The peak in test error occurs at the
+interpolation threshold. This is the point where the model is just large enough to
+fit the training data with almost zero training error. The authors call this
+behavior double descent.
+
+The CNN experiments use a family of 5-layer convolutional networks. Each
+network has four convolutional layers with widths $[k, 2k, 4k, 8k]$ and one fully
+connected layer.
+
+\subsection*{Reproducible Results on PatchCamelyon}
+\begin{itemize}
+  \item \textbf{Model-wise double descent:} Sweep the width $k$. Plot the test
+        error against the model size. The plot shows the U-shape, the peak at the
+        interpolation threshold, and the second descent.
+  \item \textbf{Effect of label noise:} Repeat the sweep at $0\%$, $10\%$, and
+        $20\%$ label noise. The peak grows and moves to larger models as the
+        noise increases.
+  \item \textbf{Epoch-wise double descent:} Fix one large CNN. Train it for many
+        epochs. Plot the test error against the epoch number.
+  \item \textbf{Interpolation and the peak:} Plot the training error on the same
+        axis as the model-size sweep. The test peak appears where the training
+        error first reaches near zero.
+  \item \textbf{Effect of data augmentation:} Run the sweep with and without
+        augmentation. Augmentation moves the interpolation threshold and the peak
+        to larger models.
+  \item \textbf{Effect of the optimizer:} Run the sweep with SGD and with Adam.
+        Compare the position and the height of the peak.
+  \item \textbf{Sample-wise behavior:} Subsample the PatchCamelyon training set.
+        Find a range of model sizes where more data does not lower the test error
+        at convergence.
+  \item \textbf{Ensembling:} Train several models and combine their
+        predictions.
+\end{itemize}
+
+\section{ConvNeXt V2: Co-designing and Scaling ConvNets with Masked Autoencoders}
+\label{sec:convnextv2}
+
+\subsection*{Summary of Paper}
+This paper makes pure convolutional networks work well with masked self-supervised
+learning. It has two main parts. The first part is the Fully Convolutional Masked
+Autoencoder (FCMAE). The method hides about $60\%$ of the input patches. It
+processes only the visible pixels with sparse convolutions. This step stops
+information from the hidden regions from reaching the model. A small ConvNeXt
+decoder then rebuilds the hidden patches. The loss is the mean squared error on
+the hidden patches only.
+
+\subsection*{Reproducible Results on PatchCamelyon}
+\begin{itemize}
+  \item \textbf{FCMAE pretraining:} Pretrain the model on unlabeled
+        PatchCamelyon with masked reconstruction. Then fine-tune it on labeled
+        PatchCamelyon. Show that the pretrained model reaches higher accuracy
+        than a model that is trained from scratch. Change the labeled fraction to
+        $1\%$, $10\%$, and $100\%$. Show that the gain from pretraining grows as
+        the number of labels drops.
+  \item \textbf{Effect of Global Response Normalization (GRN):} Compare the V1 block with the V2 block that has
+        GRN. Also compare GRN with Batch, Layer, and Local Response Normalization
+        in the same place.
+  \item \textbf{Feature collapse analysis:} Show the activation map of each
+        channel. Compute the mean pairwise cosine distance between channels for
+        each layer. Show the collapse for FCMAE without GRN.
+  \item \textbf{Masking ratio:} Change the masking ratio from $0.1$ to $0.9$.
+  \item \textbf{Decoder design:} Change the depth and the width of the single
+        block decoder.
+  \item \textbf{Information leakage:} Compare correct masked encoding with plain
+        dense convolution over the masked input.
+\end{itemize}
+
+
+\section{Tent: Fully Test-Time Adaptation by Entropy Minimization}
+\label{sec:tent}
+
+\subsection*{Summary of Paper}
+This paper adapts a trained model to a new test distribution at test time. The
+method uses only the unlabeled target data and the model itself. It does not use
+the source data. It does not use labels. It does not change the training process.
+The method is called Tent. Tent lowers the Shannon entropy of the model
+predictions on each test batch.
+
+\subsection*{Reproducible results on PatchCamelyon}
+\begin{itemize}
+  \item \textbf{Test-time BN update:} Compute the Batch Normalization statistics
+        again on the target data. Use these statistics in place of the source
+        statistics.
+  \item \textbf{Tent result:} Freeze all weights except the BN affine
+        parameters. Compute the statistics again for each batch. Minimize the
+        prediction entropy.
+  \item \textbf{Entropy and error:} Plot the entropy of each prediction against
+        the error rate on corrupted PatchCamelyon.
+  \item \textbf{Severity, entropy, and loss:} Show that the entropy and the loss
+        both rise as the corruption severity rises.
+  \item \textbf{Effect across corruption types:} Apply several corruption types.
+        Show that Tent improves most of them.
+  \item \textbf{Choice of parameters to update:} Compare three options. Update
+        the affine parameters only. Update the last layer. Update the full model.
+        Show that the full update makes the result worse.
+  \item \textbf{Online and offline adaptation:} Compare one gradient step for
+        each batch with several epochs of adaptation.
+\end{itemize}
+
+\end{document}

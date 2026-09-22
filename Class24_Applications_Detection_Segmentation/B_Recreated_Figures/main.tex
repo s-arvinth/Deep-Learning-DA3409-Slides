@@ -68,7 +68,7 @@
 % =====================================================================
 \title{Convolutional Networks}
 \subtitle{Applications: Classification, Object Detection, Segmentation}
-\author{Introduction to Deep Learning \ \textperiodcentered\ Class 24}
+\author{Introduction to Deep Learning \ \textperiodcentered\ }
 \institute{}
 \date{}
 
@@ -263,7 +263,7 @@
   Figs.~10.16 and 10.17.}
 \end{frame}
 
-\begin{frame}{Where the field went next}
+\begin{frame}{The Progress of the field}
   \begin{center}
     \includegraphics[width=0.66\linewidth]{P_ConvImageNetPerformance}
   \end{center}
@@ -325,7 +325,7 @@
       \mathrm{area}(\mathbf{b} \cup \mathbf{b}^\star)$.
   \end{defx}
   \vspace{-0.3em}
-  \begin{propx}[What the ratio buys]\label{th:iouprop}
+  \begin{propx}[What is the advantage of the ratio?]\label{th:iouprop}
     \small
     $0 \leq \mathrm{IoU} \leq 1$, with $\mathrm{IoU} = 1$ exactly when
     the boxes coincide; and IoU is unchanged when both boxes are
@@ -342,29 +342,29 @@
   \srcline{Bishop \& Bishop (2024), \S10.4.2, Fig.~10.20.}
 \end{frame}
 
-\begin{frame}{Proof of the proposition}
-  \vspace{-0.25em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.30em
-    \item \focus{1}{The intersection is contained in the union, so
-          $0 \leq \mathrm{area}(\cap) \leq \mathrm{area}(\cup)$ and the
-          ratio lies in $[0, 1]$.}
-    \item \focus{2}{$\mathrm{IoU} = 1$ forces
-          $\mathrm{area}(\cap) = \mathrm{area}(\cup)$; since
-          $\mathrm{area}(\cup) = \mathrm{area}(\mathbf{b}) + \mathrm{area}(\mathbf{b}^\star)
-          - \mathrm{area}(\cap)$, both boxes have the area of the
-          intersection, so both equal it.}
-    \item \focus{3}{Scaling every coordinate by $s$ scales every area
-          by $s^2$, in the numerator and the denominator alike, so the
-          ratio is unchanged.
-          \hfill $\square$}
-  \end{itemize}}
-  \vspace{-0.1em}
-  \begin{redhighlight}
-    The metric is dimensionless on purpose: a box eight pixels off is
-    a small error on a bus and a large one on a bird.
-  \end{redhighlight}
-\end{frame}
+% \begin{frame}{Proof of the proposition}
+%   \vspace{-0.25em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.30em
+%     \item \focus{1}{The intersection is contained in the union, so
+%           $0 \leq \mathrm{area}(\cap) \leq \mathrm{area}(\cup)$ and the
+%           ratio lies in $[0, 1]$.}
+%     \item \focus{2}{$\mathrm{IoU} = 1$ forces
+%           $\mathrm{area}(\cap) = \mathrm{area}(\cup)$; since
+%           $\mathrm{area}(\cup) = \mathrm{area}(\mathbf{b}) + \mathrm{area}(\mathbf{b}^\star)
+%           - \mathrm{area}(\cap)$, both boxes have the area of the
+%           intersection, so both equal it.}
+%     \item \focus{3}{Scaling every coordinate by $s$ scales every area
+%           by $s^2$, in the numerator and the denominator alike, so the
+%           ratio is unchanged.
+%           \hfill $\square$}
+%   \end{itemize}}
+%   \vspace{-0.1em}
+%   \begin{redhighlight}
+%     The metric is dimensionless on purpose: a box eight pixels off is
+%     a small error on a bus and a large one on a bird.
+%   \end{redhighlight}
+% \end{frame}
 
 \begin{frame}{IoU, drawn and measured}
   \begin{center}

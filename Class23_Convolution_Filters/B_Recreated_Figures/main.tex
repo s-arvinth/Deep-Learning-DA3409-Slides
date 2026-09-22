@@ -66,7 +66,7 @@
 % =====================================================================
 \title{Convolutional Networks}
 \subtitle{Convolution Filters}
-\author{Introduction to Deep Learning \ \textperiodcentered\ Class 23}
+\author{Introduction to Deep Learning \ \textperiodcentered\ }
 \institute{}
 \date{}
 
@@ -146,9 +146,10 @@
   (2024), Eq.~10.1.}
 \end{frame}
 
-\begin{frame}{Images are too big, and not unstructured}
+
+\begin{frame}{Images as Data}
   \vspace{-0.15em}
-  \begin{propx}[The cost of a dense first layer]\label{th:cost}
+  \begin{block}{The cost of a dense first layer}
     \small
     A colour image of $10^3 \times 10^3$ pixels has $3 \times 10^6$
     inputs. A fully connected first layer with $1{,}000$ hidden units
@@ -156,7 +157,7 @@
     A convolutional layer with $64$ channels and a $3\times3$ kernel has
     $3 \times 3 \times 3 \times 64 + 64 = 1{,}792$, whatever the image
     size.
-  \end{propx}
+  \end{block}
   \vspace{0.3em}
   {\footnotesize
   \begin{itemize}\itemsep0.22em
@@ -171,7 +172,7 @@
   Prince (2023), \S10.2.4.}
 \end{frame}
 
-\begin{frame}{The same statement, drawn}
+\begin{frame}{Images as Data}
   \vspace{-0.5em}
   \begin{center}
     \includegraphics[width=0.69\linewidth]{dense_vs_conv}
@@ -188,8 +189,17 @@
 % =====================================================================
 \section{Invariance and Equivariance}
 % =====================================================================
+\begin{frame}{Images}
+  \begin{center}
+    \includegraphics[height=0.505\textheight]{P_ConvEquiInv}
+  \end{center}
+  \figcap[0.97]{(a--b) classification: the horizontal shift must leave
+  the label ``mountain'' unchanged --- invariance. (c--f) segmentation:
+  when the image is translated, the per-pixel output must translate with
+  it --- equivariance. Prince (2023), Fig.~10.1.}
+\end{frame}
 
-\begin{frame}{What we want of the output}
+\begin{frame}{Some Definitions}
   \vspace{-0.2em}
   \begin{defx}[Invariance and equivariance]\label{th:inv}
     \small
@@ -215,105 +225,25 @@
   Bishop \& Bishop (2024), \S10.2.2.}
 \end{frame}
 
-\begin{frame}{Convolution is the equivariant linear map}
-  \vspace{-0.25em}
-  \begin{thmx}[Equivariance, and its converse]\label{th:equi}
-    \small
-    Let $T_a$ shift a signal by $a$ positions. A convolution
-    $z_i = \sum_j w_j\, x_{i+j}$ satisfies
-    $\mathrm{conv}(T_a \mathbf{x}) = T_a\,\mathrm{conv}(\mathbf{x})$ for every $a$.
-    Conversely, a linear map $\mathbf{z} = \bm{\Omega}\mathbf{x}$ that commutes
-    with every $T_a$ must have $\Omega_{ij}$ depending only on $i-j$ ---
-    that is, it \alert{is} a convolution.
-  \end{thmx}
-  \vspace{0.25em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.22em
-    \item So convolution is not one convenient equivariant layer among
-          many. Up to boundary handling it is the \alert{only} linear one
-    \item The forward direction is the reason to use it; the converse is
-          the reason there is nothing else to try
-  \end{itemize}}
-  \srcline{Bishop \& Bishop (2024), \S10.2.2; converse from
-  Cohen \& Welling (2016).}
-\end{frame}
 
-\begin{frame}{Proof, in both directions}
-  \vspace{-0.25em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.28em
-    \item \focus{1}{Forward. Write $y_i = (T_a \mathbf{x})_i = x_{i-a}$. Then
-          $\mathrm{conv}(\mathbf{y})_i = \sum_j w_j\, y_{i+j}
-          = \sum_j w_j\, x_{i-a+j}$.}
-    \item \focus{2}{That last expression is exactly
-          $\mathrm{conv}(\mathbf{x})_{i-a}$, which is
-          $T_a\,\mathrm{conv}(\mathbf{x})$ evaluated at $i$. \hfill $\square$}
-    \item \focus{3}{Converse. Commuting with $T_a$ means
-          $\bm{\Omega} T_a = T_a \bm{\Omega}$ for every $a$, and in
-          coordinates that reads
-          $\Omega_{i,\,j-a} = \Omega_{i-a,\,j}$.}
-    \item \focus{4}{Setting $a = j$ gives
-          $\Omega_{i,0} = \Omega_{i-j,\,j}$, so every entry is fixed by
-          the single index $i-j$.}
-    \item \focus{5}{Define $w_{i-j} = \Omega_{ij}$. Then
-          $z_i = \sum_j \Omega_{ij} x_j = \sum_j w_{i-j} x_j$, a
-          convolution. \hfill $\square$}
-  \end{itemize}}
-  \vspace{-0.15em}
-  \begin{redhighlight}
-    Sharing the weights is not a trick to save memory. It is what
-    equivariance forces, and the saving is a consequence.
-  \end{redhighlight}
-\end{frame}
-
-\begin{frame}{Equivariance, on an image}
-  \begin{center}
-    \includegraphics[height=0.505\textheight]{P_ConvEquiInv}
-  \end{center}
-  \figcap[0.97]{(a--b) classification: the horizontal shift must leave
-  the label ``mountain'' unchanged --- invariance. (c--f) segmentation:
-  when the image is translated, the per-pixel output must translate with
-  it --- equivariance. Prince (2023), Fig.~10.1.}
-\end{frame}
 
 % =====================================================================
 \section{The Operation}
 % =====================================================================
-
 \begin{frame}{One dimension, one kernel}
-  \vspace{-0.35em}
-  \[
-    z_i \;=\; \sum_{j=1}^{k} w_j\, x_{\,i + j - \lceil k/2 \rceil},
-    \qquad
-    h_i \;=\; a\Big[\beta + \sum_{j=1}^{k} w_j\, x_{\,i+j-2}\Big]
-    \quad (k = 3).
-  \]
-  \vspace{-0.45em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.24em
-    \item Each output reads a window of $k$ inputs. The same $k$ weights
-          are used at \alert{every} position --- this is the parameter
-          sharing of Class 18, in its canonical form
-    \item A convolutional layer adds a bias and an activation, exactly
-          as a dense layer does
-    \item Compare a dense layer, $h_i = a[\beta_i + \sum_{j=1}^{D}
-          \Omega_{ij} x_j]$: $D^2$ weights and $D$ biases against
-          $k$ weights and one bias
-  \end{itemize}}
-  \srcline{Prince (2023), Eqs.~10.3--10.5, Figs.~10.2, 10.4.}
-\end{frame}
-
-\begin{frame}{A convolution is a dense layer with most of it deleted}
+  \vspace{-0.5em}
   \begin{center}
-    \includegraphics[width=0.94\linewidth]{weight_matrix}
+    \includegraphics[width=0.86\linewidth]{conv_knobs}
   \end{center}
-  \figcap[0.97]{The actual matrix each layer applies, on twelve inputs.
-  (a) dense: $144$ free numbers. (b) kernel three: $34$ non-zeros but
-  only \alert{three} free numbers, because the colours repeat down the
-  band. (c) stride two removes every other row. Sparsity alone would
-  leave $3n$ free weights; tying them is what leaves three.}
+  \vspace{-0.8em}
+  {\tiny\color{mcMuted}
+  Eight inputs each time; shaded inputs are the ones the shaded output
+  reads, through the weights $w_j$. (a--b) stride two evaluates the
+  kernel at every other position, and $z_1$ reads a zero pad. (c) a
+  kernel of five reads more and costs more weights. (d) a dilated kernel
+  reaches as far as a kernel of five wit
+  \hfill Prince (2023), Fig.~10.3.\par}
 \end{frame}
-
 \begin{frame}{Three knobs, and one formula}
   \vspace{-0.15em}
   \begin{propx}[Output length]\label{th:size}
@@ -331,28 +261,50 @@
   {\footnotesize
   \begin{itemize}\itemsep0.20em
     \item \alert{Padding} decides whether the representation shrinks at
-          the edges; \emph{valid} padding invents nothing but loses size
+          the edges; %\emph{valid} padding invents nothing but loses size
     \item \alert{Stride} subsamples the output; \alert{dilation} widens
           the reach without buying more weights
   \end{itemize}}
   \srcline{Prince (2023), \S10.2.2--10.2.3, Fig.~10.3;
   Bishop \& Bishop (2024), \S10.2.3--10.2.4; Dumoulin \& Visin (2016).}
 \end{frame}
-
-\begin{frame}{The three knobs, drawn}
-  \vspace{-0.5em}
-  \begin{center}
-    \includegraphics[width=0.86\linewidth]{conv_knobs}
-  \end{center}
-  \vspace{-0.8em}
-  {\tiny\color{mcMuted}
-  Eight inputs each time; shaded inputs are the ones the shaded output
-  reads, through the weights $w_j$. (a--b) stride two evaluates the
-  kernel at every other position, and $z_1$ reads a zero pad. (c) a
-  kernel of five reads more and costs more weights. (d) a dilated kernel
-  reaches as far as a kernel of five while paying for three.
-  \hfill Prince (2023), Fig.~10.3.\par}
+\begin{frame}{One dimension, one kernel}
+  \vspace{-0.35em}
+  \[
+    z_i \;=\; \sum_{j=1}^{k} w_j\, x_{\,i + j - \lceil k/2 \rceil},
+    \qquad
+    h_i \;=\; a\Big[\beta + \sum_{j=1}^{k} w_j\, x_{\,i+j-2}\Big]
+    \quad (k = 3).
+  \]
+  \vspace{-0.45em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.24em
+    \item Each output reads a window of $k$ inputs. The same $k$ weights
+          are used at \alert{every} position --- this is the parameter
+          sharing, in its canonical form
+    \item A convolutional layer adds a bias and an activation, exactly
+          as a dense layer does
+    \item Compare a dense layer, $h_i = a[\beta_i + \sum_{j=1}^{D}
+          \Omega_{ij} x_j]$: $D^2$ weights and $D$ biases against
+          $k$ weights and one bias
+  \end{itemize}}
+  \srcline{Prince (2023), Eqs.~10.3--10.5, Figs.~10.2, 10.4.}
 \end{frame}
+
+\begin{frame}{A convolution is a dense layer with most of it deleted}
+  \begin{center}
+    \includegraphics[width=0.94\linewidth]{weight_matrix}
+  \end{center}
+  % \figcap[0.97]{The actual matrix each layer applies, on twelve inputs.
+  % (a) dense: $144$ free numbers. (b) kernel three: $34$ non-zeros but
+  % only \alert{three} free numbers, because the colours repeat down the
+  % band. (c) stride two removes every other row. Sparsity alone would
+  % leave $3n$ free weights; tying them is what leaves three.}
+\end{frame}
+
+
+
+
 
 \begin{frame}{What one kernel responds to}
   \vspace{-0.2em}
@@ -375,6 +327,57 @@
     \item What templates a trained network settles on is Class 25
   \end{itemize}}
   \srcline{Bishop \& Bishop (2024), \S10.2.1, Eq.~10.1, Exercise 10.1.}
+\end{frame}
+\begin{frame}{Convolution is the equivariant linear map}
+  \vspace{-0.25em}
+  \begin{thmx}[Equivariance, and its converse]\label{th:equi}
+    \small
+    Let $T_a$ shift a signal by $a$ positions. A convolution
+    $z_i = \sum_j w_j\, x_{i+j}$ satisfies
+    $\mathrm{conv}(T_a \mathbf{x}) = T_a\,\mathrm{conv}(\mathbf{x})$ for every $a$.
+    Conversely, a linear map $\mathbf{z} = \bm{\Omega}\mathbf{x}$ that commutes
+    with every $T_a$ must have $\Omega_{ij}$ depending only on $i-j$ ---
+    that is, it \alert{is} a convolution.
+  \end{thmx}
+  \vspace{0.25em}
+  {\footnotesize
+  % \begin{itemize}\itemsep0.22em
+  %   \item So convolution is not one convenient equivariant layer among
+  %         many. Up to boundary handling it is the \alert{only} linear one
+  %   \item The forward direction is the reason to use it; the converse is
+  %         the reason there is nothing else to try
+  % \end{itemize}
+  }
+  \srcline{Bishop \& Bishop (2024), \S10.2.2; converse from
+  Cohen \& Welling (2016).}
+\end{frame}
+
+\begin{frame}{Proof, in both directions}
+  \vspace{-0.25em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.28em
+    \item \focus{1}{Forward. Write $y_i = (T_a \mathbf{x})_i = x_{i-a}$. Then
+          $\mathrm{conv}(\mathbf{y})_i = \sum_j w_j\, y_{i+j}
+          = \sum_j w_j\, x_{i-a+j}$.}
+    \item \focus{1}{That last expression is exactly
+          $\mathrm{conv}(\mathbf{x})_{i-a}$, which is
+          $T_a\,\mathrm{conv}(\mathbf{x})$ evaluated at $i$. \hfill $\square$}
+    \item \focus{1}{Converse. Commuting with $T_a$ means
+          $\bm{\Omega} T_a = T_a \bm{\Omega}$ for every $a$, and in
+          coordinates that reads
+          $\Omega_{i,\,j+a} = \Omega_{i-a,\,j}$.}
+    \item \focus{1}{Setting $a = -c$, $j=c$ and $i=r-c$ gives
+          $\Omega_{r-c,0} = \Omega_{r,\,c}$, so every entry is fixed by
+          the single index $r-c$ (or $i-j)$.}
+    \item \focus{1}{Define $w_{i-j} = \Omega_{ij}$. Then
+          $z_i = \sum_j \Omega_{ij} x_j = \sum_j w_{i-j} x_j$, a
+          convolution. \hfill $\square$}
+  \end{itemize}}
+  \vspace{-0.15em}
+  \begin{redhighlight}
+    Sharing the weights is not a trick to save memory. It is what
+    equivariance forces, and the saving is a consequence.
+  \end{redhighlight}
 \end{frame}
 
 % =====================================================================
@@ -484,39 +487,17 @@
   \hfill Prince (2023), Fig.~10.6.\par}
 \end{frame}
 
-\begin{frame}{Why depth beats a wider kernel}
-  \vspace{0.25em}
-  {\footnotesize
-  \renewcommand{\arraystretch}{1.38}
-  \begin{tabular}{@{}l@{\hspace{1.4em}}c@{\hspace{1.4em}}c@{\hspace{1.4em}}c@{}}
-    \textbf{Layer stack} & \textbf{Receptive field} &
-      \textbf{Weights ($C$ channels)} & \textbf{Nonlinearities}\\
-    one $5 \times 5$ & $5$ & $25\,C^2$ & $1$\\
-    two $3 \times 3$ & $5$ & $18\,C^2$ & $2$\\
-    one $7 \times 7$ & $7$ & $49\,C^2$ & $1$\\
-    three $3 \times 3$ & $7$ & $27\,C^2$ & $3$\\
-  \end{tabular}}
-  \vspace{0.7em}
-
-  \begin{itemize}\itemsep0.24em
-    \item Same reach, fewer weights, and more nonlinearity between the
-          input and the output
-    \item This is why $3 \times 3$ became the default kernel, and it is
-          an argument about the \emph{stack}, not the layer
-  \end{itemize}
-  \bridge{Which stacks were actually adopted, and what their filters end
-  up detecting, is Class 25.}
-\end{frame}
+   
 
 % =====================================================================
 \section{Two Dimensions}
 % =====================================================================
 
-\begin{frame}{The same operation, one index more}
+\begin{frame}{2D data: Images}
   \vspace{-0.35em}
   \[
     h^{c'}_{i,j}
-      \;=\; a\Big[\beta_{c'} + \sum_{c=1}^{C_{\mathrm{in}}}
+      \;=\; a\Big[\beta_{c'} + 
         \sum_{u=1}^{k}\sum_{v=1}^{k}
         \Omega_{c,c',u,v}\; x^{c}_{\,i+u-2,\; j+v-2}\Big]
   \]
@@ -534,6 +515,30 @@
   \end{itemize}}
   \srcline{Prince (2023), \S10.3, Eq.~10.6, Figs.~10.8--10.10;
   Bishop \& Bishop (2024), \S10.2.5.}
+\end{frame}
+
+\begin{frame}{2D Convolution}
+ \vspace{-0.5cm}
+ \begin{center}
+ \includegraphics[scale=0.55]{Class23_Convolution_Filters/B_Recreated_Figures/figs/Deep Learning.JPG}  \vspace{-0.5cm}
+\srcline{Prince (2023), \S10.3, Eq.~10.6, Fig.~10.9;
+  Bishop \& Bishop (2024), \S10.2.5.}
+  \end{center}
+\end{frame}
+
+\begin{frame}{2D Convolution with Color Images}
+ \vspace{-0.5cm}
+ \begin{center}
+ \includegraphics[scale=0.65]{Class23_Convolution_Filters/B_Recreated_Figures/figs/3D_color.JPG}  \vspace{-0.5cm}
+   \[
+    h^{c'}_{i,j}
+      \;=\; a\Big[\beta_{c'} + \sum_{c=1}^{C_{\mathrm{in}}}
+        \sum_{u=1}^{k}\sum_{v=1}^{k}
+        \Omega_{c,c',u,v}\; x^{c}_{\,i+u-2,\; j+v-2}\Big]
+  \]
+\srcline{Prince (2023), \S10.3, Eq.~10.6, Fig.~10.10;
+  Bishop \& Bishop (2024), \S10.2.5.}
+  \end{center}
 \end{frame}
 
 \begin{frame}{What a $3 \times 3$ kernel does}

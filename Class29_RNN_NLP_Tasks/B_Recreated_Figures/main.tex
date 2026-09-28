@@ -1,0 +1,953 @@
+% =====================================================================
+%  Introduction to Deep Learning — Class 29
+%  Topic (course plan): Recurrent Neural Network
+%  Subtopic (course plan): RNN for NLP tasks
+%  Sources (course plan): Jurafsky & Martin Ch. 13 (Ch. 14 in the
+%    August 2026 draft), Goodfellow Ch. 10
+%
+%  Classes 27 and 28 built the encoder-decoder and opened the cell.
+%  This class puts the cell to work on the four output structures of
+%  Jurafsky Fig. 14.15 — language modelling, sequence labelling,
+%  sequence classification, and (recalled) the encoder-decoder — and
+%  on the two ways of combining RNNs as modules: stacking and
+%  bidirectionality.  It closes with Goodfellow's reading of the RNN as
+%  a graphical model, and the recursive net as the tree-shaped cousin.
+%
+%  Every measured figure is produced by src/ on the tape of Class 27:
+%  a character-level LSTM language model trained on a short
+%  public-domain story, two taggers on a small grammar, three
+%  classifiers on a signal task.  See _shared/PLAN_Classes26_27_28_29.md.
+%
+%  Compile:  xelatex main.tex   (run twice)
+% =====================================================================
+\documentclass[aspectratio=169, 11pt]{beamer}
+
+\usetheme{metropoliscustom}
+
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\graphicspath{{figs/}{Class29_RNN_NLP_Tasks/B_Recreated_Figures/figs/}}
+\usepackage{amsmath, amssymb}
+\usepackage{bm}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing,
+                shapes.geometric, fit, backgrounds}
+\tcbuselibrary{skins}
+
+\definecolor{shc}{HTML}{341651}
+\definecolor{tealc}{HTML}{1C7293}
+\definecolor{dpc}{HTML}{800000}
+\definecolor{accc}{HTML}{B8860B}
+
+% ---- theorem environments -------------------------------------------
+\setbeamertemplate{theorems}[numbered]
+\usepackage{remreset}
+\makeatletter\@removefromreset{theorem}{section}\makeatother
+\renewcommand{\thetheorem}{\arabic{theorem}}
+\newtheorem{lemmax}[theorem]{Lemma}
+\newtheorem{propx}[theorem]{Proposition}
+\newtheorem{corx}[theorem]{Corollary}
+\newtheorem{defx}[theorem]{Definition}
+\newtheorem{thmx}[theorem]{Theorem}
+
+\newcommand{\bridge}[1]{%
+  {\scriptsize\itshape\color{mcMuted} #1\par}\vspace{0.35em}}
+
+\newcommand{\srcline}[1]{%
+  \par\vspace{0.25em}%
+  {\scriptsize\color{mcMuted}\hfill #1\par}}
+
+\newcommand{\figsource}[1]{{\scriptsize\color{mcMuted} #1}}
+\newcommand{\bos}{\langle s\rangle}
+\newcommand{\eos}{\langle/s\rangle}
+\newcommand{\figcap}[2][0.90]{%
+  \begin{center}\begin{minipage}{#1\textwidth}\centering
+    {\scriptsize\color{mcMuted} #2}
+  \end{minipage}\end{center}}
+
+% =====================================================================
+\title{Recurrent Neural Networks}
+\subtitle{RNNs for NLP Tasks}
+\author{Introduction to Deep Learning \ \textperiodcentered\ Class 29}
+\institute{}
+\date{}
+
+\footleft{Introduction to Deep Learning}
+\footright{RNNs for NLP Tasks}
+\titlelogos{}
+
+\begin{document}
+
+\maketitle
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+% =====================================================================
+\section{Introduction}
+% =====================================================================
+
+\begin{frame}{Where we are coming from}
+  \vspace{-0.3em}
+  {\scriptsize
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{@{}l@{\hspace{1.2em}}l@{}}
+    \textbf{Classes 26--28} & \textbf{what we have}\\
+    26: one cell, a state carried step to step, trained by BPTT & a reader for sequences of any length\\
+    27: two of them, a context between, attention over the states & a reader that writes a new sequence\\
+    28: a copied cell and three gates inside the cell & a reader that keeps a fact across a long wait\\
+  \end{tabular}}
+  \vspace{0.4em}
+
+  {\footnotesize
+  \begin{itemize}\itemsep0.2em
+    \item Class 26 opened with four shapes of NLP problem and solved
+          none of them; 27 solved the fourth, the encoder--decoder. The
+          other three are today: the \alert{next word}, a \alert{label per
+          token}, a \alert{label per sequence}
+    \item The cell is now fixed --- simple or gated, it makes no
+          difference to the wiring. What changes from task to task is
+          \alert{what is read out} of the states and \alert{where the loss is paid}
+    \item Then two ways of combining cells that every task can use:
+          \alert{stacking} them and running one \alert{in each direction}
+  \end{itemize}}
+  \srcline{Classes 26--28; Jurafsky \& Martin (2026), \S14.2--14.4, \S14.6.}
+\end{frame}
+
+\begin{frame}{The problems, with their examples}
+  \vspace{-0.1em}
+  {\tiny
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabular}{@{}l@{\hspace{0.8em}}l@{\hspace{0.8em}}l@{}}
+    \textbf{task} & \textbf{example} & \textbf{what is hard}\\
+    next word & \emph{So long and thanks for} $\to$ \emph{all} & $50{,}000$ choices, from all the words before\\
+    label per token & \emph{Janet will back the bill} $\to$ NNP MD VB DT NN & \emph{back}: a verb here, a noun elsewhere\\
+    label per sequence & \emph{a wonderfully warm little film} $\to$ positive & one verdict from many words, evidence anywhere\\
+    new sequence (27) & \emph{the green witch arrived} $\to$ \emph{lleg\'o la bruja verde} & its own length and order\\
+  \end{tabular}}
+  \vspace{0.4em}
+
+  {\footnotesize
+  \begin{itemize}\itemsep0.2em
+    \item Three of the four need a \alert{labelled} dataset: every word
+          tagged, every review scored. The first needs none --- the next
+          word is already in the text --- which is why it can be trained on
+          all the text there is
+    \item Two of them decide \alert{per token} and one \alert{per sequence};
+          two need the words \alert{after} the current one as much as
+          the words before
+  \end{itemize}}
+  \srcline{Jurafsky \& Martin (2026), \S14.2, \S14.3, \S14.4.2; Class 26.}
+\end{frame}
+
+\begin{frame}{Why the reader alone is not enough}
+  \vspace{0.05em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.25em
+    \item Class 26's network reads: after $t$ words it holds a state
+          $\mathbf{h}_t$ that summarises them. A state is not an answer. Each
+          task needs a \alert{read-out} --- which vectors, through which
+          softmax --- and a \alert{loss} that says where the answer is
+          checked
+    \item For the next word, the read-out is at every step and the
+          target is the text itself; for a tag, at every step against a
+          gold tag; for a verdict, once, from the last state or from all
+          of them together
+    \item The reader is also \alert{one-directional} and \alert{one layer
+          deep}: at \emph{back} it has seen nothing after \emph{back}, and
+          it computes one transformation per word
+  \end{itemize}}
+  \vspace{0.1em}
+  \begin{redhighlight}
+    Same cell, same training through time. The equipment of this class
+    is what is wired around it: read-outs, losses, a second direction, a
+    second layer.
+  \end{redhighlight}
+  \srcline{Jurafsky \& Martin (2026), \S14.2--14.4; Class 26.}
+\end{frame}
+
+\begin{frame}{The approach: one recurrent layer, four output structures}
+  \vspace{-0.3em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.1em
+    \item \alert{Language model}: read the text; at every step, a softmax
+          over the vocabulary and a loss against the next word. The text
+          supervises itself
+    \item \alert{Sequence labelling}: the same, with the tag set in place
+          of the vocabulary and gold tags as targets. One output per
+          input, aligned
+    \item \alert{Sequence classification}: read the whole text; one
+          softmax, on the last state or on a pooling of all the states,
+          and one loss at the end. Training is \alert{end to end}: the one
+          error signal goes back through the classifier and the RNN
+    \item \alert{Stacking} feeds one RNN's outputs to the next as inputs;
+          \alert{bidirectionality} runs a second RNN from the end and
+          concatenates the two states, so that the tag of \emph{back} can
+          see \emph{the bill}
+    \item The class closes with the RNN as a probabilistic model, and
+          a tree-shaped cousin of the chain
+  \end{itemize}}
+  \srcline{Jurafsky \& Martin (2026), \S14.2--14.4, \S14.6; Goodfellow et al.\ (2016), \S10.2.3, \S10.5--10.6.}
+\end{frame}
+\begin{frame}{Notation for today}
+  \vspace{-0.3em}
+  {\footnotesize
+  \renewcommand{\arraystretch}{1.22}
+  \begin{tabular}{@{}l@{\hspace{1.4em}}l@{}}
+    $\mathbf{x}_t \in \{0,1\}^{|V|}$ & one-hot token, index $w_t$; $\mathbf{e}_t = \mathbf{E}\mathbf{x}_t$ its embedding, $\mathbf{E} \in \mathbb{R}^{d \times |V|}$\\
+    $d$ & the model dimension, shared by embeddings and states\\
+    $\mathbf{h}_t = g(\mathbf{U}\mathbf{h}_{t-1} + \mathbf{W}\mathbf{e}_t)$ & the cell of Classes 27--28 (simple, or an LSTM with $\mathbf{c}_t$ inside)\\
+    $\hat{\mathbf{y}}_t = \mathrm{softmax}(\mathbf{V}\mathbf{h}_t)$ & output distribution, $\mathbf{V} \in \mathbb{R}^{|V| \times d}$; $\hat{y}_t[k]$ its $k$-th entry\\
+    $\mathbf{h}^{f}_t,\ \mathbf{h}^{b}_t$, $[\,\cdot\,;\,\cdot\,]$ & forward and backward states; concatenation\\
+    $L_{\mathrm{CE}}$, $\mathrm{PPL}$ & cross-entropy loss; perplexity\\
+    $y^{(t)}, h^{(t)}, \tau$ & Goodfellow's superscripts and length, in the graphical-model slides only\\
+  \end{tabular}}
+  \vspace{0.3em}
+
+  \begin{alertblock}{Notation used in this deck}
+    \small Jurafsky: $\mathbf{W}$ input, $\mathbf{U}$ recurrence,
+    $\mathbf{V}$ output, time as a subscript. Goodfellow swaps
+    $\mathbf{U}$ and $\mathbf{W}$ and writes $y^{(t)}$. This deck keeps
+    Jurafsky's letters, as Classes 27--28 did.
+  \end{alertblock}
+  \srcline{Jurafsky \& Martin (2026), \S14.2.1; Goodfellow et al.\ (2016), \S10.2.}
+\end{frame}
+
+% =====================================================================
+\section{The Recurrent Language Model}
+% =====================================================================
+
+\begin{frame}{The recurrent language model, recalled}
+  \vspace{-0.45em}
+  \begin{defx}[RNN language model]\label{th:lm}
+    \small
+    At each step $t$,
+    \[
+      \mathbf{e}_t = \mathbf{E}\mathbf{x}_t, \qquad
+      \mathbf{h}_t = g(\mathbf{U}\mathbf{h}_{t-1} + \mathbf{W}\mathbf{e}_t), \qquad
+      \hat{\mathbf{y}}_t = \mathrm{softmax}(\mathbf{V}\mathbf{h}_t),
+    \]
+    and $P(w_{t+1} = k \mid w_{1:t}) = \hat{y}_t[k]$. The probability of a
+    sequence is the product of its next-token probabilities,
+    $P(w_{1:n}) = \prod_{i=1}^{n} \hat{y}_i[w_i]$.
+  \end{defx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.16em
+    \item Against the $n$-gram model, the context is not $n-1$ tokens
+          but \alert{everything so far}, through $\mathbf{h}_{t-1}$; against
+          the feedforward model, not a fixed window
+    \item Shapes: $\mathbf{E}$ is $d \times |V|$, $\mathbf{U}, \mathbf{W}$ are
+          $d \times d$, $\mathbf{V}$ is $|V| \times d$: the vocabulary enters
+          only at the two ends
+  \end{itemize}}
+  \srcline{Jurafsky \& Martin (2026), Eqs.~14.4--14.9, Fig.~14.5; Mikolov et al.\ (2010).}
+\end{frame}
+
+\begin{frame}{Training by self-supervision}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[width=0.84\linewidth]{rnn_lm_training}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  In the layout of Jurafsky's Fig.~14.6: the words go in as embeddings,
+  the RNN carries the state, a softmax over the vocabulary at every step
+  is compared with the word that actually came next, and each step pays
+  $-\log \hat{y}[\text{next word}]$; the loss of the sequence is the average
+  over its $T$ words. No labels are added --- the text is its own
+  supervision --- and the input at $t+1$ is the true word, not the
+  prediction (teacher forcing, Class 27).
+  \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.6; \S14.2.2, Eqs.~14.10--14.11.\par}
+\end{frame}
+\begin{frame}{The training loss is the log of the perplexity}
+  \vspace{-0.45em}
+  \begin{propx}[Perplexity and cross-entropy]\label{th:ppl}
+    \small
+    For a text $W = w_1 \ldots w_N$, the perplexity
+    $\mathrm{PPL}(W) = P(w_1 \ldots w_N)^{-1/N}$ equals
+    $\exp$ of the mean per-token cross-entropy:
+    \[
+      \mathrm{PPL}(W) = \exp\Big( \frac{1}{N}\sum_{t=1}^{N} -\log P(w_t \mid w_{<t}) \Big).
+    \]
+  \end{propx}
+  \vspace{-0.15em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.12em
+    \item \focus{1}{Proof. By the chain rule
+          $P(w_{1:N}) = \prod_t P(w_t \mid w_{<t})$, so
+          $-\tfrac{1}{N}\log P(w_{1:N}) = \tfrac{1}{N}\sum_t -\log P(w_t \mid w_{<t})$;
+          exponentiate. \hfill $\square$}
+    \item \focus{2}{Reading: the \alert{effective number of choices} per
+          token --- $|V|$ for a uniform model, $1$ for a perfect one;
+          per-token, so texts of different lengths compare. In bits,
+          $\mathrm{PPL} = 2^{H(W)}$.}
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Jurafsky \& Martin (2026), Eqs.~3.14--3.15, 3.42, 7.58.}
+\end{frame}
+
+\begin{frame}{A language model, trained: the experiment}
+  \vspace{-0.3em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.26em
+    \item \alert{What is being tested.} That Definition~\ref{th:lm},
+          trained by nothing but the text itself, learns to predict it ---
+          and that the perplexity of Proposition~\ref{th:ppl} is how to watch it
+    \item \alert{The data.} A public-domain story of $11{,}136$
+          characters, O.\ Henry's \emph{The Gift of the Magi}, the last
+          $15\%$ held out; at \alert{character} level, $64$ symbols, so it
+          trains in a minute on Class 27's tape
+    \item \alert{The model.} An LSTM cell (Class 28) of width $64$ with a
+          tied output matrix; trained for $700$ steps on windows of $48$
+          characters, batches of $16$, Adam
+    \item \alert{Two things to look at.} (a) The perplexity on the
+          training and the held-out text every $50$ steps: both should
+          fall from $64$ (a uniform guess) towards the effective number of
+          choices per character. (b) Text sampled from the trained model
+          at three temperatures, from the prefix \emph{Della}
+    \item \alert{What to expect.} Training perplexity keeps falling;
+          held-out perplexity flattens, then rises: memorising a text
+          this small
+  \end{itemize}}
+  \srcline{Jurafsky \& Martin (2026), \S14.2.2, \S14.3.3, \S3.3; Class 27's tape.}
+\end{frame}
+
+\begin{frame}{A language model, trained: the perplexity}
+  \begin{center}
+    \includegraphics[width=0.74\linewidth]{char_lm_curve}
+  \end{center}
+  \vspace{-0.5em}
+  {\tiny\color{mcMuted}
+  Training (indigo) and held-out (maroon) perplexity by step, log scale.
+  Both fall fast from a uniform $64$; the training curve keeps going, to
+  $4.55$, while the held-out curve flattens at $7.72$ from step $450$ on:
+  from then, every further step is memorising this story rather than
+  learning English. About $7.7$ effective choices per character is what
+  this small model learned; a word model on a large corpus reaches a
+  perplexity in the tens over a vocabulary of tens of thousands.
+  \hfill Jurafsky \& Martin (2026), Eqs.~3.14, 7.58.\par}
+\end{frame}
+
+\begin{frame}{A language model, trained: the samples}
+  \begin{center}
+    \includegraphics[width=0.92\linewidth]{char_lm_samples}
+  \end{center}
+  \vspace{-0.5em}
+  {\tiny\color{mcMuted}
+  Text sampled from the trained model, character by character, from
+  the prefix \emph{Della}, at three temperatures. At $0.5$ the
+  distribution is sharpened towards its likely characters: the words are
+  mostly real, the names are the story's, and the sentences repeat. At
+  $1.0$ it is the model's own distribution: English-shaped, with invented
+  words. At $1.5$ it is flattened: spelling breaks down. None of it is in
+  the story; the model has a distribution over characters, and sampling
+  reads it out.
+  \hfill Jurafsky \& Martin (2026), \S14.3.3, \S7.6.3.\par}
+\end{frame}
+
+\begin{frame}{Generation, drawn}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[height=0.50\textheight]{generation}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  Autoregressive generation in the layout of Jurafsky's Fig.~14.9: start
+  from $\bos$; the softmax gives a distribution over the next word;
+  sample one (\emph{So}); feed its embedding back as the next input;
+  sample again (\emph{long}, \emph{and}, \ldots); stop at $\eos$ or a length
+  limit. Every word is conditioned on the words the model itself chose,
+  through the state.
+  \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.9; \S14.3.3.\par}
+\end{frame}
+\begin{frame}{Generation: sampling, one token at a time}
+  \vspace{0.05em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.28em
+    \item \alert{Autoregressive generation}: feed $\langle s\rangle$, sample a
+          word from $\hat{\mathbf{y}}_1$, feed its embedding back, sample
+          again; stop at $\langle/s\rangle$ or a length limit. The text is a
+          sample from $P(w_{1:n})$, not its mode
+    \item \alert{Temperature}: $\hat{\mathbf{y}} = \mathrm{softmax}(\mathbf{u}/\tau)$;
+          $\tau < 1$ sharpens towards the likely words, $\tau > 1$
+          flattens, $\tau \to 0$ is greedy decoding
+    \item The same loop is Class 27's decoder, started from a context
+          vector instead of $\langle s\rangle$: the priming makes it
+          translation, summarisation or an answer
+  \end{itemize}}
+  \vspace{0.1em}
+  \begin{redhighlight}
+    Class 27's greedy and beam decoding pick likely sequences; sampling
+    picks typical ones. A language model is a distribution, and both
+    are ways of reading it.
+  \end{redhighlight}
+  \srcline{Jurafsky \& Martin (2026), \S14.3.3, Fig.~14.9, \S7.6.2--7.6.3, Eq.~7.51; Shannon (1951).}
+\end{frame}
+
+\begin{frame}{Weight tying}
+  \vspace{-0.45em}
+  \begin{defx}[Tied language model]\label{th:tying}
+    \small
+    The columns of $\mathbf{E}$ and the rows of $\mathbf{V}$ are both word
+    vectors; a \alert{tied} model uses one matrix for both:
+    \[
+      \mathbf{e}_t = \mathbf{E}\mathbf{x}_t, \qquad
+      \mathbf{h}_t = g(\mathbf{U}\mathbf{h}_{t-1} + \mathbf{W}\mathbf{e}_t), \qquad
+      \hat{\mathbf{y}}_t = \mathrm{softmax}(\mathbf{E}^{\top}\mathbf{h}_t).
+    \]
+  \end{defx}
+  \vspace{-0.4em}
+  \begin{propx}[What tying saves]\label{th:tyingcount}
+    \small
+    The embedding and output layers cost $|V|\,d$ instead of $2|V|\,d$:
+    for $|V| = 50{,}000$, $d = 512$, that is $25.6$M parameters fewer,
+    with the recurrent core $2d^2$ unchanged.
+  \end{propx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.1em
+    \item \focus{1}{Proof. $\mathbf{E}$ and $\mathbf{V}$ have $|V|d$ entries
+          each; the tied model keeps one. \hfill $\square$}
+    \item \focus{2}{The score of word $k$ is $\mathbf{e}_k^{\top}\mathbf{h}_t$: the
+          next word is the one whose embedding the state points at.}
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Jurafsky \& Martin (2026), \S14.2.3, Eqs.~14.12--14.14; Press \& Wolf (2017); Inan et al.\ (2017).}
+\end{frame}
+
+% =====================================================================
+\section{Labelling and Classification}
+% =====================================================================
+
+\begin{frame}{Sequence labelling: a label at every step}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[width=0.72\linewidth]{pos_tagging}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  Part-of-speech tagging in the layout of Jurafsky's Fig.~14.7: the words
+  go in as embeddings, the RNN layer carries the state, and at every step
+  a softmax over the tag set gives a distribution whose argmax is the
+  tag --- the language model's output layer with the tag set in place of
+  the vocabulary, a cross-entropy at every step against the gold tag, and
+  a local decision at each. The histograms and tags are those of the
+  left-to-right tagger trained here on a small grammar with $9$ tags.
+  \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.7; \S14.3.1.\par}
+\end{frame}
+\begin{frame}{Sequence classification: one label per sequence}
+  \vspace{-0.55em}
+  \begin{defx}[Read-outs for classification]\label{th:readout}
+    \small
+    Run the RNN over $x_1 \ldots x_n$ and pass one vector to a
+    feedforward classifier with a softmax over the classes; three
+    choices of the vector:
+    \[
+      \mathbf{h}_n \quad\text{(the last state)}, \qquad
+      \mathbf{h}_{\mathrm{mean}} = \frac{1}{n}\sum_{i=1}^{n}\mathbf{h}_i, \qquad
+      \mathbf{h}_{\mathrm{max}} = \max_{i}\,\mathbf{h}_i \ \text{(elementwise)}.
+    \]
+  \end{defx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.16em
+    \item No loss at earlier positions: the one error signal goes
+          back through the classifier, then the RNN --- \alert{end-to-end
+          training}. $\mathbf{h}_n$ must carry the whole text; pooling
+          reads every state
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Jurafsky \& Martin (2026), \S14.3.2, Eq.~14.15, Fig.~14.8.}
+\end{frame}
+
+\begin{frame}{Sequence classification, drawn}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[width=0.72\linewidth]{seq_classification}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  In the layout of Jurafsky's Fig.~14.8. The tokens $\mathbf{x}_1 \ldots \mathbf{x}_n$
+  go into one RNN; nothing is read out until the end. The final state
+  $\mathbf{h}_n$ --- the compressed representation of the whole text --- is
+  the input to a feedforward network (the trapezoid: a hidden layer
+  that narrows) whose softmax gives the class $\hat{\mathbf{y}}$. There is one
+  loss, at the top, and its gradient goes down through the softmax and
+  the FFN, into $\mathbf{h}_n$, and back through every step of the RNN:
+  end-to-end training. Pooling replaces $\mathbf{h}_n$ by the mean or the
+  max of all the states.
+  \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.8; \S14.3.2, Eq.~14.15.\par}
+\end{frame}
+\begin{frame}{Why the read-out matters}
+  \vspace{-0.45em}
+  \begin{propx}[Gradient paths of the three read-outs]\label{th:paths}
+    \small
+    Let $L$ be the classification loss. For the last-state read-out the
+    gradient reaches $\mathbf{h}_t$ only through $n - t$ recurrent steps,
+    $\partial L/\partial\mathbf{h}_t = (\partial L/\partial\mathbf{h}_n)\,
+    \prod_{s=t+1}^{n}\mathbf{J}_s$; for the mean it also arrives directly,
+    with weight $1/n$; for the max, with weight $1$ on every coordinate
+    where $\mathbf{h}_t$ attains the max.
+  \end{propx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.12em
+    \item \focus{1}{Proof. Chain rule along the unrolled graph: the last
+          state has one path back, the recurrence; the pooled read-outs
+          add an edge from every $\mathbf{h}_t$ to the read-out, whose
+          derivative is $\tfrac{1}{n}\mathbf{I}$ or a $0$/$1$ mask.
+          \hfill $\square$}
+    \item \focus{2}{By Class 28, the product $\prod \mathbf{J}_s$ shrinks
+          geometrically for a simple cell; the direct edge does not. If
+          \emph{wonderfully warm} sits at the start of a long review, the
+          last-state classifier may never see it during training.}
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Jurafsky \& Martin (2026), \S14.3.2, in words; Class 28, Proposition~2.}
+\end{frame}
+
+% =====================================================================
+\section{Stacking and Direction}
+% =====================================================================
+
+\begin{frame}{RNNs as modules}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[width=0.98\linewidth]{stacked_bidirectional}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  Unrolled, an RNN is a feedforward graph with vectors in and out, so it
+  composes like any other layer; in the layouts of Jurafsky's
+  Figs.~14.10 and 14.11. (a) Stacked: the entire output sequence of RNN~1
+  is the input sequence of RNN~2, and so on; the top layer's outputs are
+  the final outputs. (b) Bidirectional: RNN~1 reads left to right, RNN~2
+  right to left, each reading every input; at each step their two states
+  are concatenated into one vector from which the output is computed.
+  \hfill Layouts of Jurafsky \& Martin (2026), Figs.~14.10--14.11; \S14.4.\par}
+\end{frame}
+\begin{frame}{Stacking: depth per time step}
+  \vspace{-0.45em}
+  \begin{propx}[What stacking buys]\label{th:stack}
+    \small
+    $L$ layers of width $d$ cost $O(L d^2)$ recurrent parameters, the
+    same as one layer of width $\sqrt{L}\,d$. At equal parameter count
+    the stacked network is deeper between $\mathbf{x}_t$ and $\hat{\mathbf{y}}_t$
+    ($L$ nonlinearities instead of one) and no deeper across time.
+  \end{propx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.12em
+    \item \focus{1}{Proof. Each layer has $\mathbf{U}, \mathbf{W} \in
+          \mathbb{R}^{d \times d}$, so $2d^2$ per layer; one layer of width
+          $d' = \sqrt{L}\,d$ has $2Ld^2$. The path from $\mathbf{h}^{(\ell)}_t$
+          to $\mathbf{h}^{(\ell)}_{t+1}$ is still one step. \hfill $\square$}
+    \item \focus{2}{Jurafsky: lower layers induce representations the
+          upper layers use, as early visual layers find edges for later
+          ones to find shapes; the right depth is task-specific, and the
+          training cost rises with it. Goodfellow's three ways to be deep
+          are the next slide.}
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Jurafsky \& Martin (2026), \S14.4.1; Goodfellow et al.\ (2016), \S10.5, Fig.~10.13; Graves et al.\ (2013); Pascanu et al.\ (2014).}
+\end{frame}
+
+\begin{frame}{Three ways to make an RNN deep}
+  \vspace{-0.3em}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.32\textwidth}
+      \begin{center}\includegraphics[height=0.37\textheight]{deep_a}\end{center}
+      \vspace{-0.4em}
+      {\tiny\color{mcMuted} (a) The hidden state broken into groups
+      organised hierarchically: a lower state $\mathbf{h}$ with its own
+      recurrence feeds an upper state $\mathbf{z}$ with its own --- the
+      stacked network of the previous slide. The lower layers turn the
+      raw input into a representation the upper layers work with.\par}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{center}\includegraphics[height=0.37\textheight]{deep_b}\end{center}
+      \vspace{-0.4em}
+      {\tiny\color{mcMuted} (b) Deeper computation in each of the three
+      maps: an extra layer between $\mathbf{x}$ and $\mathbf{h}$, between
+      $\mathbf{h}$ and $\mathbf{y}$, and --- shown --- on the way from
+      $\mathbf{h}_{t-1}$ back to $\mathbf{h}_t$. More capacity per step, but
+      the shortest path from one time step to the next is now two
+      layers long, which makes long dependencies harder to learn.\par}
+    \end{column}
+    \begin{column}{0.32\textwidth}
+      \begin{center}\includegraphics[height=0.37\textheight]{deep_c}\end{center}
+      \vspace{-0.4em}
+      {\tiny\color{mcMuted} (c) The same, with a skip connection: a
+      direct path from $\mathbf{h}_{t-1}$ to $\mathbf{h}_t$ beside the deeper
+      one, so the shortest path across time is one step again. Class
+      28's lesson in another form: keep one path whose factors stay
+      near one.\par}
+    \end{column}
+  \end{columns}
+  \srcline{Layout of Goodfellow et al.\ (2016), Fig.~10.13, \S10.5; Pascanu et al.\ (2014).}
+\end{frame}
+\begin{frame}{Bidirectionality: the right context}
+  \vspace{-0.45em}
+  \begin{defx}[Bidirectional RNN, as used]\label{th:bi}
+    \small
+    Two independent RNNs, concatenated at each step:
+    \[
+      \mathbf{h}^{f}_t = \mathrm{RNN}_{\mathrm{forward}}(x_1, \ldots, x_t), \qquad
+      \mathbf{h}^{b}_t = \mathrm{RNN}_{\mathrm{backward}}(x_t, \ldots, x_n), \qquad
+      \mathbf{h}_t = [\mathbf{h}^{f}_t ; \mathbf{h}^{b}_t].
+    \]
+  \end{defx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.16em
+    \item $\mathbf{h}^{f}_t$ is the ordinary state, everything to the left;
+          $\mathbf{h}^{b}_t$ the state of a network run on the reversed
+          input, everything to the right
+    \item \alert{Labelling}: the decision at $t$ sees both sides.
+          \alert{Classification}: concatenate the two final states, so the
+          beginning counts as much as the end. Needs the whole input, so
+          not for generation
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Jurafsky \& Martin (2026), \S14.4.2, Eqs.~14.16--14.18, Figs.~14.11--14.12; Schuster \& Paliwal (1997); Class 26.}
+\end{frame}
+
+\begin{frame}{Bidirectional classification, drawn}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[height=0.56\textheight]{bidir_classification}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  In the layout of Jurafsky's Fig.~14.12. Two RNNs read the same tokens,
+  one left to right and one right to left. The final state of each ---
+  $\mathbf{h}^f_n$, which has read the whole text forwards, and
+  $\mathbf{h}^b_1$, which has read it backwards --- are concatenated into one
+  vector, and that vector is the input to the feedforward classifier of
+  Fig.~14.8. A single final state favours the end of the text; with the
+  backward state beside it, the beginning counts as much as the end.
+  \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.12; \S14.4.2.\par}
+\end{frame}
+
+% =====================================================================
+\section{The RNN as a Probabilistic Model}
+% =====================================================================
+
+\begin{frame}{The RNN as a directed graphical model}
+  \vspace{-0.6em}
+  \begin{propx}[Parameter sharing over the complete graph]\label{th:gm}
+    \small
+    An RNN over $y^{(1)} \ldots y^{(\tau)}$ with no other input defines
+    $P(\mathbf{Y}) = \prod_{t=1}^{\tau} P\big(y^{(t)} \mid y^{(t-1)}, \ldots, y^{(1)}\big)$,
+    with $L = \sum_t L^{(t)}$ and $L^{(t)} = -\log P\big(y^{(t)} \mid y^{(<t)}\big)$:
+    the complete graph over the $y$'s. A tabular parametrisation with
+    $k$-valued $y$ needs $O(k^{\tau})$ parameters; the RNN's count is $O(1)$ in $\tau$.
+  \end{propx}
+  \vspace{-0.1em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.12em
+    \item \focus{1}{Proof. The chain rule of probability gives the
+          product; every conditional has the whole past as parents. The
+          table for $P(y^{(\tau)} \mid y^{(<\tau)})$ alone has $k^{\tau}$
+          entries; the RNN reuses $f$ and $\theta$ at every step.
+          \hfill $\square$}
+    \item \focus{2}{The state makes it possible: every stage has the same
+          structure and parameters; a distant $y^{(i)}$ reaches $y^{(t)}$ through $h^{(t)}$.}
+  \end{itemize}}
+  \vspace{-0.3em}
+  \srcline{Goodfellow et al.\ (2016), \S10.2.3, Eqs.~10.29--10.33.}
+\end{frame}
+
+\begin{frame}{The two graphs, drawn}
+  \vspace{-0.3em}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.50\textwidth}
+      \begin{center}\includegraphics[width=0.98\linewidth]{gm_complete}\end{center}
+      \vspace{-0.3em}
+      {\tiny\color{mcMuted} (a) The complete graph over
+      $\mathbf{y}^{(1)}, \mathbf{y}^{(2)}, \ldots$: every past observation is a
+      parent of every later one, so $\mathbf{y}^{(5)}$ has four incoming
+      edges and $\mathbf{y}^{(t)}$ has $t - 1$. The future (dotted) is not
+      yet observed. Parametrising this graph directly --- one table per
+      conditional --- needs an ever-growing number of inputs and
+      parameters per element.\par}
+    \end{column}
+    \begin{column}{0.50\textwidth}
+      \begin{center}\includegraphics[width=0.98\linewidth]{gm_state}\end{center}
+      \vspace{-0.3em}
+      {\tiny\color{mcMuted} (b) The same distribution with the state in
+      the graph: $\mathbf{h}^{(t)}$ has two parents, $\mathbf{h}^{(t-1)}$ and
+      $\mathbf{y}^{(t-1)}$, and $\mathbf{y}^{(t)}$ has one, $\mathbf{h}^{(t)}$.
+      Every stage has the same structure, so every stage can share the
+      same parameters --- $O(1)$ in the length; a distant $\mathbf{y}^{(i)}$
+      still reaches $\mathbf{y}^{(t)}$ through the states. Marginalise the
+      states out and (a) is what remains; the price is stationarity, the
+      same conditional at every $t$.\par}
+    \end{column}
+  \end{columns}
+  \srcline{Layouts of Goodfellow et al.\ (2016), Figs.~10.7--10.8; \S10.2.3.}
+\end{frame}
+\begin{frame}{Deciding when to stop}
+  \vspace{0.05em}
+  {\footnotesize
+  \begin{itemize}\itemsep0.3em
+    \item A model over sequences must also decide their \alert{length}.
+          Three mechanisms, all trained from data:
+    \item \alert{An end symbol} $\langle/s\rangle$ in the vocabulary, inserted
+          after the last token of every training sequence; sampling stops
+          when it is drawn. This is Class 27's decoder and today's language
+          model
+    \item \alert{A Bernoulli output} at every step, a sigmoid trained by
+          cross-entropy to say ``continue'' or ``halt''; works for any
+          output type, real-valued sequences included
+    \item \alert{Predict $\tau$ first}, then sample $\tau$ steps, feeding
+          $\tau$ or $\tau - t$ back as an extra input so the model knows how
+          close the end is:
+          \[
+            P(x^{(1)}, \ldots, x^{(\tau)}) = P(\tau)\,P(x^{(1)}, \ldots, x^{(\tau)} \mid \tau)
+          \]
+  \end{itemize}}
+  \srcline{Goodfellow et al.\ (2016), \S10.2.3, Eq.~10.34; Schmidhuber (2012).}
+\end{frame}
+
+\begin{frame}{The tree-shaped cousin: recursive networks}
+  \vspace{-0.4em}
+  \begin{columns}[T, onlytextwidth]
+    \begin{column}{0.50\textwidth}
+      \begin{center}\includegraphics[height=0.52\textheight]{recursive_tree}\end{center}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      \vspace{0.1em}
+      {\footnotesize
+      \begin{itemize}\itemsep0.16em
+        \item The RNN's idea --- one function, one parameter set, applied
+              repeatedly --- on a \alert{tree}: every leaf reads an input
+              through $\mathbf{V}$, every node combines its left child through
+              $\mathbf{U}$ and its right child through $\mathbf{W}$, and the root
+              gives $\mathbf{o}$, compared with $\mathbf{y}$ in the loss $L$
+        \item A variable-length sequence still maps to one vector with a
+              fixed set of weights; leaf to root is $O(\log \tau)$
+              compositions for a balanced tree, against $\tau$ for the chain
+        \item The open question is the tree: balanced, from a parser, or learned
+      \end{itemize}}
+    \end{column}
+  \end{columns}
+  \srcline{Layout of Goodfellow et al.\ (2016), Fig.~10.14, \S10.6; Pollack (1990); Socher et al.\ (2011, 2013).}
+\end{frame}
+
+% =====================================================================
+\section{Putting It Together}
+% =====================================================================
+
+\begin{frame}{Four architectures}
+  \vspace{-0.4em}
+  \begin{center}
+    \includegraphics[width=0.72\linewidth]{four_architectures}
+  \end{center}
+  \vspace{-0.6em}
+  {\tiny\color{mcMuted}
+  The four architectures of the block, in the layout of Jurafsky's
+  Fig.~14.15. (a) Sequence labelling: each input token to an output
+  token. (b) Sequence classification: the whole input to one class,
+  through the last state or a pooled one. (c) Language modelling: the
+  next token at every step. (d) Encoder--decoder: one RNN maps the input
+  to a context, another maps the context to an output sequence of its own
+  length. Each on its own, with its example, on the next four slides.
+  \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.15; \S14.6.\par}
+\end{frame}
+
+\begin{frame}{(a) Sequence labelling}
+  \vspace{-0.2em}
+  \begin{columns}[c, onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \begin{center}\includegraphics[width=\linewidth]{arch_labelling}\end{center}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      {\scriptsize
+  \begin{itemize}\itemsep0.3em
+    \item \alert{The problem}: assign a label to every token --- a
+          part-of-speech tag, a named-entity tag, a boundary mark. One
+          output per input, at the same position
+    \item \alert{The wiring}: the RNN's state at every step goes through
+          one softmax over the label set; the loss is the cross-entropy at
+          every step against the gold label; the decision at $t$ is local
+    \item \alert{The example}: \emph{Janet will back the bill} $\to$ NNP MD
+          VB DT NN. A bidirectional RNN lets the tag of \emph{back} see
+          \emph{the bill}
+      \end{itemize}}
+    \end{column}
+  \end{columns}
+  \srcline{Jurafsky \& Martin (2026), \S14.3.1, \S14.4.2, Fig.~14.7.}
+\end{frame}
+
+\begin{frame}{(b) Sequence classification}
+  \vspace{-0.2em}
+  \begin{columns}[c, onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \begin{center}\includegraphics[width=\linewidth]{arch_classification}\end{center}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      {\scriptsize
+  \begin{itemize}\itemsep0.3em
+    \item \alert{The problem}: one label for the whole sequence ---
+          the sentiment of a review, spam or not, the topic of a document
+    \item \alert{The wiring}: the RNN reads everything; the last state, or
+          the mean or max of all the states, goes through a feedforward
+          classifier and one softmax; one loss, at the end, trained end to
+          end. A bidirectional RNN concatenates the two final states
+    \item \alert{The example}: \emph{a wonderfully warm little film} $\to$
+          positive. The evidence, \emph{wonderfully warm}, sits early;
+          pooling or a backward state keeps it in reach
+      \end{itemize}}
+    \end{column}
+  \end{columns}
+  \srcline{Jurafsky \& Martin (2026), \S14.3.2, \S14.4.2, Figs.~14.8, 14.12.}
+\end{frame}
+
+\begin{frame}{(c) Language modelling}
+  \vspace{-0.2em}
+  \begin{columns}[c, onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \begin{center}\includegraphics[width=\linewidth]{arch_lm}\end{center}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      {\scriptsize
+  \begin{itemize}\itemsep0.3em
+    \item \alert{The problem}: the probability of the next token given
+          all the tokens before --- and, from it, of any text, and of
+          text the model writes itself
+    \item \alert{The wiring}: the RNN's state at every step goes through a
+          softmax over the whole vocabulary; the target at $t$ is the word
+          at $t+1$, so no labels are needed; the loss is the average
+          cross-entropy, and $\exp$ of it is the perplexity
+    \item \alert{The example}: \emph{So long and thanks for} $\to$
+          \emph{all}, with \emph{fish} and \emph{memories} as runners-up.
+          Sampling from the softmax, one word at a time, generates text
+      \end{itemize}}
+    \end{column}
+  \end{columns}
+  \srcline{Jurafsky \& Martin (2026), \S14.2, \S14.3.3, Figs.~14.6, 14.9.}
+\end{frame}
+
+\begin{frame}{(d) Encoder--decoder}
+  \vspace{-0.2em}
+  \begin{columns}[c, onlytextwidth]
+    \begin{column}{0.52\textwidth}
+      \begin{center}\includegraphics[width=\linewidth]{arch_encdec}\end{center}
+    \end{column}
+    \begin{column}{0.46\textwidth}
+      {\scriptsize
+  \begin{itemize}\itemsep0.3em
+    \item \alert{The problem}: an output sequence of its own length and
+          order --- translation, summarisation, a question's answer
+    \item \alert{The wiring} (Class 27): an encoder RNN reads the source
+          into a context; a decoder RNN, a language model primed with it,
+          writes the target one token at a time; attention gives every
+          decoder step its own context
+    \item \alert{The example}: \emph{the green witch arrived} $\to$
+          \emph{lleg\'o la bruja verde} --- the verb moves to the front, the
+          adjective after the noun
+      \end{itemize}}
+    \end{column}
+  \end{columns}
+  \srcline{Jurafsky \& Martin (2026), \S14.7--14.8, Figs.~14.17--14.22; Class 27.}
+\end{frame}
+\begin{frame}{The block, in one table}
+  \vspace{0.2em}
+  {\scriptsize
+  \renewcommand{\arraystretch}{1.36}
+  \begin{tabular}{@{}l@{\hspace{1.0em}}l@{\hspace{1.0em}}l@{\hspace{1.0em}}l@{}}
+    & \textbf{output} & \textbf{loss} & \textbf{where the gradient enters}\\
+    language model & $\hat{\mathbf{y}}_t$ over $V$, every step & $-\log \hat{y}_t[w_{t+1}]$, averaged & every step\\
+    sequence labelling & $\hat{\mathbf{y}}_t$ over tags, every step & cross-entropy, every step & every step\\
+    classification & one softmax & one cross-entropy & $\mathbf{h}_n$, or every $\mathbf{h}_t$ if pooled\\
+    encoder--decoder (27) & $\hat{\mathbf{y}}_t$ over $V$, decoder steps & teacher-forced cross-entropy & decoder steps, back through $\mathbf{c}$\\
+    \multicolumn{4}{c}{}\\[-0.9em]
+    stacked & top layer's outputs & as above & through $L$ cells per step\\
+    bidirectional & $[\mathbf{h}^{f}_t ; \mathbf{h}^{b}_t]$ & as above & from both directions\\
+  \end{tabular}}
+  \vspace{0.6em}
+
+  \begin{redhighlight}
+    One cell, three matrices, and the choice of what to read out and
+    where to pay the loss: that choice is the architecture.
+  \end{redhighlight}
+\end{frame}
+
+\begin{frame}{Takeaways}
+  \vspace{-0.1em}
+  {\scriptsize
+  \begin{enumerate}\itemsep0.24em
+    \item Four problems, one reader: what differs is the read-out and
+          where the loss is paid
+    \item A language model is an RNN whose output is the next token;
+          it trains on raw text by self-supervision, and its loss is the
+          log of its perplexity (Definition~\ref{th:lm},
+          Proposition~\ref{th:ppl})
+    \item Tying the output matrix to the embeddings removes $|V|\,d$
+          parameters (Definition~\ref{th:tying}, Proposition~\ref{th:tyingcount});
+          sampling with a temperature reads the model as a distribution
+    \item Labelling emits a distribution at every step; classification
+          reads out one vector, and pooling gives the early tokens a
+          direct path to the loss (Definition~\ref{th:readout},
+          Proposition~\ref{th:paths})
+    \item Stacking buys depth per step at the same parameter count
+          (Proposition~\ref{th:stack}); bidirectionality buys the right
+          context (Definition~\ref{th:bi})
+    \item The RNN is the complete graphical model over the sequence
+          with $O(1)$ parameters in its length (Proposition~\ref{th:gm});
+          the recursive net is the same idea on a tree
+  \end{enumerate}}
+  \vspace{-0.2em}
+  \bridge{Classes 30--31: the recurrence goes, attention stays --- the transformer.}
+\end{frame}
+
+\begin{frame}[allowframebreaks]{References}
+  \scriptsize
+  \begin{itemize}\itemsep0.3em
+    \item Jurafsky, D. \& Martin, J. H. (2026). \emph{Speech and Language
+          Processing}, 3rd ed.\ draft, August 2026. Ch.~14, \S14.2--14.4,
+          14.6; \S3.3, \S3.7; \S7.6.
+    \item Goodfellow, I., Bengio, Y. \& Courville, A. (2016). \emph{Deep
+          Learning}. MIT Press. \S10.2.3, \S10.3, \S10.5--10.6.
+    \item Mikolov, T., Karafi\'at, M., Burget, L., \v{C}ernock\'y, J. \&
+          Khudanpur, S. (2010). Recurrent neural network based language
+          model. \emph{Interspeech}.
+    \item Elman, J. L. (1990). Finding structure in time. \emph{Cognitive
+          Science}, 14, 179--211.
+    \item Press, O. \& Wolf, L. (2017). Using the output embedding to
+          improve language models. \emph{EACL}.
+    \item Inan, H., Khosravi, K. \& Socher, R. (2017). Tying word vectors
+          and word classifiers. \emph{ICLR}.
+    \item Schuster, M. \& Paliwal, K. K. (1997). Bidirectional recurrent
+          neural networks. \emph{IEEE Trans.\ Signal Processing}, 45,
+          2673--2681.
+    \item Graves, A., Mohamed, A. \& Hinton, G. (2013). Speech recognition
+          with deep recurrent neural networks. \emph{ICASSP}.
+    \item Pascanu, R., Gulcehre, C., Cho, K. \& Bengio, Y. (2014). How to
+          construct deep recurrent neural networks. \emph{ICLR}.
+    \item Graves, A. (2013). Generating sequences with recurrent neural
+          networks. arXiv:1308.0850.
+    \item Shannon, C. E. (1951). Prediction and entropy of printed
+          English. \emph{Bell System Technical Journal}, 30, 50--64.
+    \item Schmidhuber, J. (2012). Self-delimiting neural networks.
+          arXiv:1210.0118.
+    \item Pollack, J. B. (1990). Recursive distributed representations.
+          \emph{Artificial Intelligence}, 46, 77--105.
+    \item Socher, R., Lin, C. C., Ng, A. Y. \& Manning, C. D. (2011).
+          Parsing natural scenes and natural language with recursive
+          neural networks. \emph{ICML}.
+    \item Socher, R. et al.\ (2013). Recursive deep models for semantic
+          compositionality over a sentiment treebank. \emph{EMNLP}.
+    \item Henry, O. (1905). The Gift of the Magi. Public domain; the text
+          the language model is trained on.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[standout]
+  Questions?
+\end{frame}
+
+\end{document}

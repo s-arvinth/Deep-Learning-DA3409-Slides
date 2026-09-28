@@ -148,7 +148,8 @@ Results the deck states, and which are proved:
 
 Because 5 is outside both books, Class 26 has a **C variant** removing it.
 
-**Built.** Class 26 ships as A (53 pages), B (59 pages) and C (57 pages)
+**Built.** Class 26 ships as A (53 pages) and B (59 pages) — the C variant
+was dropped across all classes to stay under Overleaf's file limit —
 after the first corrections round, which added an eight-slide
 introduction — where convolution left us, what a sequence is, what NLP
 asks, why a window fails (Jurafsky's example 14.19), sharing across space
@@ -241,8 +242,8 @@ Because 3–5 rest on statements outside both books, Class 27 has a **C
 variant** that removes the convex-hull proposition, the exposure-bias
 proposition and the beam-search bound, keeping the books' own words.
 
-**Built.** Class 27 ships as A (48 pages), B (53 pages) and C (49 pages)
-after its corrections round, which gave it Class 26's shape: a four-slide
+**Built.** Class 27 ships as A (48 pages) and B (53 pages) — no C variant,
+as for 26 — after its corrections round, which gave it Class 26's shape: a four-slide
 opening (where Class 26 left us, the translation example and what moves in
 it, why the tagger/classifier/language-model/window each fail, and the
 read-then-write idea), every later slide phrased on the example, and the
@@ -336,8 +337,17 @@ Because 2 and 4 are outside both books, Class 28 has a **C variant**
 removing the gradient-norm bound and the forget-gate product, keeping the
 books' descriptions.
 
-**Built.** Class 28 ships as A (39 pages), B (41 pages) and C (39 pages).
-Its narrative order is: the power iteration and the gradient bound, with the
+**Built.** Class 28 ships as A (46 pages) and B (49 pages) after its
+corrections round — the C variant was dropped across all classes to stay
+under Overleaf's file limit. The round gave it Classes 26–27's shape: a
+four-slide opening (what 26–27 measured about the state, the running
+sentence's fact that must survive a wait, the whiteboard that is rewritten
+every step, and the notebook-with-eraser-pen-lens idea of the LSTM), the
+power method and the composition explained as experiments, the three
+paths drawn, and every book figure recreated in the deck's palette:
+Jurafsky Figs. 14.13 and 14.14, Goodfellow Figs. 10.15, 10.16, 10.17 (as a
+3-D surface computed here) and 10.18, with an explanation slide for the
+explicit memory. Its narrative order is then: the power iteration and the gradient bound, with the
 gradient by lag measured for three trained cells; skip connections, leaky
 units and echo state networks as the ancestors of the gate; the LSTM in
 equations, drawn in TikZ in the book's layout, the constant error carousel,

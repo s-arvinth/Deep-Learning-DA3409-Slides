@@ -378,7 +378,62 @@
   the same error in pixels costs the narrow box far more.
   \hfill Bishop \& Bishop (2024), Fig.~10.20.\par}
 \end{frame}
+\begin{frame}{Object Detection and Objective Function}
+    \vspace{-0.2cm}
+    \begin{tiny}
+    \begin{equation*}
+    \begin{aligned}
+    \mathcal{L} = &\; \color{blue}\lambda_{\text{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbf{1}_{ij}^{\text{obj}} \left[ (x_i - \hat{x}_i)^2 + (y_i - \hat{y}_i)^2 \right] 
+    + \lambda_{\text{coord}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbf{1}_{ij}^{\text{obj}} \left[ (\sqrt{w_i} - \sqrt{\hat{w}_i})^2 + (\sqrt{h_i} - \sqrt{\hat{h}_i})^2 \right] \\
+    &+ \color{red}\sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbf{1}_{ij}^{\text{obj}} (C_i - \hat{C}_i)^2 
+    + \lambda_{\text{noobj}} \sum_{i=0}^{S^2} \sum_{j=0}^{B} \mathbf{1}_{ij}^{\text{noobj}} (C_i - \hat{C}_i)^2 
+    + \color{teal}\sum_{i=0}^{S^2} \mathbf{1}_{i}^{\text{obj}} \sum_{c \in \text{classes}} (p_i(c) - \hat{p}_i(c))^2
+    \end{aligned}
+    \end{equation*}
+    \end{tiny}
 
+    \vspace{-0.3cm}
+    \begin{columns}[t]
+        \begin{column}{0.32\textwidth}
+            \begin{block}{\small 1. Localization Loss}
+                \tiny
+                \begin{itemize}
+                    \item Optimizes center $(x,y)$ and size $(w,h)$.
+                    \item $\sqrt{w}, \sqrt{h}$ penalize relative scale errors (small box vs. large box).
+                    \item Scaled up by $\lambda_{\text{coord}} = 5$.
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.32\textwidth}
+            \begin{block}{\small 2. Confidence Loss}
+                \tiny
+                \begin{itemize}
+                    \item Measures objectness confidence $C_i$.
+                    \item $\mathbf{1}_{ij}^{\text{obj}}$: Responsible predictor box.
+                    \item $\mathbf{1}_{ij}^{\text{noobj}}$: Background box, scaled down by $\lambda_{\text{noobj}} = 0.5$ to handle imbalance.
+                \end{itemize}
+            \end{block}
+        \end{column}
+
+        \begin{column}{0.32\textwidth}
+            \begin{block}{\small 3. Classification Loss}
+                \tiny
+                \begin{itemize}
+                    \item Calculates error for conditional class probabilities $p_i(c)$.
+                    \item Evaluated only for grid cells containing an object ($\mathbf{1}_{i}^{\text{obj}} = 1$).
+                \end{itemize}
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.2cm}
+    \begin{alertblock}{\small Key Indicators}
+        \centering \tiny
+        $\mathbf{1}_{ij}^{\text{obj}} = 1$ if predictor $j$ in cell $i$ has the highest IoU with ground truth; $\mathbf{1}_{ij}^{\text{noobj}} = 1 - \mathbf{1}_{ij}^{\text{obj}}$.
+    \end{alertblock}
+     \srcline{Redmon et al.\ (2016).}
+\end{frame}
 \begin{frame}{Sliding windows}
   \vspace{0.1em}
   {\footnotesize
@@ -477,20 +532,20 @@
   \begin{enumerate}\itemsep0.22em
     \item \focus{1}{Run the detector at every position and record the
           probability of the class at each.}
-    \item \focus{2}{Discard every box whose probability is below a
+    \item \focus{1}{Discard every box whose probability is below a
           threshold, say $0.7$.}
-    \item \focus{3}{Declare the most probable remaining box a
+    \item \focus{1}{Declare the most probable remaining box a
           detection and record it.}
-    \item \focus{4}{Discard every other box whose IoU with that
+    \item \focus{1}{Discard every other box whose IoU with that
           detection exceeds a threshold, say $0.5$: those are the same
           object seen again.}
-    \item \focus{5}{Return to step 3 with what is left, until every
+    \item \focus{1}{Return to step 3 with what is left, until every
           box is either recorded or discarded.}
   \end{enumerate}}
   \vspace{-0.1em}
   \begin{redhighlight}
-    Two thresholds, two meanings: the first says how sure to be, the
-    second says how close is the same object.
+    % Two thresholds, two meanings: the first says how sure to be, the
+    % second says how close is the same object.
   \end{redhighlight}
   \srcline{Bishop \& Bishop (2024), \S10.4.5, Fig.~10.25.}
 \end{frame}
@@ -519,11 +574,11 @@
   \vspace{0.15em}
   {\footnotesize
   \begin{itemize}\itemsep0.22em
-    \item In the original: a $448 \times 448$ input, $24$ convolutional
-          layers shrinking to $7 \times 7 \times 1024$, a fully connected
-          layer of $4096$, and one more to the output; $S = 7$, $B = 2$
-    \item The trunk was first trained on ImageNet and then fine-tuned
-          --- the transfer route of Class 19
+    % \item In the original: a $448 \times 448$ input, $24$ convolutional
+    %       layers shrinking to $7 \times 7 \times 1024$, a fully connected
+    %       layer of $4096$, and one more to the output; $S = 7$, $B = 2$
+    % \item The trunk was first trained on ImageNet and then fine-tuned
+    %       --- the transfer route of Class 19
     \item Low-confidence boxes are dropped and the rest pass through
           non-max suppression, exactly as before
   \end{itemize}}
@@ -542,30 +597,30 @@
   adapted from Redmon et al.\ (2016).}
 \end{frame}
 
-\begin{frame}{Looking only where it matters}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.30em
-    \item A scan spends the full network on every region, including
-          those unlikely to hold anything
-    \item \alert{Region proposals}: a cheap method --- a segmentation,
-          say --- nominates promising regions, and the full network runs
-          only there (R-CNN, fast R-CNN)
-    \item Let a second convolutional network make the proposals, and
-          the whole thing trains end to end (faster R-CNN)
-    \item Precise localisation by scanning alone needs finely spaced
-          windows; predicting the box \emph{relative to the window}
-          gives the precision without the positions
-  \end{itemize}}
-  \vspace{0.3em}
-  \begin{redhighlight}
-    Every detector is some mixture of the same three ingredients: a
-    classifier, a way of proposing where to look, and a box regression
-    to finish the job.
-  \end{redhighlight}
-  \srcline{Bishop \& Bishop (2024), \S10.4.6; Girshick (2015);
-  Ren et al.\ (2015).}
-\end{frame}
+% \begin{frame}{Looking only where it matters}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.30em
+%     \item A scan spends the full network on every region, including
+%           those unlikely to hold anything
+%     \item \alert{Region proposals}: a cheap method --- a segmentation,
+%           say --- nominates promising regions, and the full network runs
+%           only there (R-CNN, fast R-CNN)
+%     \item Let a second convolutional network make the proposals, and
+%           the whole thing trains end to end (faster R-CNN)
+%     \item Precise localisation by scanning alone needs finely spaced
+%           windows; predicting the box \emph{relative to the window}
+%           gives the precision without the positions
+%   \end{itemize}}
+%   \vspace{0.3em}
+%   \begin{redhighlight}
+%     Every detector is some mixture of the same three ingredients: a
+%     classifier, a way of proposing where to look, and a box regression
+%     to finish the job.
+%   \end{redhighlight}
+%   \srcline{Bishop \& Bishop (2024), \S10.4.6; Girshick (2015);
+%   Ren et al.\ (2015).}
+% \end{frame}
 
 % =====================================================================
 \section{Semantic Segmentation}
@@ -584,10 +639,10 @@
   \vspace{0.0em}
   {\footnotesize
   \begin{itemize}\itemsep0.16em
-    \item This is the \alert{equivariant} task of Class 23: translate
+    \item This is the \alert{equivariant} task: translate
           the input and the output must translate with it
     \item So the resolution that classification discarded on purpose
-          has to be recovered, and the whole section is about how
+          has to be recovered
   \end{itemize}}
   \srcline{Bishop \& Bishop (2024), \S10.5; Prince (2023), \S10.5.3.}
 \end{frame}
@@ -650,7 +705,8 @@
   {\footnotesize
   \begin{itemize}\itemsep0.22em
     \item Both are fixed functions with no parameters, like the
-          poolings they undo; Class 23 drew them as circles
+          poolings they undo; 
+          %Class 23 drew them as circles
     \item The remembered positions are the first place spatial
           information is handed \alert{across} the bottleneck instead
           of through it
@@ -678,7 +734,7 @@
 \begin{frame}{Learned up-sampling}
   \vspace{-0.3em}
   \begin{propx}[Transpose convolution]\label{th:tconv}
-    \small
+    \footnotesize
     Write a strided convolution with no padding as a matrix, so the
     down-sampled map is $\mathbf{z} = \mathbf{M}\mathbf{x}$. The up-sampling in
     which each unit of $\mathbf{z}$ multiplies the kernel into a patch of
@@ -686,19 +742,20 @@
     exactly $\mathbf{M}^{\mathsf T}\mathbf{z}$.
   \end{propx}
   \vspace{0.05em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.26em
-    \item \focus{1}{Proof. Row $r$ of $\mathbf{M}$ holds the kernel at the
-          $r$-th window position, so column $q$ of $\mathbf{M}^{\mathsf T}$
-          holds the same numbers, indexed by output pixel.}
-    \item \focus{2}{$\mathbf{M}^{\mathsf T}\mathbf{z} = \sum_r z_r\,(\text{row } r)^{\mathsf T}$
-          adds $z_r$ times the kernel at window position $r$: a
-          scattered patch per unit, overlaps summed. \hfill $\square$}
-    \item \focus{3}{The stride is now fractional --- one step in the
-          input is two in the output --- and the kernel is
-          \alert{learned}, unlike duplication. Call it neither
-          ``deconvolution'', which means something else.}
-  \end{itemize}}
+  % {\footnotesize
+  % \begin{itemize}\itemsep0.26em
+  %   \item \focus{1}{Proof. Row $r$ of $\mathbf{M}$ holds the kernel at the
+  %         $r$-th window position, so column $q$ of $\mathbf{M}^{\mathsf T}$
+  %         holds the same numbers, indexed by output pixel.}
+  %   \item \focus{2}{$\mathbf{M}^{\mathsf T}\mathbf{z} = \sum_r z_r\,(\text{row } r)^{\mathsf T}$
+  %         adds $z_r$ times the kernel at window position $r$: a
+  %         scattered patch per unit, overlaps summed. \hfill $\square$}
+  %   \item \focus{3}{The stride is now fractional --- one step in the
+  %         input is two in the output --- and the kernel is
+  %         \alert{learned}, unlike duplication. Call it neither
+  %         ``deconvolution'', which means something else.}
+  % \end{itemize}}
+  \includegraphics[scale=0.20]{Class24_Applications_Detection_Segmentation/B_Recreated_Figures/figs/Image_Report.png}
   \srcline{Bishop \& Bishop (2024), \S10.5.3, Fig.~10.30, Exercise 10.13;
   Dumoulin \& Visin (2016).}
 \end{frame}
@@ -767,26 +824,26 @@
   Prince (2023), Fig.~10.20, adapted from Noh et al.\ (2015).}
 \end{frame}
 
-\begin{frame}{What the bottleneck discards}
-  \vspace{-0.3em}
-  \begin{center}
-    \includegraphics[width=0.88\linewidth]{downup}
-  \end{center}
-  \vspace{-0.6em}
-  \begin{propx}[A bottleneck alone cannot place every pixel]\label{th:rank}
-    \small
-    A decoder that is linear in a bottleneck of $m$ units produces
-    outputs of rank at most $m$. With $m = 7 \cdot 7 \cdot 512 = 25{,}088$
-    and $224^2 = 50{,}176$ output positions, it cannot produce an
-    arbitrary per-pixel labelling; the position of an edge must come
-    from elsewhere.
-  \end{propx}
-  \vspace{-0.1em}
-  \vspace{-0.3em}
-  \figcap[0.97]{The scene of Class 23, average-pooled $L$ times and
-  brought back by bilinear up-sampling: the error grows with depth,
-  and the thin line is gone by the second level.}
-\end{frame}
+% \begin{frame}{What the bottleneck discards}
+%   \vspace{-0.3em}
+%   \begin{center}
+%     \includegraphics[width=0.88\linewidth]{downup}
+%   \end{center}
+%   \vspace{-0.6em}
+%   \begin{propx}[A bottleneck alone cannot place every pixel]\label{th:rank}
+%     \small
+%     A decoder that is linear in a bottleneck of $m$ units produces
+%     outputs of rank at most $m$. With $m = 7 \cdot 7 \cdot 512 = 25{,}088$
+%     and $224^2 = 50{,}176$ output positions, it cannot produce an
+%     arbitrary per-pixel labelling; the position of an edge must come
+%     from elsewhere.
+%   \end{propx}
+%   \vspace{-0.1em}
+%   \vspace{-0.3em}
+%   \figcap[0.97]{The scene of Class 23, average-pooled $L$ times and
+%   brought back by bilinear up-sampling: the error grows with depth,
+%   and the thin line is gone by the second level.}
+% \end{frame}
 
 \begin{frame}{The U-net}
   \begin{center}

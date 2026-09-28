@@ -1,4 +1,4 @@
-% =====================================================================
+ % =====================================================================
 %  Introduction to Deep Learning — Class 25
 %  Topic (course plan): Convolution Networks
 %  Subtopic (course plan): Convolution Filters
@@ -29,6 +29,7 @@
 \graphicspath{{figs/}{Class25_Convolution_Filters_Learned/B_Recreated_Figures/figs/}}
 \usepackage{amsmath, amssymb}
 \usepackage{bm}
+\usepackage{booktabs}
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, calc, decorations.pathreplacing,
                 shapes.geometric, fit, backgrounds}
@@ -66,7 +67,7 @@
 % =====================================================================
 \title{Convolutional Networks}
 \subtitle{Convolution Filters: What They Learn}
-\author{Introduction to Deep Learning \ \textperiodcentered\ Class 25}
+\author{Introduction to Deep Learning \ \textperiodcentered\ }
 \institute{}
 \date{}
 
@@ -197,7 +198,7 @@
     Two convolutions in succession with kernels $\mathbf{W}_1$
     ($k_1 \times k_1$) and $\mathbf{W}_2$ ($k_2 \times k_2$), with no
     nonlinearity between them, equal one convolution with a kernel of
-    size $(k_1 + k_2 - 1)^2$, namely $\mathbf{W}_2 * \mathbf{W}_1$. With a
+    size $(k_1 + k_2 - 1) \times (k_1 + k_2 - 1) $, namely $\mathbf{W}_2 * \mathbf{W}_1$. With a
     ReLU between them they are, in general, no single kernel at all.
   \end{propx}
   \vspace{0.05em}
@@ -208,11 +209,11 @@
           too, and by the converse there it is a convolution; its
           kernel is the response to a single one, which is
           $\mathbf{W}_2 * \mathbf{W}_1$. \hfill $\square$}
-    \item \focus{2}{So the stack of (a) is not only cheaper than the
+    \item \focus{1}{So the stack of (a) is not only cheaper than the
           big kernel: it is \alert{constrained} to big kernels that
           factor into small ones --- an inductive bias, in Class 18's
           sense.}
-    \item \focus{3}{The ReLU between layers is what makes depth more
+    \item \focus{1}{The ReLU between layers is what makes depth more
           than a factorisation: the second filter reads a rectified
           map, and the whole is not linear in the image.}
   \end{itemize}}
@@ -330,405 +331,492 @@
   \srcline{Bishop \& Bishop (2024), \S10.2.8; Prince (2023), \S10.5.1.}
 \end{frame}
 
+\begin{frame}{1. Overview: Encoder-Decoder Architecture}
+  \begin{itemize}
+    \item \textbf{Encoder (Downsampling):} Reduces spatial resolution to compress features and expand receptive field ($X \to Z \to X_{down}$).
+    \item \textbf{Decoder (Upsampling):} Restores spatial resolution for dense prediction tasks like segmentation or super-resolution ($X_{down} \to X_{up}$).
+  \end{itemize}
+  
+  \vspace{0.3cm}
+  \begin{block}{Core Gradient Computation Goals}
+    For any layer $l$ receiving upstream gradient $\delta^{(l)} = \frac{\partial L}{\partial Z^{(l)}}$:
+    \begin{enumerate}
+      \item \textbf{Weight Update:} $\frac{\partial L}{\partial W^{(l)}}$ to optimize parameters via SGD/Adam.
+      \item \textbf{Gradient Propagation:} $\frac{\partial L}{\partial X^{(l)}}$ to push gradients back to layer $l-1$.
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+%-------------------------------------------------------------------
+\begin{frame}{2. Standard Convolution Backpropagation}
+  \textbf{Forward Pass:} $Z_{i,j,c_{out}} = \sum_{c_{in}} \sum_{m} \sum_{n} X_{i+m, j+n, c_{in}} W_{m,n,c_{in},c_{out}} + b_{c_{out}}$
+  
+  \vspace{0.4cm}
+  \begin{columns}[T]
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Weight Gradient $\frac{\partial L}{\partial W}$}
+        $$\frac{\partial L}{\partial W_{m,n,c_{in},c_{out}}} = \sum_{i,j} X_{i+m, j+n, c_{in}} \delta_{i,j,c_{out}}$$
+        \begin{itemize}
+          \item Cross-correlation between input $X$ and upstream gradient $\delta$.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    
+    \begin{column}{0.48\textwidth}
+      \begin{block}{Input Gradient $\frac{\partial L}{\partial X}$}
+        For multi-channel tensors ($X \in \mathbb{R}^{H \times W \times C_{in}}$, $Z \in \mathbb{R}^{H' \times W' \times C_{out}}$), the roles of input and output channels swap during backpropagation:$$\frac{\partial L}{\partial X_{i,j,c_{in}}} = \sum_{c_{out}=1}^{C_{out}} \delta_{c_{out}} * \text{rot}_{180}\left(W_{c_{in}, c_{out}}\right)$$
+      \end{block}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+%-------------------------------------------------------------------
+\begin{frame}{3. Downsampling: Max Pooling \& Strided Conv}
+  \begin{block}{A. Max Pooling Backpropagation}
+    Gradients flow \textbf{only} through indices that held maximum activation during forward pass:
+    $$\frac{\partial L}{\partial X_{m,n}} = \sum_{i,j} \delta_{i,j} \cdot \mathbb{I}\left((m,n) = \arg\max \Theta_{i,j}\right)$$
+  \end{block}
+
+  \vspace{0.1cm}
+  % \begin{block}{B. Strided Convolution ($s > 1$)}
+  %   Forward stride $s > 1$ corresponds to backward \textbf{zero-padding/dilation} of $\delta$:
+  %   $$\frac{\partial L}{\partial X} = \delta^{(\uparrow s)} * \text{rot}_{180}(W)$$
+  %   where $\delta^{(\uparrow s)}$ inserts $s-1$ zeros between spatial entries of $\delta$.
+  % \end{block}
+\end{frame}
+
+%-------------------------------------------------------------------
+\begin{frame}{4. Upsampling: Interpolation \& Transposed Conv}
+  \begin{block}{A. Nearest-Neighbor / Bilinear Interpolation}
+    Sum gradients from all output positions $(m,n)$ generated by input pixel $(i,j)$:
+    $$\frac{\partial L}{\partial X_{i,j}} = \sum_{(m,n)} \delta_{m,n} \cdot \frac{\partial Y_{m,n}}{\partial X_{i,j}}$$
+  \end{block}
+
+  \vspace{0.2cm}
+  % \begin{block}{B. Transposed Convolution (Deconvolution with Stride $s$)}
+  %   Let $\tilde{X} = X^{(\uparrow s)}$ be the input dilated with $s-1$ zeros:
+  %   \begin{align*}
+  %     \text{Forward:} \quad & Y = \tilde{X} * W \\
+  %     \text{Backward w.r.t. } X: \quad & \frac{\partial L}{\partial X} = \left( \delta * \text{rot}_{180}(W) \right)_{[\text{subsample by } s]} \\
+  %     \text{Backward w.r.t. } W: \quad & \frac{\partial L}{\partial W} = \tilde{X} * \delta
+  %   \end{align*}
+  % \end{block}
+\end{frame}
+
+%-------------------------------------------------------------------
+\begin{frame}{5. Summary: Duality Between Operations}
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \textbf{Operation} & \textbf{Forward Operation} & \textbf{Backward Operation} \\
+    \midrule
+    Standard Conv & Cross-correlation ($X * W$) & Convolution with $\text{rot}_{180}(W)$ \\
+    Max Pooling & Downsample via $\max(\cdot)$ & Route gradient via $\arg\max$ mask \\
+    Strided Conv ($s>1$) & Subsample spatial layout & Dilate gradient $\delta^{(\uparrow s)} * \text{rot}_{180}(W)$ \\
+    Transposed Conv & Dilate input $\tilde{X} * W$ & Subsample convolved gradient \\
+    Interpolation & Distribute pixels & Accumulate (sum) gradients \\
+    \bottomrule
+  \end{tabular}
+\end{frame}
 % =====================================================================
-\section{What a Filter Responds To}
-% =====================================================================
+% \section{What a Filter Responds To}
+% % =====================================================================
 
-\begin{frame}{The visual cortex}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.28em
-    \item Hubel and Wiesel (1959) recorded single neurons in the visual
-          cortex of cats while showing them stimuli
-    \item \alert{Simple cells} fire for an edge at one orientation and
-          one position, and little else; their response is modelled by
-          a Gabor filter
-    \item \alert{Complex cells} combine simple cells and are partly
-          invariant to small shifts --- the role pooling plays in a
-          convolutional network
-    \item Deeper cells are more specific and more invariant still; the
-          notional \emph{grandmother cell} fires for one person at any
-          location, scale or lighting
-    \item The neocognitron (Fukushima, 1980) copied this: local
-          receptive fields, shared weights, local pooling --- but no
-          end-to-end training, since it predated backpropagation
-  \end{itemize}}
-  \srcline{Bishop \& Bishop (2024), \S10.3.1.}
-\end{frame}
+% \begin{frame}{The visual cortex}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.28em
+%     \item Hubel and Wiesel (1959) recorded single neurons in the visual
+%           cortex of cats while showing them stimuli
+%     \item \alert{Simple cells} fire for an edge at one orientation and
+%           one position, and little else; their response is modelled by
+%           a Gabor filter
+%     \item \alert{Complex cells} combine simple cells and are partly
+%           invariant to small shifts --- the role pooling plays in a
+%           convolutional network
+%     \item Deeper cells are more specific and more invariant still; the
+%           notional \emph{grandmother cell} fires for one person at any
+%           location, scale or lighting
+%     \item The neocognitron (Fukushima, 1980) copied this: local
+%           receptive fields, shared weights, local pooling --- but no
+%           end-to-end training, since it predated backpropagation
+%   \end{itemize}}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.1.}
+% \end{frame}
 
-\begin{frame}{The Gabor filter}
-  \vspace{-0.3em}
-  \begin{defx}[Gabor filter]\label{th:gabor}
-    \small
-    \[
-      G(x, y) = A \exp\!\big( -\alpha \tilde{x}^2 - \beta \tilde{y}^2 \big)
-                \sin\!\big( \omega \tilde{x} + \phi \big),
-      \qquad
-      \begin{aligned}
-        \tilde{x} &= (x - x_0)\cos\theta + (y - y_0)\sin\theta,\\
-        \tilde{y} &= -(x - x_0)\sin\theta + (y - y_0)\cos\theta.
-      \end{aligned}
-    \]
-  \end{defx}
-  \vspace{0.05em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.22em
-    \item $(\tilde{x}, \tilde{y})$ is the coordinate system rotated by
-          $\theta$, so the sine is a spatial oscillation in the
-          direction $\theta$ with frequency $\omega$ and phase $\phi$
-    \item The exponential is a decay envelope that localises the
-          filter around $(x_0, y_0)$, with rates $\alpha$ and $\beta$
-    \item Correlate an image with it and the response is large where
-          there is an edge or a stripe at that orientation and scale,
-          which is what a simple cell does
-  \end{itemize}}
-  \srcline{Bishop \& Bishop (2024), Eqs.~10.6--10.8, Fig.~10.11.}
-\end{frame}
+% \begin{frame}{The Gabor filter}
+%   \vspace{-0.3em}
+%   \begin{defx}[Gabor filter]\label{th:gabor}
+%     \small
+%     \[
+%       G(x, y) = A \exp\!\big( -\alpha \tilde{x}^2 - \beta \tilde{y}^2 \big)
+%                 \sin\!\big( \omega \tilde{x} + \phi \big),
+%       \qquad
+%       \begin{aligned}
+%         \tilde{x} &= (x - x_0)\cos\theta + (y - y_0)\sin\theta,\\
+%         \tilde{y} &= -(x - x_0)\sin\theta + (y - y_0)\cos\theta.
+%       \end{aligned}
+%     \]
+%   \end{defx}
+%   \vspace{0.05em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.22em
+%     \item $(\tilde{x}, \tilde{y})$ is the coordinate system rotated by
+%           $\theta$, so the sine is a spatial oscillation in the
+%           direction $\theta$ with frequency $\omega$ and phase $\phi$
+%     \item The exponential is a decay envelope that localises the
+%           filter around $(x_0, y_0)$, with rates $\alpha$ and $\beta$
+%     \item Correlate an image with it and the response is large where
+%           there is an edge or a stripe at that orientation and scale,
+%           which is what a simple cell does
+%   \end{itemize}}
+%   \srcline{Bishop \& Bishop (2024), Eqs.~10.6--10.8, Fig.~10.11.}
+% \end{frame}
 
-\begin{frame}{Gabor filters, drawn}
-  \begin{center}
-    \includegraphics[height=0.62\textheight]{gabor}
-  \end{center}
-  \vspace{-0.5em}
-  {\tiny\color{mcMuted}
-  Eq.~10.6 on a grid: the orientation $\theta$ runs from $0$ in the
-  top row to $\pi/2$ in the bottom row, the frequency $\omega$ from $1$
-  in the left column to $10$ in the right.
-  \hfill Bishop \& Bishop (2024), Fig.~10.11.\par}
-\end{frame}
+% \begin{frame}{Gabor filters, drawn}
+%   \begin{center}
+%     \includegraphics[height=0.62\textheight]{gabor}
+%   \end{center}
+%   \vspace{-0.5em}
+%   {\tiny\color{mcMuted}
+%   Eq.~10.6 on a grid: the orientation $\theta$ runs from $0$ in the
+%   top row to $\pi/2$ in the bottom row, the frequency $\omega$ from $1$
+%   in the left column to $10$ in the right.
+%   \hfill Bishop \& Bishop (2024), Fig.~10.11.\par}
+% \end{frame}
 
-\begin{frame}{Reading the first layer directly}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.30em
-    \item A first-layer filter is a small patch in pixel space, so its
-          weights can be shown as an image; the unit fires when the
-          inner product with the patch under it is large
-    \item The filters a network learns on ImageNet look remarkably like
-          Gabor filters
-    \item That is \emph{not} evidence that the network is a model of
-          the brain: many statistical methods recover the same filters
-          from natural images. They are a property of the
-          \alert{statistics of images}, useful to any system that looks
-          at them
-    \item Deeper layers cannot be read this way: their inputs are
-          filter responses, not pixels
-  \end{itemize}}
-  \srcline{Bishop \& Bishop (2024), \S10.3.2, Fig.~10.12;
-  Hyv\"arinen et al.\ (2009).}
-\end{frame}
+% \begin{frame}{Reading the first layer directly}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.30em
+%     \item A first-layer filter is a small patch in pixel space, so its
+%           weights can be shown as an image; the unit fires when the
+%           inner product with the patch under it is large
+%     \item The filters a network learns on ImageNet look remarkably like
+%           Gabor filters
+%     \item That is \emph{not} evidence that the network is a model of
+%           the brain: many statistical methods recover the same filters
+%           from natural images. They are a property of the
+%           \alert{statistics of images}, useful to any system that looks
+%           at them
+%     \item Deeper layers cannot be read this way: their inputs are
+%           filter responses, not pixels
+%   \end{itemize}}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.2, Fig.~10.12;
+%   Hyv\"arinen et al.\ (2009).}
+% \end{frame}
 
-\begin{frame}{The first layer of AlexNet}
-  \begin{center}
-    \includegraphics[height=0.58\textheight]{Bishop10_12}
-  \end{center}
-  \vspace{-0.3em}
-  \figcap[0.97]{Learned first-layer filters of AlexNet: oriented edges
-  and stripes at several scales, and colour-opponent blobs --- many of
-  them Gabor filters to the eye. Bishop \& Bishop (2024), Fig.~10.12.}
-\end{frame}
+% \begin{frame}{The first layer of AlexNet}
+%   \begin{center}
+%     \includegraphics[height=0.58\textheight]{Bishop10_12}
+%   \end{center}
+%   \vspace{-0.3em}
+%   \figcap[0.97]{Learned first-layer filters of AlexNet: oriented edges
+%   and stripes at several scales, and colour-opponent blobs --- many of
+%   them Gabor filters to the eye. Bishop \& Bishop (2024), Fig.~10.12.}
+% \end{frame}
 
-\begin{frame}{Deeper layers: ask what excites a unit}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.30em
-    \item Hubel and Wiesel's method, applied to a network: show it many
-          image patches and keep the ones that excite a given unit most
-    \item Doing this for a five-layer network trained on ImageNet
-          shows a \alert{hierarchy}: edges in layer 1, textures and
-          simple shapes in layer 2, parts of objects in layer 3, whole
-          objects in layer 5
-    \item The same locality and pooling that gave Class 23's growing
-          receptive field give this growing meaning
-  \end{itemize}}
-  \vspace{0.2em}
-  \begin{redhighlight}
-    Depth composes filters into detectors of larger and more abstract
-    things, layer by layer --- what the composition proposition
-    permits, and the ReLU makes non-trivial.
-  \end{redhighlight}
-  \srcline{Bishop \& Bishop (2024), \S10.3.2, Fig.~10.13;
-  Zeiler \& Fergus (2013).}
-\end{frame}
+% \begin{frame}{Deeper layers: ask what excites a unit}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.30em
+%     \item Hubel and Wiesel's method, applied to a network: show it many
+%           image patches and keep the ones that excite a given unit most
+%     \item Doing this for a five-layer network trained on ImageNet
+%           shows a \alert{hierarchy}: edges in layer 1, textures and
+%           simple shapes in layer 2, parts of objects in layer 3, whole
+%           objects in layer 5
+%     \item The same locality and pooling that gave Class 23's growing
+%           receptive field give this growing meaning
+%   \end{itemize}}
+%   \vspace{0.2em}
+%   \begin{redhighlight}
+%     Depth composes filters into detectors of larger and more abstract
+%     things, layer by layer --- what the composition proposition
+%     permits, and the ReLU makes non-trivial.
+%   \end{redhighlight}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.2, Fig.~10.13;
+%   Zeiler \& Fergus (2013).}
+% \end{frame}
 
-\begin{frame}{Patches that excite units, by layer}
-  \begin{center}
-    \includegraphics[width=0.92\linewidth]{Bishop10_13}
-  \end{center}
-  \vspace{-0.2em}
-  \figcap[0.97]{For four channels in each of layers 1, 2, 3 and 5, the
-  nine validation patches with the strongest activation, as a
-  $3 \times 3$ grid each: edges, then textures, then object parts, then
-  objects. Bishop \& Bishop (2024), Fig.~10.13, from Zeiler \& Fergus
-  (2013).}
-\end{frame}
+% \begin{frame}{Patches that excite units, by layer}
+%   \begin{center}
+%     \includegraphics[width=0.92\linewidth]{Bishop10_13}
+%   \end{center}
+%   \vspace{-0.2em}
+%   \figcap[0.97]{For four channels in each of layers 1, 2, 3 and 5, the
+%   nine validation patches with the strongest activation, as a
+%   $3 \times 3$ grid each: edges, then textures, then object parts, then
+%   objects. Bishop \& Bishop (2024), Fig.~10.13, from Zeiler \& Fergus
+%   (2013).}
+% \end{frame}
 
-\begin{frame}{Or optimise the image}
-  \vspace{-0.45em}
-  \begin{propx}[Maximise the pre-activation, not the probability]\label{th:preact}
-    \small
-    To find the image most representative of class $c$, ascend the
-    pre-activation $a^{(c)}(\mathbf{x})$, not the softmax output $p_c$:
-    \[
-      \frac{\partial \log p_c}{\partial a^{(c')}} = \delta_{cc'} - p_{c'} ,
-    \]
-    so the gradient of $p_c$ depends on every other class through the
-    denominator: it would make the image \emph{less} like a cat as much
-    as more like a dog.
-  \end{propx}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.22em
-    \item Unconstrained ascent sends pixels to infinity, so it is
-          regularised: a sum-of-squares penalty, blurring between steps,
-          clipping of pixels that contribute little
-    \item The result is a \alert{synthetic image} of the class; the
-          same gradient, pointed the other way, is an attack
-  \end{itemize}}
-  \srcline{Bishop \& Bishop (2024), \S10.3.2, Fig.~10.14;
-  Yosinski et al.\ (2015).}
-\end{frame}
+% \begin{frame}{Or optimise the image}
+%   \vspace{-0.45em}
+%   \begin{propx}[Maximise the pre-activation, not the probability]\label{th:preact}
+%     \small
+%     To find the image most representative of class $c$, ascend the
+%     pre-activation $a^{(c)}(\mathbf{x})$, not the softmax output $p_c$:
+%     \[
+%       \frac{\partial \log p_c}{\partial a^{(c')}} = \delta_{cc'} - p_{c'} ,
+%     \]
+%     so the gradient of $p_c$ depends on every other class through the
+%     denominator: it would make the image \emph{less} like a cat as much
+%     as more like a dog.
+%   \end{propx}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.22em
+%     \item Unconstrained ascent sends pixels to infinity, so it is
+%           regularised: a sum-of-squares penalty, blurring between steps,
+%           clipping of pixels that contribute little
+%     \item The result is a \alert{synthetic image} of the class; the
+%           same gradient, pointed the other way, is an attack
+%   \end{itemize}}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.2, Fig.~10.14;
+%   Yosinski et al.\ (2015).}
+% \end{frame}
 
-\begin{frame}{Synthetic images of four classes}
-  \begin{center}
-    \includegraphics[width=0.92\linewidth]{Bishop10_14}
-  \end{center}
-  \vspace{-0.2em}
-  \figcap[0.97]{Images that maximise a class output of a trained
-  classifier, four regularisation settings per class. Bishop \& Bishop
-  (2024), Fig.~10.14, from Yosinski et al.\ (2015).}
-\end{frame}
+% \begin{frame}{Synthetic images of four classes}
+%   \begin{center}
+%     \includegraphics[width=0.92\linewidth]{Bishop10_14}
+%   \end{center}
+%   \vspace{-0.2em}
+%   \figcap[0.97]{Images that maximise a class output of a trained
+%   classifier, four regularisation settings per class. Bishop \& Bishop
+%   (2024), Fig.~10.14, from Yosinski et al.\ (2015).}
+% \end{frame}
 
-% =====================================================================
-\section{Reading and Fooling a Network}
-% =====================================================================
+% % =====================================================================
+% \section{Reading and Fooling a Network}
+% % =====================================================================
 
-\begin{frame}{Saliency: which pixels decided}
-  \vspace{-0.3em}
-  \begin{defx}[Grad-CAM]\label{th:gradcam}
-    \small
-    For an input image and a class $c$, take the last convolutional
-    layer, with $M_k$ units in channel $k$ and pre-activations
-    $a^{(k)}_{ij}$. Average the gradient of the class pre-activation over
-    each channel, and weight the channels by it:
-    \[
-      \alpha_k = \frac{1}{M_k}\sum_i \sum_j
-        \frac{\partial a^{(c)}}{\partial a^{(k)}_{ij}},
-      \qquad
-      \mathbf{L} = \sum_k \alpha_k \mathbf{A}^{(k)} .
-    \]
-  \end{defx}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.22em
-    \item The last convolutional layer is the right place: it still has
-          positions, which the fully connected layers lose, and the
-          most semantic features
-    \item $\mathbf{L}$ has the size of that layer --- $14 \times 14$ for
-          VGG-16 --- and is drawn over the image as a heat map
-  \end{itemize}}
-  \vspace{-0.3em}
-  \srcline{Bishop \& Bishop (2024), \S10.3.3, Eqs.~10.9--10.10;
-  Selvaraju et al.\ (2016).}
-\end{frame}
+% \begin{frame}{Saliency: which pixels decided}
+%   \vspace{-0.3em}
+%   \begin{defx}[Grad-CAM]\label{th:gradcam}
+%     \small
+%     For an input image and a class $c$, take the last convolutional
+%     layer, with $M_k$ units in channel $k$ and pre-activations
+%     $a^{(k)}_{ij}$. Average the gradient of the class pre-activation over
+%     each channel, and weight the channels by it:
+%     \[
+%       \alpha_k = \frac{1}{M_k}\sum_i \sum_j
+%         \frac{\partial a^{(c)}}{\partial a^{(k)}_{ij}},
+%       \qquad
+%       \mathbf{L} = \sum_k \alpha_k \mathbf{A}^{(k)} .
+%     \]
+%   \end{defx}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.22em
+%     \item The last convolutional layer is the right place: it still has
+%           positions, which the fully connected layers lose, and the
+%           most semantic features
+%     \item $\mathbf{L}$ has the size of that layer --- $14 \times 14$ for
+%           VGG-16 --- and is drawn over the image as a heat map
+%   \end{itemize}}
+%   \vspace{-0.3em}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.3, Eqs.~10.9--10.10;
+%   Selvaraju et al.\ (2016).}
+% \end{frame}
 
-\begin{frame}{Grad-CAM, computed by hand}
-  \begin{center}
-    \includegraphics[width=0.96\linewidth]{gradcam}
-  \end{center}
-  \vspace{-0.6em}
-  {\tiny\color{mcMuted}
-  A two-layer network small enough to differentiate on paper: Class
-  23's four kernels with a ReLU, then one $3 \times 3$ kernel per channel
-  summed into a class map, whose sum is the score. (b) the four maps
-  and their $\alpha_k$, exact averages of a gradient written out as a
-  ReLU mask sent back through each second-layer kernel. (c) $\mathbf{L}$
-  over the image: the score depends most on horizontal edges.
-  \hfill Bishop \& Bishop (2024), Eqs.~10.9--10.10.\par}
-\end{frame}
+% \begin{frame}{Grad-CAM, computed by hand}
+%   \begin{center}
+%     \includegraphics[width=0.96\linewidth]{gradcam}
+%   \end{center}
+%   \vspace{-0.6em}
+%   {\tiny\color{mcMuted}
+%   A two-layer network small enough to differentiate on paper: Class
+%   23's four kernels with a ReLU, then one $3 \times 3$ kernel per channel
+%   summed into a class map, whose sum is the score. (b) the four maps
+%   and their $\alpha_k$, exact averages of a gradient written out as a
+%   ReLU mask sent back through each second-layer kernel. (c) $\mathbf{L}$
+%   over the image: the score depends most on horizontal edges.
+%   \hfill Bishop \& Bishop (2024), Eqs.~10.9--10.10.\par}
+% \end{frame}
 
-\begin{frame}{Saliency, on an image}
-  \begin{center}
-    \includegraphics[width=0.80\linewidth]{Bishop10_15}
-  \end{center}
-  \vspace{-0.2em}
-  \figcap[0.97]{Grad-CAM for VGG-16: the same image, and the regions
-  that decide `dog' and `cat' respectively. Bishop \& Bishop (2024),
-  Fig.~10.15, from Selvaraju et al.\ (2016).}
-\end{frame}
+% \begin{frame}{Saliency, on an image}
+%   \begin{center}
+%     \includegraphics[width=0.80\linewidth]{Bishop10_15}
+%   \end{center}
+%   \vspace{-0.2em}
+%   \figcap[0.97]{Grad-CAM for VGG-16: the same image, and the regions
+%   that decide `dog' and `cat' respectively. Bishop \& Bishop (2024),
+%   Fig.~10.15, from Selvaraju et al.\ (2016).}
+% \end{frame}
 
-\begin{frame}{Turning the gradient against the network}
-  \vspace{-0.45em}
-  \begin{defx}[Fast gradient sign method]\label{th:fgsm}
-    \small
-    With the network fixed and $E(\mathbf{x}, t)$ its error on image
-    $\mathbf{x}$ with true label $t$, move every pixel by $\epsilon$ in the
-    direction that increases the error:
-    \[
-      \mathbf{x}' = \mathbf{x} + \epsilon\, \mathrm{sign}\big( \nabla_{\mathbf{x}} E(\mathbf{x}, t) \big).
-    \]
-  \end{defx}
-  \vspace{-0.2em}
-  \begin{propx}[Why a tiny $\epsilon$ is enough]\label{th:linear}
-    \small
-    For an activation linear in the pixels,
-    $a = \mathbf{w}^{\mathsf T}\mathbf{x} + b$, the attack changes it by
-    $\epsilon \|\mathbf{w}\|_1$: one step of $\epsilon$ per pixel, added
-    over all $d$ of them, so it grows like $d$ while no single pixel
-    changes by more than $\epsilon$. Training moves the parameters to
-    reduce $E$; the attack moves the image to increase it, by the same
-    backpropagation.
-  \end{propx}
-  \vspace{-0.3em}
-  \srcline{Bishop \& Bishop (2024), \S10.3.4, Eq.~10.11;
-  Goodfellow et al.\ (2014).}
-\end{frame}
+% \begin{frame}{Turning the gradient against the network}
+%   \vspace{-0.45em}
+%   \begin{defx}[Fast gradient sign method]\label{th:fgsm}
+%     \small
+%     With the network fixed and $E(\mathbf{x}, t)$ its error on image
+%     $\mathbf{x}$ with true label $t$, move every pixel by $\epsilon$ in the
+%     direction that increases the error:
+%     \[
+%       \mathbf{x}' = \mathbf{x} + \epsilon\, \mathrm{sign}\big( \nabla_{\mathbf{x}} E(\mathbf{x}, t) \big).
+%     \]
+%   \end{defx}
+%   \vspace{-0.2em}
+%   \begin{propx}[Why a tiny $\epsilon$ is enough]\label{th:linear}
+%     \small
+%     For an activation linear in the pixels,
+%     $a = \mathbf{w}^{\mathsf T}\mathbf{x} + b$, the attack changes it by
+%     $\epsilon \|\mathbf{w}\|_1$: one step of $\epsilon$ per pixel, added
+%     over all $d$ of them, so it grows like $d$ while no single pixel
+%     changes by more than $\epsilon$. Training moves the parameters to
+%     reduce $E$; the attack moves the image to increase it, by the same
+%     backpropagation.
+%   \end{propx}
+%   \vspace{-0.3em}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.4, Eq.~10.11;
+%   Goodfellow et al.\ (2014).}
+% \end{frame}
 
-\begin{frame}{The attack, run}
-  \begin{center}
-    \includegraphics[width=0.94\linewidth]{fgsm}
-  \end{center}
-  \vspace{-0.6em}
-  {\tiny\color{mcMuted}
-  A logistic classifier on raw pixels, trained to tell a disc from a
-  square in noise of standard deviation $0.25$: $99\%$ on held-out
-  images. (a) one test image, the sign perturbation at
-  $\epsilon = 0.05$ --- a fifth of the noise already there --- and the
-  result: $p(\mathrm{square})$ falls from $0.98$ to $0.46$. (b) accuracy
-  against $\epsilon$, to chance by $0.05$; $\|\mathbf{w}\|_1 = 86$, so
-  that $\epsilon$ moves the activation by $4.3$.
-  \hfill Bishop \& Bishop (2024), Eq.~10.11.\par}
-\end{frame}
+% \begin{frame}{The attack, run}
+%   \begin{center}
+%     \includegraphics[width=0.94\linewidth]{fgsm}
+%   \end{center}
+%   \vspace{-0.6em}
+%   {\tiny\color{mcMuted}
+%   A logistic classifier on raw pixels, trained to tell a disc from a
+%   square in noise of standard deviation $0.25$: $99\%$ on held-out
+%   images. (a) one test image, the sign perturbation at
+%   $\epsilon = 0.05$ --- a fifth of the noise already there --- and the
+%   result: $p(\mathrm{square})$ falls from $0.98$ to $0.46$. (b) accuracy
+%   against $\epsilon$, to chance by $0.05$; $\|\mathbf{w}\|_1 = 86$, so
+%   that $\epsilon$ moves the activation by $4.3$.
+%   \hfill Bishop \& Bishop (2024), Eq.~10.11.\par}
+% \end{frame}
 
-\begin{frame}{What the attacks show}
-  \vspace{-0.2em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.16em
-    \item An imperceptible change makes a network misclassify with
-          high confidence
-    \item Not over-fitting: an image adapted to fool one network fools
-          others, and a \alert{linear} model is fooled the same way ---
-          Proposition~\ref{th:linear} is the reason
-    \item Physical objects can be built that a plain photograph of
-          misclassifies; simple attacks yield to simple changes in
-          training, sophisticated ones are an open problem
-  \end{itemize}}
-  \vspace{-0.2em}
-  \begin{center}
-    \includegraphics[height=0.19\textheight]{Bishop10_16}\hspace{1.2em}%
-    \includegraphics[height=0.19\textheight]{Bishop10_17}%
-  \end{center}
-  \vspace{-0.7em}
-  {\tiny\color{mcMuted}
-  Left: panda $57.7\%$ $\to$ gibbon $99.3\%$. Right: stop signs read as
-  $45$\,mph. \hfill Bishop \& Bishop (2024), Figs.~10.16--10.17, from
-  Goodfellow et al.\ (2014) and Eykholt et al.\ (2018).\par}
-\end{frame}
+% \begin{frame}{What the attacks show}
+%   \vspace{-0.2em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.16em
+%     \item An imperceptible change makes a network misclassify with
+%           high confidence
+%     \item Not over-fitting: an image adapted to fool one network fools
+%           others, and a \alert{linear} model is fooled the same way ---
+%           Proposition~\ref{th:linear} is the reason
+%     \item Physical objects can be built that a plain photograph of
+%           misclassifies; simple attacks yield to simple changes in
+%           training, sophisticated ones are an open problem
+%   \end{itemize}}
+%   \vspace{-0.2em}
+%   \begin{center}
+%     \includegraphics[height=0.19\textheight]{Bishop10_16}\hspace{1.2em}%
+%     \includegraphics[height=0.19\textheight]{Bishop10_17}%
+%   \end{center}
+%   \vspace{-0.7em}
+%   {\tiny\color{mcMuted}
+%   Left: panda $57.7\%$ $\to$ gibbon $99.3\%$. Right: stop signs read as
+%   $45$\,mph. \hfill Bishop \& Bishop (2024), Figs.~10.16--10.17, from
+%   Goodfellow et al.\ (2014) and Eykholt et al.\ (2018).\par}
+% \end{frame}
 
-\begin{frame}{DeepDream: amplify what a layer already sees}
-  \vspace{-0.3em}
-  \begin{defx}[DeepDream]\label{th:dream}
-    \small
-    Forward-propagate an image $I$ to a chosen layer, set each unit's
-    $\delta$ there equal to its own pre-activation, backpropagate to
-    the pixels, and step the image along the gradient. This ascends
-    \[
-      F(I) = \sum_{i, j, k} a_{ijk}(I)^2 ,
-    \]
-    the sum of squared pre-activations of the layer.
-  \end{defx}
-  \vspace{0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.22em
-    \item Whatever the layer responds to a little is made to respond
-          a lot: a cat-like cloud becomes more cat-like, over several
-          iterations, with smoothing and clipping to keep it plausible
-    \item From noise it makes an image entirely of the network's own
-  \end{itemize}}
-  \vspace{-0.3em}
-  \srcline{Bishop \& Bishop (2024), \S10.3.5, Eq.~10.12, Exercise 10.10;
-  Mordvintsev et al.\ (2015).}
-\end{frame}
+% \begin{frame}{DeepDream: amplify what a layer already sees}
+%   \vspace{-0.3em}
+%   \begin{defx}[DeepDream]\label{th:dream}
+%     \small
+%     Forward-propagate an image $I$ to a chosen layer, set each unit's
+%     $\delta$ there equal to its own pre-activation, backpropagate to
+%     the pixels, and step the image along the gradient. This ascends
+%     \[
+%       F(I) = \sum_{i, j, k} a_{ijk}(I)^2 ,
+%     \]
+%     the sum of squared pre-activations of the layer.
+%   \end{defx}
+%   \vspace{0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.22em
+%     \item Whatever the layer responds to a little is made to respond
+%           a lot: a cat-like cloud becomes more cat-like, over several
+%           iterations, with smoothing and clipping to keep it plausible
+%     \item From noise it makes an image entirely of the network's own
+%   \end{itemize}}
+%   \vspace{-0.3em}
+%   \srcline{Bishop \& Bishop (2024), \S10.3.5, Eq.~10.12, Exercise 10.10;
+%   Mordvintsev et al.\ (2015).}
+% \end{frame}
 
-\begin{frame}{DeepDream, on an image}
-  \begin{center}
-    \includegraphics[width=0.62\linewidth]{Bishop10_18}
-  \end{center}
-  \vspace{-0.2em}
-  \figcap[0.97]{Layer 7 (top) and layer 10 (bottom) of VGG-16, after
-  five and thirty iterations. Bishop \& Bishop (2024), Fig.~10.18.}
-\end{frame}
+% \begin{frame}{DeepDream, on an image}
+%   \begin{center}
+%     \includegraphics[width=0.62\linewidth]{Bishop10_18}
+%   \end{center}
+%   \vspace{-0.2em}
+%   \figcap[0.97]{Layer 7 (top) and layer 10 (bottom) of VGG-16, after
+%   five and thirty iterations. Bishop \& Bishop (2024), Fig.~10.18.}
+% \end{frame}
 
-% =====================================================================
-\section{Style Transfer}
-% =====================================================================
+% % =====================================================================
+% \section{Style Transfer}
+% % =====================================================================
 
-\begin{frame}{Content and style, as errors}
-  \vspace{-0.3em}
-  \begin{defx}[Neural style transfer]\label{th:style}
-    \small
-    Generate $G$ from a content image $C$ and a style image $S$ by
-    descent on $E(G) = E_{\mathrm{content}}(G, C) + E_{\mathrm{style}}(G, S)$,
-    at a convolutional layer with $I \times J$ maps and $K$ channels:
-    \[
-      E_{\mathrm{content}} = \sum_{i,j,k} \big\{ a_{ijk}(G) - a_{ijk}(C) \big\}^2,
-      \quad
-      F_{kk'} = \sum_{i,j} a_{ijk}\, a_{ijk'},
-      \quad
-      E_{\mathrm{style}} = \frac{\sum_{k,k'} \{ F_{kk'}(G) - F_{kk'}(S) \}^2}{(2IJK)^2}.
-    \]
-  \end{defx}
-  \vspace{-0.1em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.16em
-    \item Content is matched \emph{feature by feature, in place}; style
-          through the $K \times K$ \alert{style matrix} of co-occurrences,
-          summed over every location; in practice
-          $\sum_l \lambda_l E^{(l)}_{\mathrm{style}}$ over several layers
-  \end{itemize}}
-  \srcline{Bishop \& Bishop (2024), \S10.6, Eqs.~10.13--10.17;
-  Gatys et al.\ (2015).}
-\end{frame}
+% \begin{frame}{Content and style, as errors}
+%   \vspace{-0.3em}
+%   \begin{defx}[Neural style transfer]\label{th:style}
+%     \small
+%     Generate $G$ from a content image $C$ and a style image $S$ by
+%     descent on $E(G) = E_{\mathrm{content}}(G, C) + E_{\mathrm{style}}(G, S)$,
+%     at a convolutional layer with $I \times J$ maps and $K$ channels:
+%     \[
+%       E_{\mathrm{content}} = \sum_{i,j,k} \big\{ a_{ijk}(G) - a_{ijk}(C) \big\}^2,
+%       \quad
+%       F_{kk'} = \sum_{i,j} a_{ijk}\, a_{ijk'},
+%       \quad
+%       E_{\mathrm{style}} = \frac{\sum_{k,k'} \{ F_{kk'}(G) - F_{kk'}(S) \}^2}{(2IJK)^2}.
+%     \]
+%   \end{defx}
+%   \vspace{-0.1em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.16em
+%     \item Content is matched \emph{feature by feature, in place}; style
+%           through the $K \times K$ \alert{style matrix} of co-occurrences,
+%           summed over every location; in practice
+%           $\sum_l \lambda_l E^{(l)}_{\mathrm{style}}$ over several layers
+%   \end{itemize}}
+%   \srcline{Bishop \& Bishop (2024), \S10.6, Eqs.~10.13--10.17;
+%   Gatys et al.\ (2015).}
+% \end{frame}
 
-\begin{frame}{Why the style matrix forgets position}
-  \vspace{-0.45em}
-  \begin{propx}[The style matrix is translation-invariant]\label{th:gram}
-    \small
-    Translating every feature map by the same amount leaves
-    $F_{kk'} = \sum_{ij} a_{ijk} a_{ijk'}$ unchanged, up to the values
-    that leave the frame, since the sum runs over all positions and a
-    translation only permutes them. The content error has no such
-    invariance: it compares position with position.
-  \end{propx}
-  \vspace{0.05em}
-  {\footnotesize
-  \begin{itemize}\itemsep0.26em
-    \item \focus{1}{Proof. Write $a'_{ijk} = a_{i+u,\,j+v,\,k}$. Then
-          $\sum_{ij} a'_{ijk} a'_{ijk'} = \sum_{ij} a_{i+u,j+v,k}\,
-          a_{i+u,j+v,k'}$, a re-indexing of the same sum over the
-          positions that stay inside. \hfill $\square$}
-    \item \focus{2}{So $F$ measures whether a vertical edge tends to
-          come with an orange blob, \emph{wherever} the two are ---
-          which is what one means by the style of a painting.}
-    \item \focus{3}{Early layers match edges; later layers match larger
-          structures. The layer chosen decides how literal the copy is.}
-  \end{itemize}}
-  \vspace{-0.3em}
-  \srcline{Bishop \& Bishop (2024), \S10.6.}
-\end{frame}
+% \begin{frame}{Why the style matrix forgets position}
+%   \vspace{-0.45em}
+%   \begin{propx}[The style matrix is translation-invariant]\label{th:gram}
+%     \small
+%     Translating every feature map by the same amount leaves
+%     $F_{kk'} = \sum_{ij} a_{ijk} a_{ijk'}$ unchanged, up to the values
+%     that leave the frame, since the sum runs over all positions and a
+%     translation only permutes them. The content error has no such
+%     invariance: it compares position with position.
+%   \end{propx}
+%   \vspace{0.05em}
+%   {\footnotesize
+%   \begin{itemize}\itemsep0.26em
+%     \item \focus{1}{Proof. Write $a'_{ijk} = a_{i+u,\,j+v,\,k}$. Then
+%           $\sum_{ij} a'_{ijk} a'_{ijk'} = \sum_{ij} a_{i+u,j+v,k}\,
+%           a_{i+u,j+v,k'}$, a re-indexing of the same sum over the
+%           positions that stay inside. \hfill $\square$}
+%     \item \focus{2}{So $F$ measures whether a vertical edge tends to
+%           come with an orange blob, \emph{wherever} the two are ---
+%           which is what one means by the style of a painting.}
+%     \item \focus{3}{Early layers match edges; later layers match larger
+%           structures. The layer chosen decides how literal the copy is.}
+%   \end{itemize}}
+%   \vspace{-0.3em}
+%   \srcline{Bishop \& Bishop (2024), \S10.6.}
+% \end{frame}
 
-\begin{frame}{Style transfer, on an image}
-  \begin{center}
-    \includegraphics[width=0.94\linewidth]{Bishop10_32}
-  \end{center}
-  \vspace{-0.2em}
-  \figcap[0.97]{A canal scene (left) rendered in the style of Turner's
-  \emph{The Wreck of a Transport Ship} (centre) and of van Gogh's
-  \emph{The Starry Night} (right); the style image is inset. Bishop \&
-  Bishop (2024), Fig.~10.32, from Gatys et al.\ (2015).}
-\end{frame}
+% \begin{frame}{Style transfer, on an image}
+%   \begin{center}
+%     \includegraphics[width=0.94\linewidth]{Bishop10_32}
+%   \end{center}
+%   \vspace{-0.2em}
+%   \figcap[0.97]{A canal scene (left) rendered in the style of Turner's
+%   \emph{The Wreck of a Transport Ship} (centre) and of van Gogh's
+%   \emph{The Starry Night} (right); the style image is inset. Bishop \&
+%   Bishop (2024), Fig.~10.32, from Gatys et al.\ (2015).}
+% \end{frame}
 
-% =====================================================================
+% % =====================================================================
 \section{Putting It Together}
 % =====================================================================
 

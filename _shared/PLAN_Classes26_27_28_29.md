@@ -428,35 +428,33 @@ Results the deck states, and which are proved:
    $O(L d^2)$, one layer of width $\sqrt{L}\,d$ costs the same; what stacking
    buys is depth per time step, not parameters (Goodfellow §10.5).
 
-Because 4 is outside both books, Class 29 has a **C variant** removing it.
+**Built.** Class 29 ships as A (47 pages) and B (50 pages) after its
+corrections round — no C variant (dropped across all classes to stay under
+Overleaf's file limit). The round gave it Classes 26–28's shape: a
+four-slide opening (where 26–28 leave us, the four problems with their
+running examples, why the reader alone is not enough, the idea of one
+reader with four wirings), then the recurrent language model with
+Jurafsky Fig. 14.6 recreated, the character LSTM's experiment split into
+"the experiment", "the perplexity" and "the samples", generation drawn as
+Fig. 14.9, weight tying stated; labelling (Fig. 14.7 recreated with the
+tagger's real distributions) and classification (Fig. 14.8), the gradient
+paths stated; stacking and bidirectionality drawn as Figs. 14.10–14.11,
+Goodfellow Fig. 10.13 in three columns, Fig. 14.12; the graphical model
+with Goodfellow Figs. 10.7–10.8 in two columns, the recursive tree of
+Fig. 10.14 with every arrow labelled; and Fig. 14.15 followed by one slide
+per architecture with its problem, wiring and example. The measured
+slides removed in the round: weight tying tried, the three read-outs
+measured, stacking tried, bidirectionality measured. The A variant uses
+Jurafsky Figs. 14.6–14.12, 14.15 and Goodfellow Figs. 10.7, 10.8, 10.13,
+10.14, and omits the three trained-LM slides.
 
-**Built.** Class 29 ships as A (39 pages), B (40 pages) and C (39 pages).
-Its narrative order is: the recurrent language model recalled, training by
-self-supervision, perplexity as the exponent of the loss, a character LSTM
-trained and sampled, weight tying counted and tried; labelling and
-classification with the three read-outs, their gradient paths stated and
-measured; stacking and bidirectionality as modules, each tried; the RNN as
-the complete graphical model, deciding when to stop, the recursive net;
-the four architectures as the closing figure. Result 1 (perplexity as the
-exponent of the mean cross-entropy) turned out to be stated by Jurafsky
-(Eq. 3.42 and the exercise of §7.5), so C keeps it; the `char_lm` corpus is
-O. Henry's *The Gift of the Magi* (11,136 characters), and `rnn_lm_training`,
-`four_architectures` and the stacked/bidirectional layouts are drawn in the
-book's layouts rather than measured. The A variant uses Jurafsky Figs.
-14.6–14.12, 14.15 and Goodfellow Figs. 10.7, 10.8, 10.13, 10.14.
-
-Figures to build:
+Figures built (all in `B_Recreated_Figures/src/figures/`, see its README):
 
 | Figure | What it computes |
 |---|---|
-| `rnn_lm_training` | Jurafsky Fig. 14.6's layout: the unrolled LM with per-token losses on a real sentence, in our colours |
-| `char_lm` | a character-level RNN LM trained here on a small public-domain text: training and validation perplexity against epoch, and samples at three temperatures |
-| `weight_tying` | parameter count against vocabulary size with and without tying, at $d = 512$; the perplexity of the tied and untied char-LM |
-| `pos_tagging` | Fig. 14.7's layout on "Janet will back the bill", with the tag distributions from a tagger trained here on a small synthetic grammar |
-| `pooling` | last-state, mean and max pooling on a toy sentiment task where the signal sits at the start of the sequence: accuracy against length |
-| `bidirectional_labelling` | the same labelling task with a left-to-right RNN and a bidirectional one: where each fails |
-| `stacked_depth` | Fig. 14.10 / Goodfellow Fig. 10.13's layout, and the char-LM's perplexity against number of layers at matched parameter count |
-| `four_architectures` | Jurafsky Fig. 14.15 in our colours: the four output structures side by side |
+| `rnn_lm_training`, `generation`, `pos_tagging`, `seq_classification`, `stacked_bidirectional`, `bidir_classification`, `four_architectures` (+ `arch_*`) | Jurafsky Figs. 14.6, 14.9, 14.7, 14.8, 14.10–14.11, 14.12, 14.15 recreated exactly in the deck's palette; `pos_tagging` carries the tagger's measured distributions |
+| `char_lm_curve`, `char_lm_samples` | a character-level LSTM LM trained here on *The Gift of the Magi*: training and held-out perplexity by step; samples at three temperatures |
+| `deep_a/b/c`, `gm_complete`, `gm_state`, `recursive_tree` | Goodfellow Figs. 10.13, 10.7, 10.8, 10.14 recreated |
 
 ---
 

@@ -1,0 +1,93 @@
+MODIFICATIONS REQUIRED IN THE SLIDE .TEX FILES
+==============================================
+
+Apply to every deck. Do not change the slides' content, layout or order.
+Only add the source lines described below.
+
+
+1. Add these three lines to the preamble of every deck:
+
+     \newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+     \newcommand{\nosrc}{}       % this slide is not based on any external source
+     \newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+
+   All three print nothing, so the slides look exactly the same. Existing visible
+   citations (\figsource{...}, \tag{...}, References slide) can stay as they are.
+
+
+2. In every frame, add one \src line for each place in a book or paper that the
+   slide's content is taken from. If the slide is not taken from any source
+   (title, outline, recap, notation, takeaways, summary tables, the instructor's
+   own examples or derivations), add \nosrc instead.
+
+   Every frame must have at least one \src, or one \nosrc.
+
+
+3. {source} is one of these fixed keys:
+
+     bishop2024       Bishop & Bishop, Deep Learning: Foundations and Concepts, Springer 2024
+     prince2023       Prince, Understanding Deep Learning, MIT Press 2023
+     rojas1996        Rojas, Neural Networks: A Systematic Introduction, Springer 1996
+     goodfellow2016   Goodfellow, Bengio & Courville, Deep Learning, MIT Press 2016
+     jurafsky_slp3    Jurafsky & Martin, Speech and Language Processing, 3rd edition draft
+
+   For any other source (paper, notes, another book), use the first author's
+   surname and the year in lower case, e.g. cybenko1989, hornik1991. If two
+   sources share a key, add a letter: mikolov2013a, mikolov2013b.
+
+   Every key other than the five above must be defined once in the preamble of
+   each deck that uses it, with the full reference and, for books, the edition:
+
+     \srcdef{cybenko1989}{Cybenko, Approximation by superpositions of a sigmoidal
+             function, Mathematics of Control, Signals and Systems 2, 1989}
+     \srcdef{mikolov2013a}{Mikolov et al., Efficient estimation of word
+             representations in vector space, arXiv:1301.3781, 2013}
+
+   Always use the same edition of a book; numbers differ between editions.
+   For jurafsky_slp3, add one \srcdef giving the date of the draft used.
+
+
+4. {type} is one of:  chapter, section, figure, equation, table, algorithm, page
+
+
+5. {number} is the number exactly as printed in the source, with nothing else:
+   6.2.4 (not "§6.2.4"), 6.10 (not "Fig. 6.10"), 4.14 (not "(4.14)").
+   A range of equations is written with a hyphen: 6.7-6.9.
+
+
+6. Use the most specific place available:
+   figure or equation, then subsection (6.2.4), then section (6.2), then chapter.
+
+
+7. Write \src in normal code. Never inside a % comment.
+
+
+8. Only cite what the slide is based on. Do not add \src for passing mentions
+   in the slide text (e.g. "as on the surface in Fig. 2.4").
+   If a slide draws on two sources, put the main one first.
+
+
+9. If a figure on the slide was redrawn from a book figure, cite that book figure.
+   For papers without numbered sections, cite the page: the page number printed
+   on the paper, or the PDF page number if none is printed (e.g. arXiv).
+
+
+Examples:
+
+   \begin{frame}{The same picture in Bishop's notation}
+     \src{bishop2024}{figure}{6.9}
+     \src{bishop2024}{section}{6.2}
+     ...
+   \end{frame}
+
+   \begin{frame}{Universal approximation}
+     \src{prince2023}{figure}{3.5}
+     \src{prince2023}{section}{3.2}
+     \src{cybenko1989}{page}{303}
+     ...
+   \end{frame}
+
+   \begin{frame}{Takeaways}
+     \nosrc
+     ...
+   \end{frame}

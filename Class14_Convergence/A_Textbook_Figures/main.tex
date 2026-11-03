@@ -86,11 +86,26 @@
 \footright{Convergence}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{duchi2011}{J. Duchi, E. Hazan, Y. Singer, Adaptive subgradient methods for online learning and stochastic optimization, JMLR 12(61), 2121-2159, 2011}
+\srcdef{goyal2018}{P. Goyal, P. Dollar, R. Girshick, P. Noordhuis, L. Wesolowski, A. Kyrola, A. Tulloch, Y. Jia, K. He, Accurate, large minibatch SGD: training ImageNet in 1 hour, arXiv:1706.02677v2, 2018}
+\srcdef{hinton2012}{G. Hinton, N. Srivastava, K. Swersky, Neural Networks for Machine Learning, Lecture 6 slides (6a-6e; 6e: rmsprop), Coursera / University of Toronto, 2012}
+\srcdef{kingma2015}{D. P. Kingma, J. Ba, Adam: a method for stochastic optimization, ICLR 2015; arXiv:1412.6980, 2015}
+\srcdef{loshchilov2017}{I. Loshchilov, F. Hutter, SGDR: Stochastic gradient descent with warm restarts, ICLR 2017; arXiv:1608.03983, 2017}
+\srcdef{loshchilov2019}{I. Loshchilov, F. Hutter, Decoupled weight decay regularization, ICLR 2019; arXiv:1711.05101, 2019}
+\srcdef{nesterov2004}{Y. Nesterov, Introductory Lectures on Convex Optimization: A Basic Course, 1st edition, Kluwer / Springer (Applied Optimization 87), 2004}
+\srcdef{polyak1964}{B. T. Polyak, Some methods of speeding up the convergence of iteration methods, USSR Computational Mathematics and Mathematical Physics 4(5), 1-17, 1964}
+\srcdef{reddi2018}{S. J. Reddi, S. Kale, S. Kumar, On the convergence of Adam and beyond, ICLR 2018; arXiv:1904.09237, 2018}
+\srcdef{robbins1951}{H. Robbins, S. Monro, A stochastic approximation method, Annals of Mathematical Statistics 22(3), 400-407, 1951}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -99,6 +114,7 @@
 % =====================================================================
 
 \begin{frame}{From a safe step to a fast one}
+  \nosrc
   \bridge{Class 13 established that a step with $\eta < 2/L$ lowers the
   error. It said nothing about how long that takes.}
   \vspace{0.35em}
@@ -124,6 +140,7 @@
 \end{frame}
 
 \begin{frame}{Notation added today}
+  \nosrc
   \vspace{0.4em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.34}
@@ -154,6 +171,7 @@
 \end{frame}
 
 \begin{frame}{What it means for an iteration to converge}
+  \nosrc
   \begin{block}{Definition (rate of convergence)}
     Write $\delta_T = E(\mathbf{w}^{(T)}) - E(\mathbf{w}^\star)$. The iteration converges
     \alert{linearly} (or geometrically) with factor $\rho \in (0,1)$ if
@@ -172,6 +190,8 @@
 \end{frame}
 
 \begin{frame}{The tool: the quadratic model, again}
+  \src{bishop2024}{equation}{7.7-7.11}
+  \src{bishop2024}{section}{7.1.1}
   \bridge{Class 13 used the local quadratic model to say what a minimum
   looks like. The same model now says how the iterate moves on it.}
   \vspace{-0.2em}
@@ -195,6 +215,8 @@
 % =====================================================================
 
 \begin{frame}{The directions never interact}
+  \src{bishop2024}{equation}{7.24-7.29}
+  \src{bishop2024}{section}{7.3}
   \vspace{-0.25em}
   \begin{lemmax}[Decoupled contraction]\label{th:decay}
     \small
@@ -224,6 +246,7 @@
 \end{frame}
 
 \begin{frame}{What that recursion already tells us}
+  \src{bishop2024}{section}{7.3}
   \vspace{-0.2em}
   \vspace{-0.3em}
   \begin{corx}[Stability and linear convergence]\label{th:stab}
@@ -246,6 +269,7 @@
 \end{frame}
 
 \begin{frame}{The best case, stated}
+  \nosrc
   \vspace{0.3em}
   \begin{itemize}\itemsep0.45em
     \item If all $\lambda_i$ are equal then $\eta = 1/\lambda$ makes
@@ -268,6 +292,7 @@
 % =====================================================================
 
 \begin{frame}{The condition number}
+  \src{bishop2024}{section}{7.3}
   \begin{block}{Definition (condition number of the Hessian)}
     \[
       \kappa \;=\; \frac{\lambda_{\max}}{\lambda_{\min}} \;\geq\; 1 .
@@ -287,6 +312,9 @@
 \end{frame}
 
 \begin{frame}{The condition number as the shape of a contour}
+  \src{bishop2024}{figure}{7.2}
+  \src{bishop2024}{equation}{7.10-7.14}
+  \src{bishop2024}{section}{7.1.1}
   \vspace{-0.1em}
   A contour of the quadratic model is the set
   $\tfrac12\sum_i \lambda_i \alpha_i^2 = c$, where
@@ -310,6 +338,8 @@
 \end{frame}
 
 \begin{frame}{The slowest direction sets the pace}
+  \src{bishop2024}{equation}{7.30}
+  \src{bishop2024}{section}{7.3}
   \vspace{-0.2em}
   \begin{propx}[The rate at the stability limit]\label{th:slow}
     \small
@@ -334,6 +364,7 @@
 \end{frame}
 
 \begin{frame}{The best a fixed step size can do}
+  \nosrc
   \vspace{-0.2em}
   \begin{propx}[The optimal learning rate for a quadratic]\label{th:opt}
     \small
@@ -363,6 +394,7 @@
 \end{frame}
 
 \begin{frame}{The valley}
+  \src{bishop2024}{figure}{7.3}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{Bishop7_3}
   \end{center}
@@ -370,6 +402,7 @@
 \end{frame}
 
 \begin{frame}{Where the condition number comes from}
+  \nosrc
   \vspace{0.1em}
   \begin{itemize}\itemsep0.3em
     \item \alert{Input scale}: a feature measured in millimetres and one
@@ -395,6 +428,7 @@
 % =====================================================================
 
 \begin{frame}{A ball with inertia}
+  \src{bishop2024}{section}{7.3.1}
   \vspace{-0.3em}
   \begin{center}
   \begin{tikzpicture}[>=Stealth, font=\scriptsize, scale=0.99,
@@ -469,6 +503,7 @@
 \end{frame}
 
 \begin{frame}{The analogy, term by term}
+  \nosrc
   \vspace{0.45em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.42}
@@ -491,6 +526,10 @@
 \end{frame}
 
 \begin{frame}{The momentum update}
+  \src{bishop2024}{equation}{7.31}
+  \src{bishop2024}{section}{7.3.1}
+  \src{prince2023}{equation}{6.11}
+  \src{prince2023}{section}{6.3}
   \vspace{-0.3em}
   \[
     \Delta \mathbf{w}^{(\tau-1)}
@@ -513,6 +552,8 @@
 \end{frame}
 
 \begin{frame}{Why momentum helps where it helps}
+  \src{bishop2024}{equation}{7.32-7.33}
+  \src{bishop2024}{section}{7.3.1}
   \vspace{-0.25em}
   \begin{propx}[Effective learning rate on a consistent slope]\label{th:mom}
     \small
@@ -536,6 +577,8 @@
 \end{frame}
 
 \begin{frame}{The two regimes}
+  \src{bishop2024}{figure}{7.4}
+  \src{bishop2024}{figure}{7.5}
   \vspace{0.4em}
   \begin{center}
     \includegraphics[height=0.36\textheight]{Bishop7_4}\hspace{2.4em}%
@@ -549,6 +592,7 @@
 \end{frame}
 
 \begin{frame}{Momentum on the valley}
+  \src{bishop2024}{figure}{7.6}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{Bishop7_6}
   \end{center}
@@ -556,6 +600,7 @@
 \end{frame}
 
 \begin{frame}{What momentum buys, precisely}
+  \src{polyak1964}{page}{1-17}
   \vspace{-0.2em}
   \begin{propx}[Heavy-ball acceleration on a quadratic]\label{th:hb}
     \small
@@ -577,6 +622,8 @@
 \end{frame}
 
 \begin{frame}{Nesterov momentum}
+  \src{prince2023}{figure}{6.8}
+  \src{prince2023}{section}{6.3.1}
   \vspace{-0.3em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.46\textwidth}
@@ -611,6 +658,8 @@
 \end{frame}
 
 \begin{frame}{The guarantee behind the name}
+  \src{nesterov2004}{chapter}{2}
+  \src{bishop2024}{section}{7.3.1}
   \vspace{-0.2em}
   \begin{propx}[Accelerated rates]\label{th:nest}
     \small
@@ -632,6 +681,8 @@
 \end{frame}
 
 \begin{frame}{Stochastic gradient descent with momentum}
+  \src{bishop2024}{algorithm}{7.3}
+  \src{bishop2024}{section}{7.3.1}
   \vspace{0.2em}
   \begin{algox}[SGD with momentum]\label{th:algmom}
     \small
@@ -656,6 +707,9 @@
 % =====================================================================
 
 \begin{frame}{Why a fixed step size cannot finish the job}
+  \src{bishop2024}{equation}{7.35}
+  \src{bishop2024}{section}{7.3.2}
+  \src{prince2023}{section}{6.2.2}
   \bridge{Momentum attacks the condition number. It does nothing about
   the noise in a mini-batch gradient.}
   \vspace{0.3em}
@@ -677,6 +731,9 @@
 \end{frame}
 
 \begin{frame}{How fast may $\eta$ be allowed to fall?}
+  \src{robbins1951}{equation}{6}
+  \src{robbins1951}{equation}{26}
+  \src{robbins1951}{section}{3}
   \vspace{-0.35em}
   \begin{propx}[Robbins--Monro conditions]\label{th:rm}
     \small
@@ -699,6 +756,8 @@
 \end{frame}
 
 \begin{frame}{Three algebraic schedules}
+  \src{bishop2024}{equation}{7.36-7.38}
+  \src{bishop2024}{section}{7.3.2}
   \vspace{0.2em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.33\textwidth}
@@ -728,6 +787,10 @@
 \end{frame}
 
 \begin{frame}{Warm-up, and why the start is different}
+  \src{prince2023}{page}{93}
+  \src{goyal2018}{section}{2.2}
+  \src{loshchilov2017}{equation}{5}
+  \src{loshchilov2017}{section}{3}
   \vspace{0.3em}
   \begin{itemize}\itemsep0.45em
     \item Cosine annealing decays smoothly to zero over the whole run
@@ -747,6 +810,8 @@
 % =====================================================================
 
 \begin{frame}{One rate cannot serve two curvatures}
+  \src{prince2023}{section}{6.4}
+  \src{bishop2024}{section}{7.3.3}
   \bridge{Momentum and schedules both keep a single $\eta$ shared by
   every parameter. That is the next assumption to drop.}
   \vspace{0.4em}
@@ -764,6 +829,7 @@
 \end{frame}
 
 \begin{frame}{The problem, and three responses}
+  \src{prince2023}{figure}{6.9}
   \vspace{0.2em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.46\textwidth}
@@ -788,6 +854,8 @@
 \end{frame}
 
 \begin{frame}{Normalising the gradient to its sign}
+  \src{prince2023}{equation}{6.13-6.14}
+  \src{prince2023}{section}{6.4}
   \vspace{-0.3em}
   \[
     \mathbf{m}^{(\tau+1)} = \nabla E ,
@@ -810,6 +878,10 @@
 \end{frame}
 
 \begin{frame}{AdaGrad}
+  \src{bishop2024}{equation}{7.39-7.40}
+  \src{bishop2024}{section}{7.3.3}
+  \src{duchi2011}{equation}{1}
+  \src{duchi2011}{section}{1.1}
   \vspace{-0.3em}
   \[
     r^{(\tau)}_i = r^{(\tau-1)}_i
@@ -834,6 +906,9 @@
 \end{frame}
 
 \begin{frame}{RMSProp}
+  \src{bishop2024}{equation}{7.41-7.42}
+  \src{bishop2024}{section}{7.3.3}
+  \src{hinton2012}{page}{29}
   \vspace{-0.3em}
   \[
     r^{(\tau)}_i = \beta\, r^{(\tau-1)}_i
@@ -858,6 +933,9 @@
 \end{frame}
 
 \begin{frame}{Adam}
+  \src{bishop2024}{equation}{7.43-7.47}
+  \src{bishop2024}{section}{7.3.3}
+  \src{kingma2015}{algorithm}{1}
   \vspace{-0.55em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.485\textwidth}
@@ -895,6 +973,11 @@
 \end{frame}
 
 \begin{frame}{Why the bias correction is there}
+  \src{bishop2024}{equation}{7.45-7.46}
+  \src{bishop2024}{section}{7.3.3}
+  \src{kingma2015}{equation}{1-4}
+  \src{kingma2015}{section}{3}
+  \src{prince2023}{equation}{6.16}
   \vspace{-0.25em}
   \begin{propx}[The averages start too small]\label{th:bias}
     \small
@@ -926,6 +1009,8 @@
 \end{frame}
 
 \begin{frame}{Adam, as an algorithm}
+  \src{bishop2024}{algorithm}{7.4}
+  \src{bishop2024}{section}{7.3.3}
   \vspace{0.15em}
   \begin{algox}[Adam optimization]\label{th:algadam}
     \small
@@ -952,6 +1037,7 @@
 \end{frame}
 
 \begin{frame}{Momentum on a noisy problem}
+  \src{prince2023}{figure}{6.7}
   \begin{center}
     \includegraphics[height=0.55\textheight]{TrainMomentum}
   \end{center}
@@ -962,6 +1048,12 @@
 \end{frame}
 
 \begin{frame}{Four honest caveats}
+  \src{prince2023}{page}{93-94}
+  \src{bishop2024}{section}{7.3.3}
+  \src{reddi2018}{section}{3}
+  \src{reddi2018}{section}{4}
+  \src{loshchilov2019}{algorithm}{2}
+  \src{loshchilov2019}{section}{2}
   \begin{itemize}\itemsep0.3em
     \item The per-parameter argument assumes the principal curvature
           directions are \alert{aligned with the axes} of weight space
@@ -984,6 +1076,7 @@
 % =====================================================================
 
 \begin{frame}{What each method actually fixes}
+  \nosrc
   \vspace{0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.38}
@@ -1007,6 +1100,7 @@
 \end{frame}
 
 \begin{frame}{The hyperparameters of the training algorithm}
+  \src{prince2023}{section}{6.5}
   \vspace{0.35em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.40}
@@ -1031,6 +1125,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{0.15em}
   \vspace{-0.15em}
   {\footnotesize
@@ -1059,6 +1154,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \begin{itemize}\itemsep0.26em
@@ -1085,6 +1181,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

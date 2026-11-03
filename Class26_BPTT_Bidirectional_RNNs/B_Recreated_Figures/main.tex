@@ -76,11 +76,20 @@
 \footright{BPTT and Bidirectional RNNs}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{elman1990}{Elman, J. L., Finding structure in time, Cognitive Science 14, 179-211, 1990}
+\srcdef{jurafsky_slp3}{Jurafsky \& Martin, Speech and Language Processing, 3rd edition draft of August 19, 2026, https://web.stanford.edu/~jurafsky/slp3/}
+\srcdef{schuster1997}{Schuster, M. \& Paliwal, K. K., Bidirectional recurrent neural networks, IEEE Trans. Signal Processing 45, 2673-2681, 1997}
+\srcdef{werbos1990}{Werbos, P. J., Backpropagation through time: what it does and how to do it, Proceedings of the IEEE 78, 1550-1560, 1990}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -89,6 +98,8 @@
 % =====================================================================
 
 \begin{frame}{Where we are coming from}
+  \src{goodfellow2016}{chapter}{10}
+  \src{jurafsky_slp3}{chapter}{14}
   \vspace{-0.3em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -115,6 +126,8 @@
 \end{frame}
 
 \begin{frame}{The data: sequences}
+  \src{jurafsky_slp3}{chapter}{14}
+  \src{goodfellow2016}{chapter}{10}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -138,6 +151,10 @@
 \end{frame}
 
 \begin{frame}{What natural language processing asks of a model}
+  \src{jurafsky_slp3}{figure}{14.15}
+  \src{jurafsky_slp3}{section}{14.6}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.3}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.88\linewidth]{sequence_tasks}
@@ -155,6 +172,9 @@
 \end{frame}
 
 \begin{frame}{NLP, in one paragraph}
+  \src{jurafsky_slp3}{chapter}{14}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.3}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -179,6 +199,8 @@
 \end{frame}
 
 \begin{frame}{Why the tools we have fall short}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.5}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.78\linewidth]{window_fails}
@@ -196,6 +218,8 @@
 \end{frame}
 
 \begin{frame}{The idea: from sharing across space to sharing across time}
+  \src{goodfellow2016}{chapter}{10}
+  \src{goodfellow2016}{section}{10.1}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.74\linewidth]{space_vs_time}
@@ -214,6 +238,9 @@
 \end{frame}
 
 \begin{frame}{How the recurrent network reads the sentence}
+  \src{jurafsky_slp3}{section}{14.1}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{goodfellow2016}{section}{10.1}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.72\linewidth]{running_example}
@@ -232,6 +259,7 @@
 \end{frame}
 
 \begin{frame}{The block ahead, and where today sits}
+  \nosrc
   \vspace{0.1em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -260,6 +288,9 @@
 % =====================================================================
 
 \begin{frame}{A network with a cycle}
+  \src{jurafsky_slp3}{section}{14.1}
+  \src{goodfellow2016}{section}{10.1}
+  \src{elman1990}{page}{182-184}
   \vspace{-0.2em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -280,6 +311,7 @@
   \srcline{Jurafsky \& Martin (2026), \S14.1; Goodfellow et al.\ (2016), \S10.1; Elman (1990).}
 \end{frame}
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{-0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.22}
@@ -304,6 +336,10 @@
 \end{frame}
 
 \begin{frame}{The simple recurrent network}
+  \src{jurafsky_slp3}{equation}{14.1-14.3}
+  \src{jurafsky_slp3}{section}{14.1.1}
+  \src{goodfellow2016}{equation}{10.8-10.11}
+  \src{goodfellow2016}{section}{10.2}
   \vspace{-0.45em}
   \begin{defx}[Simple recurrent network]\label{th:rnn}
     \small
@@ -333,6 +369,10 @@
 \end{frame}
 
 \begin{frame}{Each term, in words}
+  \src{jurafsky_slp3}{section}{14.1}
+  \src{jurafsky_slp3}{section}{14.1.1}
+  \src{goodfellow2016}{section}{10.1}
+  \src{goodfellow2016}{section}{10.2}
   \vspace{-0.1em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -359,6 +399,8 @@
 \end{frame}
 
 \begin{frame}{The simple recurrent network, drawn}
+  \src{jurafsky_slp3}{figure}{14.1}
+  \src{jurafsky_slp3}{section}{14.1}
   \begin{center}
     \includegraphics[width=0.52\linewidth]{elman_network}
   \end{center}
@@ -373,6 +415,8 @@
 \end{frame}
 
 \begin{frame}{The same network, as one feedforward step}
+  \src{jurafsky_slp3}{figure}{14.2}
+  \src{jurafsky_slp3}{section}{14.1}
   \begin{center}
     \includegraphics[width=0.44\linewidth]{elman_feedforward}
   \end{center}
@@ -388,6 +432,8 @@
 \end{frame}
 
 \begin{frame}{Why unfold}
+  \src{goodfellow2016}{section}{10.1}
+  \src{jurafsky_slp3}{section}{14.1.2}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -408,6 +454,8 @@
   \srcline{Goodfellow et al.\ (2016), \S10.1; Jurafsky \& Martin (2026), \S14.1.2.}
 \end{frame}
 \begin{frame}{Unfolding, stated}
+  \src{goodfellow2016}{equation}{10.1-10.7}
+  \src{goodfellow2016}{section}{10.1}
   \vspace{-0.45em}
   \begin{propx}[Unfolding the recurrence]\label{th:unfold}
     \small
@@ -433,6 +481,10 @@
 \end{frame}
 
 \begin{frame}{Unfolding, drawn}
+  \src{goodfellow2016}{figure}{10.2}
+  \src{goodfellow2016}{figure}{10.3}
+  \src{goodfellow2016}{section}{10.1}
+  \src{goodfellow2016}{section}{10.2}
   \begin{center}
     \includegraphics[width=0.78\linewidth]{unfolding}
   \end{center}
@@ -445,6 +497,10 @@
 \end{frame}
 
 \begin{frame}{Three design patterns}
+  \src{goodfellow2016}{figure}{10.3}
+  \src{goodfellow2016}{figure}{10.4}
+  \src{goodfellow2016}{figure}{10.5}
+  \src{goodfellow2016}{section}{10.2}
   \begin{center}
     \includegraphics[width=0.92\linewidth]{design_patterns}
   \end{center}
@@ -461,6 +517,9 @@
 \end{frame}
 
 \begin{frame}{The loss of a sequence}
+  \src{goodfellow2016}{equation}{10.12-10.14}
+  \src{goodfellow2016}{section}{10.2}
+  \src{jurafsky_slp3}{section}{14.1.2}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.3em
@@ -490,6 +549,8 @@
 % =====================================================================
 
 \begin{frame}{Why two gradients}
+  \src{goodfellow2016}{section}{10.2.2}
+  \src{jurafsky_slp3}{section}{14.1.2}
   \vspace{-0.25em}
   {\footnotesize
   \begin{itemize}\itemsep0.2em
@@ -515,6 +576,10 @@
   \srcline{Goodfellow et al.\ (2016), \S10.2.2; Jurafsky \& Martin (2026), \S14.1.2; Class 11.}
 \end{frame}
 \begin{frame}{The gradient on the states}
+  \src{goodfellow2016}{equation}{10.17-10.21}
+  \src{goodfellow2016}{section}{10.2.2}
+  \src{jurafsky_slp3}{section}{14.1.2}
+  \src{werbos1990}{section}{III}
   \vspace{-0.45em}
   \begin{thmx}[Back-propagation through time, I]\label{th:bptt}
     \small
@@ -548,6 +613,10 @@
 \end{frame}
 
 \begin{frame}{The two passes, drawn}
+  \src{jurafsky_slp3}{figure}{14.4}
+  \src{goodfellow2016}{equation}{10.20}
+  \src{jurafsky_slp3}{section}{14.1.2}
+  \src{goodfellow2016}{section}{10.2.2}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{bptt_flow}
@@ -561,6 +630,8 @@
   \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.4; Goodfellow et al.\ (2016), Eq.~10.20.\par}
 \end{frame}
 \begin{frame}{The gradient on the parameters}
+  \src{goodfellow2016}{equation}{10.22-10.28}
+  \src{goodfellow2016}{section}{10.2.2}
   \vspace{-0.45em}
   \begin{thmx}[Back-propagation through time, II]\label{th:bptt2}
     \small
@@ -591,6 +662,8 @@
 \end{frame}
 
 \begin{frame}{The theorem, checked: the experiment}
+  \src{goodfellow2016}{equation}{10.17-10.28}
+  \src{goodfellow2016}{section}{10.2.2}
   \vspace{-0.15em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -618,6 +691,8 @@
 \end{frame}
 
 \begin{frame}{The theorem, checked: the result}
+  \src{goodfellow2016}{equation}{10.17-10.28}
+  \src{goodfellow2016}{section}{10.2.2}
   \begin{center}
     \includegraphics[width=0.78\linewidth]{bptt_check}
   \end{center}
@@ -634,6 +709,8 @@
   \hfill Goodfellow et al.\ (2016), Eqs.~10.17--10.28.\par}
 \end{frame}
 \begin{frame}{Where the gradient comes from}
+  \src{goodfellow2016}{equation}{10.21}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.45em}
   \begin{corx}[The gradient across a lag is a product]\label{th:product}
     \small
@@ -664,6 +741,9 @@
 \end{frame}
 
 \begin{frame}{The terms of the sum: the experiment}
+  \src{goodfellow2016}{equation}{10.20}
+  \src{goodfellow2016}{equation}{10.26}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.15em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -692,6 +772,9 @@
 \end{frame}
 
 \begin{frame}{The terms of the sum: the result}
+  \src{goodfellow2016}{equation}{10.20}
+  \src{goodfellow2016}{equation}{10.26}
+  \src{goodfellow2016}{section}{10.7}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{time_contributions}
   \end{center}
@@ -715,6 +798,8 @@
 % =====================================================================
 
 \begin{frame}{Two passes, sequential}
+  \src{goodfellow2016}{section}{10.2}
+  \src{jurafsky_slp3}{section}{14.1.2}
   \vspace{-0.45em}
   \begin{propx}[Cost of the unrolled graph]\label{th:cost}
     \small
@@ -743,6 +828,7 @@
 \end{frame}
 
 \begin{frame}{The cost, measured}
+  \src{goodfellow2016}{section}{10.2}
   \begin{center}
     \includegraphics[width=0.84\linewidth]{cost}
   \end{center}
@@ -757,6 +843,7 @@
 \end{frame}
 
 \begin{frame}{Truncation}
+  \src{jurafsky_slp3}{section}{14.1.2}
   \vspace{-0.45em}
   \begin{propx}[What truncated BPTT removes]\label{th:trunc}
     \small
@@ -788,6 +875,8 @@
 % =====================================================================
 
 \begin{frame}{Why a second direction}
+  \src{goodfellow2016}{section}{10.3}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -809,6 +898,10 @@
   \srcline{Goodfellow et al.\ (2016), \S10.3; Jurafsky \& Martin (2026), \S14.4.2; Class 29.}
 \end{frame}
 \begin{frame}{Reading the sequence both ways}
+  \src{jurafsky_slp3}{equation}{14.16-14.18}
+  \src{jurafsky_slp3}{section}{14.4.2}
+  \src{goodfellow2016}{section}{10.3}
+  \src{schuster1997}{section}{II.B}
   \vspace{-0.45em}
   \begin{defx}[Bidirectional RNN]\label{th:bi}
     \small
@@ -837,6 +930,8 @@
 \end{frame}
 
 \begin{frame}{What the second direction changes}
+  \src{goodfellow2016}{section}{10.3}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.45em}
   \begin{propx}[The bidirectional output sees the whole input]\label{th:bidep}
     \small
@@ -864,6 +959,8 @@
 \end{frame}
 
 \begin{frame}{Both directions, drawn}
+  \src{goodfellow2016}{figure}{10.11}
+  \src{goodfellow2016}{section}{10.3}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.56\linewidth]{bidirectional_goodfellow}
@@ -879,6 +976,8 @@
 \end{frame}
 
 \begin{frame}{Both directions, as two networks}
+  \src{jurafsky_slp3}{figure}{14.11}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.74\linewidth]{bidirectional_jurafsky}
@@ -895,6 +994,7 @@
 \end{frame}
 
 \begin{frame}{Both directions, measured}
+  \src{goodfellow2016}{section}{10.3}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{influence_maps}
   \end{center}
@@ -917,6 +1017,7 @@
 % =====================================================================
 
 \begin{frame}{The block ahead, revisited}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.36}
@@ -937,6 +1038,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.24em
@@ -1000,6 +1102,7 @@
 
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

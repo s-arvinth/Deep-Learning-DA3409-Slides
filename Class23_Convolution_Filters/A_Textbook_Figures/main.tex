@@ -74,11 +74,19 @@
 \footright{Convolution Filters}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{cohen2016a}{T. S. Cohen, M. Welling, Group Equivariant Convolutional Networks, ICML 2016, 2016}
+\srcdef{dumoulin2016}{V. Dumoulin, F. Visin, A guide to convolution arithmetic for deep learning, arXiv:1603.07285, 2016}
+\srcdef{luo2016}{W. Luo, Y. Li, R. Urtasun, R. Zemel, Understanding the Effective Receptive Field in Deep Convolutional Neural Networks, NIPS 2016, 2016}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -87,6 +95,7 @@
 % =====================================================================
 
 \begin{frame}{Building the symmetry in, rather than learning it}
+  \nosrc
   \bridge{Class 18 listed four ways to obtain an invariance and said the
   fourth was to build it into the architecture. This class carries that
   out.}
@@ -111,6 +120,7 @@
 \end{frame}
 
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.35em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.30}
@@ -147,6 +157,9 @@
 \end{frame}
 
 \begin{frame}{Images are too big, and not unstructured}
+  \src{bishop2024}{section}{10.2}
+  \src{bishop2024}{section}{10.1.1}
+  \src{prince2023}{section}{10.2.4}
   \vspace{-0.15em}
   \begin{propx}[The cost of a dense first layer]\label{th:cost}
     \small
@@ -172,6 +185,8 @@
 \end{frame}
 
 \begin{frame}{The same statement, drawn}
+  \src{prince2023}{figure}{10.4}
+  \src{prince2023}{section}{10.2.4}
   \begin{center}
     \includegraphics[height=0.505\textheight]{P_Conv2a}
   \end{center}
@@ -187,6 +202,10 @@
 % =====================================================================
 
 \begin{frame}{What we want of the output}
+  \src{prince2023}{equation}{10.1-10.2}
+  \src{prince2023}{figure}{10.1}
+  \src{prince2023}{section}{10.1}
+  \src{bishop2024}{section}{10.2.2}
   \vspace{-0.2em}
   \begin{defx}[Invariance and equivariance]\label{th:inv}
     \small
@@ -213,6 +232,8 @@
 \end{frame}
 
 \begin{frame}{Convolution is the equivariant linear map}
+  \src{bishop2024}{section}{10.2.2}
+  \src{cohen2016a}{section}{5}
   \vspace{-0.25em}
   \begin{thmx}[Equivariance, and its converse]\label{th:equi}
     \small
@@ -236,6 +257,7 @@
 \end{frame}
 
 \begin{frame}{Proof, in both directions}
+  \nosrc
   \vspace{-0.25em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -264,6 +286,8 @@
 \end{frame}
 
 \begin{frame}{Equivariance, measured}
+  \src{prince2023}{figure}{10.1}
+  \src{prince2023}{section}{10.1}
   \begin{center}
     \includegraphics[height=0.505\textheight]{P_ConvEquiInv}
   \end{center}
@@ -278,6 +302,11 @@
 % =====================================================================
 
 \begin{frame}{One dimension, one kernel}
+  \src{prince2023}{equation}{10.3-10.5}
+  \src{prince2023}{figure}{10.2}
+  \src{prince2023}{figure}{10.4}
+  \src{prince2023}{section}{10.2.1}
+  \src{prince2023}{section}{10.2.4}
   \vspace{-0.35em}
   \[
     z_i \;=\; \sum_{j=1}^{k} w_j\, x_{\,i + j - \lceil k/2 \rceil},
@@ -301,6 +330,8 @@
 \end{frame}
 
 \begin{frame}{A convolution is a dense layer with most of it deleted}
+  \src{bishop2024}{figure}{10.2}
+  \src{bishop2024}{section}{10.2.2}
   \vspace{0.3em}
   \begin{center}
     \includegraphics[height=0.40\textheight]{Bishop10_2}
@@ -313,6 +344,12 @@
 \end{frame}
 
 \begin{frame}{Three knobs, and one formula}
+  \src{dumoulin2016}{section}{5.1}
+  \src{prince2023}{figure}{10.3}
+  \src{prince2023}{section}{10.2.2}
+  \src{prince2023}{section}{10.2.3}
+  \src{bishop2024}{section}{10.2.3}
+  \src{bishop2024}{section}{10.2.4}
   \vspace{-0.15em}
   \begin{propx}[Output length]\label{th:size}
     \small
@@ -338,6 +375,8 @@
 \end{frame}
 
 \begin{frame}{The three knobs, drawn}
+  \src{prince2023}{figure}{10.3}
+  \src{prince2023}{section}{10.2.3}
   \begin{center}
     \includegraphics[width=0.74\linewidth]{P_Conv1a}
   \end{center}
@@ -348,6 +387,8 @@
 \end{frame}
 
 \begin{frame}{What one kernel responds to}
+  \src{bishop2024}{equation}{10.1}
+  \src{bishop2024}{section}{10.2.1}
   \vspace{-0.2em}
   \begin{propx}[The kernel is what it detects]\label{th:matched}
     \small
@@ -375,6 +416,8 @@
 % =====================================================================
 
 \begin{frame}{One kernel is not enough}
+  \src{prince2023}{figure}{10.5}
+  \src{prince2023}{section}{10.2.5}
   \vspace{-0.3em}
   \[
     h^{c'}_{i}
@@ -400,6 +443,9 @@
 \end{frame}
 
 \begin{frame}{How far back a unit can see}
+  \src{prince2023}{figure}{10.6}
+  \src{prince2023}{section}{10.2.6}
+  \src{luo2016}{section}{1}
   \vspace{-0.2em}
   \begin{thmx}[Receptive field]\label{th:rf}
     \small
@@ -425,6 +471,8 @@
 \end{frame}
 
 \begin{frame}{The recursion, checked}
+  \src{prince2023}{figure}{10.6}
+  \src{prince2023}{section}{10.2.6}
   \begin{center}
     \includegraphics[height=0.51\textheight]{P_ConvNetworkRF}
   \end{center}
@@ -436,6 +484,7 @@
 \end{frame}
 
 \begin{frame}{Why depth beats a wider kernel}
+  \nosrc
   \vspace{0.25em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.38}
@@ -464,6 +513,9 @@
 % =====================================================================
 
 \begin{frame}{The same operation, one index more}
+  \src{prince2023}{equation}{10.6}
+  \src{prince2023}{section}{10.3}
+  \src{bishop2024}{section}{10.2.5}
   \vspace{-0.35em}
   \[
     h^{c'}_{i,j}
@@ -488,6 +540,8 @@
 \end{frame}
 
 \begin{frame}{What a $3 \times 3$ kernel does}
+  \src{bishop2024}{figure}{10.4}
+  \src{bishop2024}{section}{10.2.2}
   \begin{center}
     \includegraphics[width=0.90\linewidth]{Bishop10_4}
   \end{center}
@@ -502,6 +556,9 @@
 % =====================================================================
 
 \begin{frame}{Down, and back up}
+  \src{prince2023}{section}{10.4.1}
+  \src{prince2023}{section}{10.4.2}
+  \src{bishop2024}{section}{10.2.6}
   \vspace{-0.15em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.22}
@@ -530,6 +587,10 @@
 \end{frame}
 
 \begin{frame}{Resolution, measured}
+  \src{prince2023}{figure}{10.11}
+  \src{prince2023}{figure}{10.12}
+  \src{prince2023}{section}{10.4.1}
+  \src{prince2023}{section}{10.4.2}
   \vspace{0.2em}
   \begin{center}
     \includegraphics[width=0.455\linewidth]{P_ConvDown}\hspace{0.8em}%
@@ -546,6 +607,7 @@
 % =====================================================================
 
 \begin{frame}{The layer, in one table}
+  \nosrc
   \vspace{-0.05em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.24}
@@ -576,6 +638,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.05em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -608,6 +671,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -639,6 +703,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

@@ -74,11 +74,22 @@
 \footright{What the Filters Learn}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{gatys2015}{L. A. Gatys, A. S. Ecker, M. Bethge, A Neural Algorithm of Artistic Style, arXiv:1508.06576, 2015}
+\srcdef{goodfellow2015}{I. J. Goodfellow, J. Shlens, C. Szegedy, Explaining and harnessing adversarial examples, ICLR 2015, 2015}
+\srcdef{selvaraju2017}{R. R. Selvaraju, M. Cogswell, A. Das, R. Vedantam, D. Parikh, D. Batra, Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization, ICCV 2017 (arXiv 2016), 2017}
+\srcdef{simonyan2015}{K. Simonyan, A. Zisserman, Very Deep Convolutional Networks for Large-Scale Image Recognition, ICLR 2015, 2015}
+\srcdef{yosinski2015}{J. Yosinski, J. Clune, A. Nguyen, T. Fuchs, H. Lipson, Understanding Neural Networks Through Deep Visualization, ICML 2015 Deep Learning Workshop, 2015}
+\srcdef{zeiler2014}{M. D. Zeiler, R. Fergus, Visualizing and Understanding Convolutional Networks, ECCV 2014 (arXiv 2013), 2014}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -87,6 +98,7 @@
 % =====================================================================
 
 \begin{frame}{Opening the trunk}
+  \nosrc
   \bridge{Class 23 defined one layer. Class 24 built three tasks on a
   trunk it treated as a given. Today the trunk itself: how filters
   compose, what a standard one looks like, and what the filters turn
@@ -115,6 +127,7 @@
 \end{frame}
 
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.30}
@@ -150,6 +163,7 @@
 \end{frame}
 
 \begin{frame}{A layer, counted}
+  \src{bishop2024}{section}{10.2.7}
   \vspace{-0.25em}
   \begin{defx}[A convolutional layer with channels]\label{th:layer}
     \small
@@ -177,6 +191,8 @@
 \end{frame}
 
 \begin{frame}{Reach grows with depth}
+  \src{bishop2024}{figure}{10.9}
+  \src{bishop2024}{section}{10.2.7}
   \begin{center}
     \includegraphics[height=0.50\textheight]{Bishop10_9}
   \end{center}
@@ -189,6 +205,7 @@
 \end{frame}
 
 \begin{frame}{Two small filters are one large one --- until a ReLU}
+  \src{bishop2024}{section}{10.2.8}
   \vspace{-0.3em}
   \begin{propx}[Composition of kernels]\label{th:compose}
     \small
@@ -220,6 +237,8 @@
 \end{frame}
 
 \begin{frame}{The $1 \times 1$ convolution}
+  \src{prince2023}{figure}{10.14}
+  \src{prince2023}{section}{10.4.3}
   \vspace{-0.3em}
   \begin{defx}[$1 \times 1$ convolution]\label{th:onebyone}
     \small
@@ -249,6 +268,10 @@
 % =====================================================================
 
 \begin{frame}{VGG-16, layer by layer}
+  \src{bishop2024}{section}{10.2.8}
+  \src{simonyan2015}{table}{1}
+  \src{simonyan2015}{table}{2}
+  \src{simonyan2015}{section}{2.1}
   \vspace{0.05em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.24}
@@ -279,6 +302,8 @@
 \end{frame}
 
 \begin{frame}{VGG-16, drawn}
+  \src{bishop2024}{figure}{10.10}
+  \src{bishop2024}{section}{10.2.8}
   \begin{center}
     \includegraphics[width=0.60\linewidth]{Bishop10_10}
   \end{center}
@@ -291,6 +316,8 @@
 \end{frame}
 
 \begin{frame}{What ImageNet did to the field}
+  \src{bishop2024}{section}{10.2.8}
+  \src{prince2023}{section}{10.5.1}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -319,6 +346,7 @@
 % =====================================================================
 
 \begin{frame}{The visual cortex}
+  \src{bishop2024}{section}{10.3.1}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -341,6 +369,8 @@
 \end{frame}
 
 \begin{frame}{The Gabor filter}
+  \src{bishop2024}{equation}{10.6-10.8}
+  \src{bishop2024}{section}{10.3.1}
   \vspace{-0.3em}
   \begin{defx}[Gabor filter]\label{th:gabor}
     \small
@@ -370,6 +400,8 @@
 \end{frame}
 
 \begin{frame}{Gabor filters, drawn}
+  \src{bishop2024}{figure}{10.11}
+  \src{bishop2024}{section}{10.3.1}
   \begin{center}
     \includegraphics[height=0.56\textheight]{Bishop10_11}
   \end{center}
@@ -381,6 +413,7 @@
 \end{frame}
 
 \begin{frame}{Reading the first layer directly}
+  \src{bishop2024}{section}{10.3.2}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -402,6 +435,8 @@
 \end{frame}
 
 \begin{frame}{The first layer of AlexNet}
+  \src{bishop2024}{figure}{10.12}
+  \src{bishop2024}{section}{10.3.2}
   \begin{center}
     \includegraphics[height=0.58\textheight]{Bishop10_12}
   \end{center}
@@ -412,6 +447,8 @@
 \end{frame}
 
 \begin{frame}{Deeper layers: ask what excites a unit}
+  \src{bishop2024}{section}{10.3.2}
+  \src{zeiler2014}{section}{4}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -435,6 +472,8 @@
 \end{frame}
 
 \begin{frame}{Patches that excite units, by layer}
+  \src{bishop2024}{figure}{10.13}
+  \src{bishop2024}{section}{10.3.2}
   \begin{center}
     \includegraphics[width=0.92\linewidth]{Bishop10_13}
   \end{center}
@@ -447,6 +486,8 @@
 \end{frame}
 
 \begin{frame}{Or optimise the image}
+  \src{bishop2024}{section}{10.3.2}
+  \src{yosinski2015}{section}{3}
   \vspace{-0.45em}
   \begin{propx}[Maximise the pre-activation, not the probability]\label{th:preact}
     \small
@@ -473,6 +514,8 @@
 \end{frame}
 
 \begin{frame}{Synthetic images of four classes}
+  \src{bishop2024}{figure}{10.14}
+  \src{bishop2024}{section}{10.3.2}
   \begin{center}
     \includegraphics[width=0.92\linewidth]{Bishop10_14}
   \end{center}
@@ -487,6 +530,10 @@
 % =====================================================================
 
 \begin{frame}{Saliency: which pixels decided}
+  \src{bishop2024}{equation}{10.9-10.10}
+  \src{bishop2024}{section}{10.3.3}
+  \src{selvaraju2017}{equation}{1-2}
+  \src{selvaraju2017}{section}{3}
   \vspace{-0.3em}
   \begin{defx}[Grad-CAM]\label{th:gradcam}
     \small
@@ -516,6 +563,8 @@
 \end{frame}
 
 \begin{frame}{Saliency, on an image}
+  \src{bishop2024}{figure}{10.15}
+  \src{bishop2024}{section}{10.3.3}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{Bishop10_15}
   \end{center}
@@ -526,6 +575,10 @@
 \end{frame}
 
 \begin{frame}{Turning the gradient against the network}
+  \src{bishop2024}{equation}{10.11}
+  \src{bishop2024}{section}{10.3.4}
+  \src{goodfellow2015}{section}{4}
+  \src{goodfellow2015}{section}{3}
   \vspace{-0.45em}
   \begin{defx}[Fast gradient sign method]\label{th:fgsm}
     \small
@@ -553,6 +606,9 @@
 \end{frame}
 
 \begin{frame}{What the attacks show}
+  \src{bishop2024}{figure}{10.16}
+  \src{bishop2024}{figure}{10.17}
+  \src{bishop2024}{section}{10.3.4}
   \vspace{-0.2em}
   {\footnotesize
   \begin{itemize}\itemsep0.16em
@@ -578,6 +634,8 @@
 \end{frame}
 
 \begin{frame}{DeepDream: amplify what a layer already sees}
+  \src{bishop2024}{equation}{10.12}
+  \src{bishop2024}{section}{10.3.5}
   \vspace{-0.3em}
   \begin{defx}[DeepDream]\label{th:dream}
     \small
@@ -603,6 +661,8 @@
 \end{frame}
 
 \begin{frame}{DeepDream, on an image}
+  \src{bishop2024}{figure}{10.18}
+  \src{bishop2024}{section}{10.3.5}
   \begin{center}
     \includegraphics[width=0.62\linewidth]{Bishop10_18}
   \end{center}
@@ -616,6 +676,9 @@
 % =====================================================================
 
 \begin{frame}{Content and style, as errors}
+  \src{bishop2024}{equation}{10.13-10.17}
+  \src{bishop2024}{section}{10.6}
+  \src{gatys2015}{equation}{1-7}
   \vspace{-0.3em}
   \begin{defx}[Neural style transfer]\label{th:style}
     \small
@@ -643,6 +706,7 @@
 \end{frame}
 
 \begin{frame}{Why the style matrix forgets position}
+  \src{bishop2024}{section}{10.6}
   \vspace{-0.45em}
   \begin{propx}[The style matrix is translation-invariant]\label{th:gram}
     \small
@@ -670,6 +734,8 @@
 \end{frame}
 
 \begin{frame}{Style transfer, on an image}
+  \src{bishop2024}{figure}{10.32}
+  \src{bishop2024}{section}{10.6}
   \begin{center}
     \includegraphics[width=0.94\linewidth]{Bishop10_32}
   \end{center}
@@ -685,6 +751,7 @@
 % =====================================================================
 
 \begin{frame}{One gradient, five uses}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.36}
@@ -707,6 +774,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.22em
@@ -737,6 +805,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -779,6 +848,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

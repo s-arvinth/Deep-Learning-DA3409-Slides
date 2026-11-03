@@ -76,11 +76,23 @@
 \footright{Applications}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{badrinarayanan2017}{V. Badrinarayanan, A. Kendall, R. Cipolla, SegNet: A Deep Convolutional Encoder-Decoder Architecture for Image Segmentation, IEEE TPAMI 39(12) (arXiv 2015), 2017}
+\srcdef{dumoulin2016}{V. Dumoulin, F. Visin, A guide to convolution arithmetic for deep learning, arXiv:1603.07285, 2016}
+\srcdef{krizhevsky2012}{A. Krizhevsky, I. Sutskever, G. E. Hinton, ImageNet Classification with Deep Convolutional Neural Networks, NeurIPS 2012 (Advances in Neural Information Processing Systems 25), 2012}
+\srcdef{long2015}{J. Long, E. Shelhamer, T. Darrell, Fully Convolutional Networks for Semantic Segmentation, CVPR 2015, 2015}
+\srcdef{redmon2016}{J. Redmon, S. Divvala, R. Girshick, A. Farhadi, You Only Look Once: Unified, Real-Time Object Detection, CVPR 2016, 2016}
+\srcdef{sermanet2014}{P. Sermanet, D. Eigen, X. Zhang, M. Mathieu, R. Fergus, Y. LeCun, OverFeat: Integrated Recognition, Localization and Detection using Convolutional Networks, ICLR 2014 (arXiv 2013), 2014}
+\srcdef{simonyan2015}{K. Simonyan, A. Zisserman, Very Deep Convolutional Networks for Large-Scale Image Recognition, ICLR 2015, 2015}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -89,6 +101,7 @@
 % =====================================================================
 
 \begin{frame}{From the layer to the task}
+  \nosrc
   \bridge{Class 23 built one layer and said nothing about any network.
   Today is about what you build with it, and the three tasks differ in
   one thing only: what the network must emit.}
@@ -113,6 +126,7 @@
 \end{frame}
 
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.35em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.30}
@@ -148,6 +162,9 @@
 \end{frame}
 
 \begin{frame}{What the output structure decides}
+  \src{prince2023}{section}{10.5.1}
+  \src{prince2023}{section}{10.5.2}
+  \src{prince2023}{section}{10.5.3}
   \begin{center}
     \includegraphics[width=0.90\linewidth]{output_shapes}
   \end{center}
@@ -165,6 +182,9 @@
 % =====================================================================
 
 \begin{frame}{One label for the whole image}
+  \src{prince2023}{section}{10.5.1}
+  \src{bishop2024}{section}{10.1}
+  \src{bishop2024}{section}{10.4}
   \vspace{-0.4em}
   \begin{defx}[Image classification]\label{th:cls}
     \small
@@ -191,6 +211,8 @@
 \end{frame}
 
 \begin{frame}{ImageNet, the benchmark}
+  \src{prince2023}{figure}{10.15}
+  \src{prince2023}{section}{10.5.1}
   \vspace{-0.25em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.50\textwidth}
@@ -222,6 +244,11 @@
 \end{frame}
 
 \begin{frame}{Two networks, one lesson}
+  \src{prince2023}{section}{10.5.1}
+  \src{krizhevsky2012}{table}{2}
+  \src{krizhevsky2012}{section}{3.5}
+  \src{simonyan2015}{table}{7}
+  \src{simonyan2015}{section}{2.2}
   \vspace{0.1em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.34}
@@ -251,6 +278,9 @@
 \end{frame}
 
 \begin{frame}{Two networks, drawn to the same scale}
+  \src{prince2023}{figure}{10.16}
+  \src{prince2023}{figure}{10.17}
+  \src{prince2023}{section}{10.5.1}
   \vspace{-0.2em}
   \begin{center}
     \includegraphics[height=0.40\textheight]{P_ConvAlex}\hspace{1.2em}%
@@ -264,6 +294,7 @@
 \end{frame}
 
 \begin{frame}{The Progress of the field}
+  \src{prince2023}{figure}{10.21}
   \begin{center}
     \includegraphics[width=0.66\linewidth]{P_ConvImageNetPerformance}
   \end{center}
@@ -279,6 +310,7 @@
 % =====================================================================
 
 \begin{frame}{Where is it, and what is it}
+  \src{bishop2024}{section}{10.4.1}
   \vspace{-0.25em}
   \begin{defx}[Bounding box]\label{th:box}
     \small
@@ -305,6 +337,8 @@
 \end{frame}
 
 \begin{frame}{Boxes on an image}
+  \src{bishop2024}{figure}{10.19}
+  \src{bishop2024}{section}{10.4.1}
   \begin{center}
     \includegraphics[height=0.56\textheight]{Bishop10_19}
   \end{center}
@@ -316,6 +350,7 @@
 \end{frame}
 
 \begin{frame}{Scoring a box}
+  \src{bishop2024}{section}{10.4.2}
   \vspace{-0.3em}
   \begin{defx}[Intersection over union]\label{th:iou}
     \small
@@ -367,6 +402,8 @@
 % \end{frame}
 
 \begin{frame}{IoU, drawn and measured}
+  \src{bishop2024}{figure}{10.20}
+  \src{bishop2024}{section}{10.4.2}
   \begin{center}
     \includegraphics[width=0.92\linewidth]{iou}
   \end{center}
@@ -379,6 +416,8 @@
   \hfill Bishop \& Bishop (2024), Fig.~10.20.\par}
 \end{frame}
 \begin{frame}{Object Detection and Objective Function}
+  \src{redmon2016}{equation}{3}
+  \src{redmon2016}{section}{2.2}
     \vspace{-0.2cm}
     \begin{tiny}
     \begin{equation*}
@@ -435,6 +474,8 @@
      \srcline{Redmon et al.\ (2016).}
 \end{frame}
 \begin{frame}{Sliding windows}
+  \src{bishop2024}{section}{10.4.3}
+  \src{sermanet2014}{section}{3.5}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -455,6 +496,8 @@
 \end{frame}
 
 \begin{frame}{A sliding window is a convolution}
+  \src{bishop2024}{section}{10.4.3}
+  \src{sermanet2014}{section}{3.5}
   \vspace{-0.3em}
   \begin{propx}[Shared computation]\label{th:slide}
     \small
@@ -480,6 +523,9 @@
 \end{frame}
 
 \begin{frame}{The saving, drawn}
+  \src{bishop2024}{figure}{10.22}
+  \src{bishop2024}{figure}{10.23}
+  \src{bishop2024}{section}{10.4.3}
   \begin{center}
     \includegraphics[width=0.92\linewidth]{sliding_window}
   \end{center}
@@ -496,6 +542,8 @@
 \end{frame}
 
 \begin{frame}{Detection across scales}
+  \src{bishop2024}{figure}{10.24}
+  \src{bishop2024}{section}{10.4.4}
   \vspace{-0.3em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.50\textwidth}
@@ -524,6 +572,7 @@
 \end{frame}
 
 \begin{frame}{Non-max suppression}
+  \src{bishop2024}{section}{10.4.5}
   \vspace{-0.25em}
   \bridge{A scanned detector fires several times around each object.
   The rule that keeps one box per object, applied one class at a time:}
@@ -551,6 +600,8 @@
 \end{frame}
 
 \begin{frame}{Suppression, drawn}
+  \src{bishop2024}{figure}{10.25}
+  \src{bishop2024}{section}{10.4.5}
   \begin{center}
     \includegraphics[height=0.50\textheight]{Bishop10_25}
   \end{center}
@@ -561,6 +612,9 @@
 \end{frame}
 
 \begin{frame}{Predicting boxes directly}
+  \src{prince2023}{section}{10.5.2}
+  \src{bishop2024}{section}{10.4.1}
+  \src{redmon2016}{section}{2}
   \vspace{-0.3em}
   \begin{defx}[Grid prediction, YOLO]\label{th:yolo}
     \small
@@ -587,6 +641,8 @@
 \end{frame}
 
 \begin{frame}{Grid prediction, drawn}
+  \src{prince2023}{figure}{10.18}
+  \src{prince2023}{section}{10.5.2}
   \begin{center}
     \includegraphics[height=0.56\textheight]{P_ConvYOLO}
   \end{center}
@@ -627,6 +683,8 @@
 % =====================================================================
 
 \begin{frame}{A label for every pixel}
+  \src{bishop2024}{section}{10.5}
+  \src{prince2023}{section}{10.5.3}
   \vspace{-0.25em}
   \begin{defx}[Semantic segmentation]\label{th:seg}
     \small
@@ -648,6 +706,8 @@
 \end{frame}
 
 \begin{frame}{Segmentation, on an image}
+  \src{bishop2024}{figure}{10.26}
+  \src{bishop2024}{section}{10.5}
   \vspace{-0.2em}
   \begin{center}
     \includegraphics[height=0.42\textheight]{Bishop10_26a}\hspace{0.8em}%
@@ -661,6 +721,7 @@
 \end{frame}
 
 \begin{frame}{The naive network, and why it fails}
+  \src{bishop2024}{section}{10.5.1}
   \vspace{0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -680,6 +741,8 @@
 \end{frame}
 
 \begin{frame}{Down, then back up}
+  \src{bishop2024}{figure}{10.27}
+  \src{bishop2024}{section}{10.5.2}
   \begin{center}
     \includegraphics[width=0.72\linewidth]{Bishop10_27}
   \end{center}
@@ -690,6 +753,8 @@
 \end{frame}
 
 \begin{frame}{Undoing pooling}
+  \src{bishop2024}{section}{10.5.2}
+  \src{badrinarayanan2017}{section}{3}
   \vspace{-0.3em}
   \begin{propx}[Unpooling inverts pooling]\label{th:unpool}
     \small
@@ -716,6 +781,9 @@
 \end{frame}
 
 \begin{frame}{Unpooling, drawn}
+  \src{bishop2024}{figure}{10.28}
+  \src{bishop2024}{figure}{10.29}
+  \src{bishop2024}{section}{10.5.2}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.74\linewidth]{unpooling}
@@ -732,6 +800,11 @@
 \end{frame}
 
 \begin{frame}{Learned up-sampling}
+  \src{bishop2024}{section}{10.5.3}
+  \src{prince2023}{figure}{10.13}
+  \src{prince2023}{section}{10.4.2}
+  \src{dumoulin2016}{section}{4.1}
+  \src{dumoulin2016}{section}{4.2}
   \vspace{-0.3em}
   \begin{propx}[Transpose convolution]\label{th:tconv}
     \footnotesize
@@ -761,6 +834,8 @@
 \end{frame}
 
 \begin{frame}{Transpose convolution, drawn}
+  \src{bishop2024}{figure}{10.30}
+  \src{bishop2024}{section}{10.5.3}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[height=0.62\textheight]{transpose_conv}
@@ -776,6 +851,9 @@
 \end{frame}
 
 \begin{frame}{Fully convolutional networks}
+  \src{bishop2024}{section}{10.5.3}
+  \src{long2015}{section}{3}
+  \src{prince2023}{section}{10.5.3}
   \vspace{-0.3em}
   \begin{propx}[Any size in, the same size out]\label{th:fcn}
     \small
@@ -802,6 +880,8 @@
 \end{frame}
 
 \begin{frame}{An early segmentation network}
+  \src{prince2023}{figure}{10.19}
+  \src{prince2023}{section}{10.5.3}
   \vspace{-0.2em}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{P_ConvSemSeg}
@@ -814,6 +894,8 @@
 \end{frame}
 
 \begin{frame}{What it produces}
+  \src{prince2023}{figure}{10.20}
+  \src{prince2023}{section}{10.5.3}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{P_ConvSemSegResults}
   \end{center}
@@ -846,6 +928,8 @@
 % \end{frame}
 
 \begin{frame}{The U-net}
+  \src{bishop2024}{figure}{10.31}
+  \src{bishop2024}{section}{10.5.4}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{Bishop10_31}
   \end{center}
@@ -862,6 +946,7 @@
 % =====================================================================
 
 \begin{frame}{Three tasks, one trunk}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.36}
@@ -884,6 +969,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.22em
@@ -914,6 +1000,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -951,6 +1038,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

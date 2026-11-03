@@ -76,11 +76,22 @@
 \footright{RNNs for NLP Tasks}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{graves2013b}{Graves, A., Mohamed, A. \& Hinton, G., Speech recognition with deep recurrent neural networks, ICASSP 2013, 2013}
+\srcdef{inan2017}{Inan, H., Khosravi, K. \& Socher, R., Tying word vectors and word classifiers: a loss framework for language modeling, ICLR 2017, 2017}
+\srcdef{jurafsky_slp3}{Jurafsky \& Martin, Speech and Language Processing, 3rd edition draft of August 19, 2026, https://web.stanford.edu/~jurafsky/slp3/}
+\srcdef{mikolov2010}{Mikolov, T., Karafiat, M., Burget, L., Cernocky, J. \& Khudanpur, S., Recurrent neural network based language model, Interspeech 2010, 1045-1048, 2010}
+\srcdef{pascanu2014}{Pascanu, R., Gulcehre, C., Cho, K. \& Bengio, Y., How to construct deep recurrent neural networks, ICLR 2014, 2014}
+\srcdef{press2017}{Press, O. \& Wolf, L., Using the output embedding to improve language models, EACL 2017, 2017}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -89,6 +100,8 @@
 % =====================================================================
 
 \begin{frame}{Where we are coming from}
+  \src{jurafsky_slp3}{section}{14.6}
+  \src{jurafsky_slp3}{section}{14.4}
   \vspace{-0.3em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -116,6 +129,11 @@
 \end{frame}
 
 \begin{frame}{The problems, with their examples}
+  \src{jurafsky_slp3}{figure}{14.7}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.3.1}
+  \src{jurafsky_slp3}{section}{14.3.2}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.1em}
   {\tiny
   \renewcommand{\arraystretch}{1.4}
@@ -142,6 +160,9 @@
 \end{frame}
 
 \begin{frame}{Why the reader alone is not enough}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.3}
+  \src{jurafsky_slp3}{section}{14.4}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -168,6 +189,12 @@
 \end{frame}
 
 \begin{frame}{The approach: one recurrent layer, four output structures}
+  \src{jurafsky_slp3}{section}{14.6}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.3}
+  \src{jurafsky_slp3}{section}{14.4}
+  \src{goodfellow2016}{section}{10.2.3}
+  \src{goodfellow2016}{section}{10.6}
   \vspace{-0.3em}
   {\footnotesize
   \begin{itemize}\itemsep0.1em
@@ -191,6 +218,7 @@
   \srcline{Jurafsky \& Martin (2026), \S14.2--14.4, \S14.6; Goodfellow et al.\ (2016), \S10.2.3, \S10.5--10.6.}
 \end{frame}
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{-0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.22}
@@ -219,6 +247,10 @@
 % =====================================================================
 
 \begin{frame}{The recurrent language model, recalled}
+  \src{jurafsky_slp3}{equation}{14.4-14.9}
+  \src{jurafsky_slp3}{figure}{14.5}
+  \src{jurafsky_slp3}{section}{14.2.1}
+  \src{mikolov2010}{section}{2}
   \vspace{-0.45em}
   \begin{defx}[RNN language model]\label{th:lm}
     \small
@@ -246,6 +278,9 @@
 \end{frame}
 
 \begin{frame}{Training by self-supervision}
+  \src{jurafsky_slp3}{figure}{14.6}
+  \src{jurafsky_slp3}{equation}{14.10-14.11}
+  \src{jurafsky_slp3}{section}{14.2.2}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.84\linewidth]{J14_6}
@@ -262,6 +297,12 @@
   \hfill Jurafsky \& Martin (2026), Fig.~14.6; \S14.2.2, Eqs.~14.10--14.11.\par}
 \end{frame}
 \begin{frame}{The training loss is the log of the perplexity}
+  \src{jurafsky_slp3}{equation}{3.14-3.15}
+  \src{jurafsky_slp3}{section}{3.3}
+  \src{jurafsky_slp3}{equation}{7.58}
+  \src{jurafsky_slp3}{section}{7.7.1}
+  \src{jurafsky_slp3}{equation}{3.42}
+  \src{jurafsky_slp3}{section}{3.7}
   \vspace{-0.45em}
   \begin{propx}[Perplexity and cross-entropy]\label{th:ppl}
     \small
@@ -289,6 +330,8 @@
 \end{frame}
 
 \begin{frame}{Generation, drawn}
+  \src{jurafsky_slp3}{figure}{14.9}
+  \src{jurafsky_slp3}{section}{14.3.3}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.84\linewidth]{J14_9}
@@ -303,6 +346,10 @@
   \hfill Jurafsky \& Martin (2026), Fig.~14.9; \S14.3.3.\par}
 \end{frame}
 \begin{frame}{Generation: sampling, one token at a time}
+  \src{jurafsky_slp3}{section}{14.3.3}
+  \src{jurafsky_slp3}{equation}{7.51}
+  \src{jurafsky_slp3}{section}{7.6.3}
+  \src{jurafsky_slp3}{section}{7.6.2}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -327,6 +374,10 @@
 \end{frame}
 
 \begin{frame}{Weight tying}
+  \src{jurafsky_slp3}{equation}{14.12-14.14}
+  \src{jurafsky_slp3}{section}{14.2.3}
+  \src{press2017}{section}{3}
+  \src{inan2017}{section}{4}
   \vspace{-0.45em}
   \begin{defx}[Tied language model]\label{th:tying}
     \small
@@ -362,6 +413,8 @@
 % =====================================================================
 
 \begin{frame}{Sequence labelling: a label at every step}
+  \src{jurafsky_slp3}{figure}{14.7}
+  \src{jurafsky_slp3}{section}{14.3.1}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{J14_7}
@@ -377,6 +430,9 @@
   \hfill Jurafsky \& Martin (2026), Fig.~14.7; \S14.3.1.\par}
 \end{frame}
 \begin{frame}{Sequence classification: one label per sequence}
+  \src{jurafsky_slp3}{equation}{14.15}
+  \src{jurafsky_slp3}{figure}{14.8}
+  \src{jurafsky_slp3}{section}{14.3.2}
   \vspace{-0.55em}
   \begin{defx}[Read-outs for classification]\label{th:readout}
     \small
@@ -402,6 +458,9 @@
 \end{frame}
 
 \begin{frame}{Sequence classification, drawn}
+  \src{jurafsky_slp3}{figure}{14.8}
+  \src{jurafsky_slp3}{equation}{14.15}
+  \src{jurafsky_slp3}{section}{14.3.2}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{J14_8}
@@ -419,6 +478,7 @@
   \hfill Jurafsky \& Martin (2026), Fig.~14.8; \S14.3.2, Eq.~14.15.\par}
 \end{frame}
 \begin{frame}{Why the read-out matters}
+  \src{jurafsky_slp3}{section}{14.3.2}
   \vspace{-0.45em}
   \begin{propx}[Gradient paths of the three read-outs]\label{th:paths}
     \small
@@ -451,6 +511,10 @@
 % =====================================================================
 
 \begin{frame}{RNNs as modules}
+  \src{jurafsky_slp3}{figure}{14.10}
+  \src{jurafsky_slp3}{figure}{14.11}
+  \src{jurafsky_slp3}{section}{14.4.1}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.3em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.49\textwidth}
@@ -475,6 +539,10 @@
   \srcline{Jurafsky \& Martin (2026), Figs.~14.10--14.11; \S14.4.}
 \end{frame}
 \begin{frame}{Stacking: depth per time step}
+  \src{jurafsky_slp3}{section}{14.4.1}
+  \src{goodfellow2016}{section}{10.5}
+  \src{graves2013b}{equation}{11-12}
+  \src{pascanu2014}{section}{3.2.4}
   \vspace{-0.45em}
   \begin{propx}[What stacking buys]\label{th:stack}
     \small
@@ -501,6 +569,9 @@
 \end{frame}
 
 \begin{frame}{Three ways to make an RNN deep}
+  \src{goodfellow2016}{figure}{10.13}
+  \src{goodfellow2016}{section}{10.5}
+  \src{pascanu2014}{section}{3.2}
   \vspace{-0.3em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.50\textwidth}
@@ -530,6 +601,8 @@
   \srcline{Goodfellow et al.\ (2016), Fig.~10.13, \S10.5; Pascanu et al.\ (2014).}
 \end{frame}
 \begin{frame}{Bidirectionality: the right context}
+  \src{jurafsky_slp3}{equation}{14.16-14.18}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.45em}
   \begin{defx}[Bidirectional RNN, as used]\label{th:bi}
     \small
@@ -556,6 +629,8 @@
 \end{frame}
 
 \begin{frame}{Bidirectional classification, drawn}
+  \src{jurafsky_slp3}{figure}{14.12}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.56\textheight]{J14_12}
@@ -577,6 +652,8 @@
 % =====================================================================
 
 \begin{frame}{The RNN as a directed graphical model}
+  \src{goodfellow2016}{equation}{10.29-10.33}
+  \src{goodfellow2016}{section}{10.2.3}
   \vspace{-0.6em}
   \begin{propx}[Parameter sharing over the complete graph]\label{th:gm}
     \small
@@ -602,6 +679,9 @@
 \end{frame}
 
 \begin{frame}{The two graphs, drawn}
+  \src{goodfellow2016}{figure}{10.7}
+  \src{goodfellow2016}{figure}{10.8}
+  \src{goodfellow2016}{section}{10.2.3}
   \vspace{-0.3em}
   \begin{columns}[c, onlytextwidth]
     \begin{column}{0.52\textwidth}
@@ -634,6 +714,8 @@
   \srcline{Goodfellow et al.\ (2016), Figs.~10.7--10.8; \S10.2.3.}
 \end{frame}
 \begin{frame}{Deciding when to stop}
+  \src{goodfellow2016}{equation}{10.34}
+  \src{goodfellow2016}{section}{10.2.3}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.3em
@@ -657,6 +739,8 @@
 \end{frame}
 
 \begin{frame}{The tree-shaped cousin: recursive networks}
+  \src{goodfellow2016}{figure}{10.14}
+  \src{goodfellow2016}{section}{10.6}
   \vspace{-0.4em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.50\textwidth}
@@ -686,6 +770,8 @@
 % =====================================================================
 
 \begin{frame}{Four architectures}
+  \src{jurafsky_slp3}{figure}{14.15}
+  \src{jurafsky_slp3}{section}{14.6}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.66\linewidth]{J14_15}
@@ -703,6 +789,9 @@
 \end{frame}
 
 \begin{frame}{(a) Sequence labelling}
+  \src{jurafsky_slp3}{figure}{14.7}
+  \src{jurafsky_slp3}{section}{14.3.1}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.2em}
   \begin{columns}[c, onlytextwidth]
     \begin{column}{0.52\textwidth}
@@ -727,6 +816,10 @@
 \end{frame}
 
 \begin{frame}{(b) Sequence classification}
+  \src{jurafsky_slp3}{figure}{14.8}
+  \src{jurafsky_slp3}{figure}{14.12}
+  \src{jurafsky_slp3}{section}{14.3.2}
+  \src{jurafsky_slp3}{section}{14.4.2}
   \vspace{-0.2em}
   \begin{columns}[c, onlytextwidth]
     \begin{column}{0.52\textwidth}
@@ -751,6 +844,10 @@
 \end{frame}
 
 \begin{frame}{(c) Language modelling}
+  \src{jurafsky_slp3}{figure}{14.6}
+  \src{jurafsky_slp3}{figure}{14.9}
+  \src{jurafsky_slp3}{section}{14.2}
+  \src{jurafsky_slp3}{section}{14.3.3}
   \vspace{-0.2em}
   \begin{columns}[c, onlytextwidth]
     \begin{column}{0.52\textwidth}
@@ -776,6 +873,8 @@
 \end{frame}
 
 \begin{frame}{(d) Encoder--decoder}
+  \src{jurafsky_slp3}{section}{14.7}
+  \src{jurafsky_slp3}{section}{14.8}
   \vspace{-0.2em}
   \begin{columns}[c, onlytextwidth]
     \begin{column}{0.52\textwidth}
@@ -799,6 +898,7 @@
   \srcline{Jurafsky \& Martin (2026), \S14.7--14.8, Figs.~14.17--14.22; Class 27.}
 \end{frame}
 \begin{frame}{The block, in one table}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.36}
@@ -821,6 +921,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.24em
@@ -849,6 +950,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \scriptsize
   \begin{itemize}\itemsep0.3em
     \item Jurafsky, D. \& Martin, J. H. (2026). \emph{Speech and Language
@@ -889,6 +991,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

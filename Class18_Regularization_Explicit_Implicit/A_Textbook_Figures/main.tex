@@ -75,11 +75,24 @@
 \footright{Explicit and Implicit Regularization}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{balduzzi2017}{D. Balduzzi, M. Frean, L. Leary, J. P. Lewis, K. W.-D. Ma, B. McWilliams, The shattered gradients problem: if resnets are the answer, then what is the question?, ICML 2017, 2017}
+\srcdef{barrett2021}{D. G. T. Barrett, B. Dherin, Implicit gradient regularization, ICLR 2021, 2021}
+\srcdef{bishop2006}{C. M. Bishop, Pattern Recognition and Machine Learning, Springer, 1st edition, 2006}
+\srcdef{nowlan1992}{S. J. Nowlan, G. E. Hinton, Simplifying neural networks by soft weight-sharing, Neural Computation 4(4), 1992}
+\srcdef{simard1992}{P. Simard, B. Victorri, Y. LeCun, J. Denker, Tangent prop - a formalism for specifying selected invariances in an adaptive network, NIPS 1991 (published 1992), 1992}
+\srcdef{smith2021}{S. L. Smith, B. Dherin, D. G. T. Barrett, S. De, On the origin of implicit regularization in stochastic gradient descent, ICLR 2021, 2021}
+\srcdef{tibshirani1996}{R. Tibshirani, Regression shrinkage and selection via the lasso, J. Royal Statistical Society B 58(1), 1996}
+\srcdef{wolpert1996}{D. H. Wolpert, The lack of a priori distinctions between learning algorithms, Neural Computation 8(7), 1996}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -88,6 +101,7 @@
 % =====================================================================
 
 \begin{frame}{From measuring the error to choosing the solution}
+  \nosrc
   \bridge{Class 17 ended with the fact that past the interpolation
   threshold many parameter vectors fit the data equally well, and the
   test error is decided by which one the procedure returns.}
@@ -112,6 +126,7 @@
 \end{frame}
 
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.4em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.34}
@@ -145,6 +160,8 @@
 \end{frame}
 
 \begin{frame}{Learning from data alone is not possible}
+  \src{bishop2024}{section}{9.1.2}
+  \src{wolpert1996}{page}{1341-1390}
   \vspace{-0.1em}
   \begin{propx}[No free lunch]\label{th:nfl}
     \small
@@ -167,6 +184,8 @@
 \end{frame}
 
 \begin{frame}{The data does not determine the function}
+  \src{prince2023}{figure}{9.1}
+  \src{prince2023}{section}{9.1}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{PrinceReg9_1}
   \end{center}
@@ -177,6 +196,7 @@
 \end{frame}
 
 \begin{frame}{Three places to put a preference}
+  \nosrc
   \vspace{0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.42}
@@ -202,6 +222,11 @@
 % =====================================================================
 
 \begin{frame}{The regularized objective}
+  \src{bishop2024}{equation}{9.1}
+  \src{bishop2024}{equation}{9.5}
+  \src{bishop2024}{section}{9.2}
+  \src{prince2023}{equation}{9.2}
+  \src{prince2023}{section}{9.1}
   \vspace{-0.2em}
   \[
     \hat{\mathbf{w}} \;=\; \arg\min_{\mathbf{w}}
@@ -225,6 +250,9 @@
 \end{frame}
 
 \begin{frame}{The penalty is a prior}
+  \src{prince2023}{equation}{9.3-9.4}
+  \src{prince2023}{section}{9.1.1}
+  \src{bishop2024}{section}{9.2}
   \vspace{-0.15em}
   \begin{propx}[Maximum a posteriori]\label{th:map}
     \small
@@ -251,6 +279,9 @@
 \end{frame}
 
 \begin{frame}{What weight decay does to each direction}
+  \src{bishop2024}{figure}{9.3}
+  \src{bishop2024}{section}{9.2}
+  \src{bishop2006}{section}{3.5.3}
   \vspace{-0.2em}
   \begin{thmx}[Shrinkage in the eigenbasis]\label{th:shrink}
     \small
@@ -275,6 +306,7 @@
 \end{frame}
 
 \begin{frame}{Proof, and what it means}
+  \nosrc
   \vspace{-0.25em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -303,6 +335,8 @@
 \end{frame}
 
 \begin{frame}{The same statement, drawn}
+  \src{bishop2024}{figure}{9.3}
+  \src{bishop2024}{section}{9.2}
   \begin{center}
     \includegraphics[height=0.485\textheight]{Bishop9_3}
   \end{center}
@@ -314,6 +348,8 @@
 \end{frame}
 
 \begin{frame}{What the coefficient costs}
+  \src{prince2023}{figure}{9.2}
+  \src{prince2023}{section}{9.1.2}
   \begin{center}
     \includegraphics[height=0.50\textheight]{PrinceReg9_2}
   \end{center}
@@ -324,6 +360,8 @@
 \end{frame}
 
 \begin{frame}{A regularizer should respect the model's symmetries}
+  \src{bishop2024}{equation}{9.6-9.15}
+  \src{bishop2024}{section}{9.2.1}
   \vspace{-0.2em}
   \begin{propx}[Consistent regularizers]\label{th:consist}
     \small
@@ -349,6 +387,9 @@
 \end{frame}
 
 \begin{frame}{Other shapes of penalty}
+  \src{bishop2024}{equation}{9.18-9.20}
+  \src{bishop2024}{figure}{9.5}
+  \src{bishop2024}{section}{9.2.2}
   \vspace{-0.2em}
   \[
     \Omega(\mathbf{w}) \;=\; \frac{1}{2}\sum_{j=1}^{W} |w_j|^q ,
@@ -372,6 +413,9 @@
 \end{frame}
 
 \begin{frame}{Why the lasso sets coefficients to zero}
+  \src{bishop2024}{figure}{9.6}
+  \src{bishop2024}{section}{9.2.2}
+  \src{tibshirani1996}{section}{2.3}
   \vspace{-0.15em}
   \begin{propx}[Sparsity from corners]\label{th:lasso}
     \small
@@ -394,6 +438,8 @@
 \end{frame}
 
 \begin{frame}{The two geometries side by side}
+  \src{bishop2024}{figure}{9.6}
+  \src{bishop2024}{section}{9.2.2}
   \vspace{0.15em}
   \begin{center}
     \includegraphics[height=0.415\textheight]{Bishop9_6a}\hspace{1.6em}%
@@ -411,6 +457,7 @@
 % =====================================================================
 
 \begin{frame}{The optimiser has a preference too}
+  \src{prince2023}{section}{9.2}
   \vspace{0.2em}
   \begin{itemize}\itemsep0.38em
     \item Nothing so far explains why an unregularized network, trained
@@ -428,6 +475,9 @@
 \end{frame}
 
 \begin{frame}{What the step size is really minimising}
+  \src{prince2023}{equation}{9.8}
+  \src{prince2023}{section}{9.2.1}
+  \src{barrett2021}{section}{3}
   \vspace{-0.25em}
   \begin{thmx}[Implicit regularization of gradient descent]\label{th:igd}
     \small
@@ -456,6 +506,7 @@
 \end{frame}
 
 \begin{frame}{Where the extra term comes from}
+  \src{barrett2021}{section}{A.1}
   \vspace{-0.25em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -484,6 +535,8 @@
 \end{frame}
 
 \begin{frame}{Testing the claim}
+  \src{prince2023}{figure}{9.3}
+  \src{prince2023}{section}{9.2.1}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{PrinceReg9_3}
   \end{center}
@@ -495,6 +548,10 @@
 \end{frame}
 
 \begin{frame}{What sampling batches adds}
+  \src{prince2023}{equation}{9.9-9.10}
+  \src{prince2023}{section}{9.2.2}
+  \src{smith2021}{equation}{2}
+  \src{smith2021}{section}{2.2}
   \vspace{-0.3em}
   \begin{thmx}[Implicit regularization of SGD]\label{th:isgd}
     \small
@@ -521,6 +578,8 @@
 \end{frame}
 
 \begin{frame}{The two implicit penalties, measured}
+  \src{prince2023}{figure}{9.4}
+  \src{prince2023}{section}{9.2.2}
   \begin{center}
     \includegraphics[height=0.50\textheight]{PrinceReg9_4}
   \end{center}
@@ -531,6 +590,8 @@
 \end{frame}
 
 \begin{frame}{What this predicts, and what is observed}
+  \src{prince2023}{section}{9.2.2}
+  \src{prince2023}{section}{9.2.1}
   \vspace{0.3em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.42}
@@ -554,6 +615,8 @@
 \end{frame}
 
 \begin{frame}{The two predictions, measured}
+  \src{prince2023}{figure}{9.5}
+  \src{prince2023}{section}{9.2}
   \begin{center}
     \includegraphics[width=0.66\linewidth]{PrinceReg9_5}
   \end{center}
@@ -567,6 +630,9 @@
 % =====================================================================
 
 \begin{frame}{Invariance and equivariance}
+  \src{bishop2024}{equation}{9.2-9.4}
+  \src{bishop2024}{section}{9.1.4}
+  \src{bishop2024}{section}{9.1.3}
   \vspace{-0.2em}
   \begin{defx}[Invariance and equivariance]\label{th:equi}
     \small
@@ -592,6 +658,8 @@
 \end{frame}
 
 \begin{frame}{Equivariance, drawn}
+  \src{bishop2024}{figure}{9.2}
+  \src{bishop2024}{section}{9.1.4}
   \begin{center}
     \includegraphics[height=0.545\textheight]{Bishop9_2}
   \end{center}
@@ -601,6 +669,8 @@
 \end{frame}
 
 \begin{frame}{Four ways to obtain an invariance}
+  \src{bishop2024}{section}{9.1.3}
+  \src{simard1992}{section}{2}
   \vspace{0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.42}
@@ -626,6 +696,9 @@
 \end{frame}
 
 \begin{frame}{Parameter sharing: a hard constraint}
+  \src{bishop2024}{section}{9.4}
+  \src{bishop2024}{section}{9.4.1}
+  \src{nowlan1992}{page}{473-493}
   \vspace{-0.3em}
   \begin{itemize}\itemsep0.22em
     \item A penalty makes some weights small. \alert{Parameter sharing}
@@ -645,6 +718,9 @@
 \end{frame}
 
 \begin{frame}{Residual connections}
+  \src{bishop2024}{equation}{9.35-9.38}
+  \src{bishop2024}{figure}{9.13}
+  \src{bishop2024}{section}{9.5}
   \vspace{-0.3em}
   \[
     \mathbf{z}_1 = F_1(\mathbf{x}) + \mathbf{x},
@@ -670,6 +746,11 @@
 \end{frame}
 
 \begin{frame}{Why residual connections smooth the surface}
+  \src{bishop2024}{equation}{9.40}
+  \src{bishop2024}{figure}{9.12}
+  \src{bishop2024}{figure}{9.15}
+  \src{bishop2024}{section}{9.5}
+  \src{balduzzi2017}{section}{3.2}
   \vspace{-0.15em}
   \begin{propx}[A residual network is an ensemble of shallower ones]\label{th:res}
     \small
@@ -693,6 +774,8 @@
 \end{frame}
 
 \begin{frame}{The same network, expanded}
+  \src{bishop2024}{figure}{9.15}
+  \src{bishop2024}{section}{9.5}
   \begin{center}
     \includegraphics[width=0.66\linewidth]{Bishop9_15}
   \end{center}
@@ -706,6 +789,7 @@
 % =====================================================================
 
 \begin{frame}{What each mechanism prefers}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.40}
@@ -728,6 +812,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.34em
@@ -757,6 +842,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -791,6 +877,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

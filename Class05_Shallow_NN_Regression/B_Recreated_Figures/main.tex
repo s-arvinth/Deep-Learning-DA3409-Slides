@@ -95,11 +95,19 @@
 \footright{Single-layer NN/Shallow NN}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{cybenko1989}{G. Cybenko, Approximation by superpositions of a sigmoidal function, Mathematics of Control, Signals and Systems 2, 303-314, 1989}
+\srcdef{hornik1991}{K. Hornik, Approximation capabilities of multilayer feedforward networks, Neural Networks 4(2), 251-257, 1991}
+\srcdef{leshno1993}{M. Leshno, V. Y. Lin, A. Pinkus, S. Schocken, Multilayer feedforward networks with a nonpolynomial activation function can approximate any function, Neural Networks 6(6), 861-867, 1993}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -108,6 +116,7 @@
 % =====================================================================
 
 \begin{frame}{Notation used throughout this course}
+  \nosrc
   \vspace{0.2em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.22}
@@ -141,6 +150,9 @@
 \end{frame}
 
 \begin{frame}{Linear regression, two views}
+  \src{prince2023}{figure}{2.2}
+  \src{prince2023}{section}{2.2.1}
+  \src{prince2023}{section}{2.2.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.44\textwidth}
       \centering
@@ -171,6 +183,9 @@
 \end{frame}
 
 \begin{frame}{Training: minimise the error}
+  \src{prince2023}{figure}{2.3}
+  \src{prince2023}{figure}{2.4}
+  \src{prince2023}{section}{2.2.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.54\textwidth}
       \centering
@@ -199,6 +214,9 @@
 \end{frame}
 
 \begin{frame}{Beyond lines: fixed basis functions}
+  \src{bishop2024}{figure}{4.2}
+  \src{bishop2024}{equation}{4.3}
+  \src{bishop2024}{section}{4.1.1}
   \[
     \hat y(\mathbf{x},\mathbf{w})
     = \sum_{j=0}^{M-1} w_j\,\phi_j(\mathbf{x})
@@ -220,6 +238,8 @@
 \end{frame}
 
 \begin{frame}{Result: the normal equations}
+  \src{bishop2024}{equation}{4.12-4.16}
+  \src{bishop2024}{section}{4.1.3}
   \begin{theorem}[Least-squares solution]
     Let $\boldsymbol{\Phi}\in\mathbb{R}^{N\times M}$ have
     $\Phi_{nj}=\phi_j(\mathbf{x}_n)$ and let
@@ -258,6 +278,8 @@
 \end{frame}
 
 \begin{frame}{Least squares in closed form: the geometry}
+  \src{bishop2024}{figure}{4.3}
+  \src{bishop2024}{section}{4.1.4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.54\textwidth}
       \vspace{0.2em}
@@ -294,6 +316,10 @@
 \end{frame}
 
 \begin{frame}{Why least squares? The probabilistic view}
+  \src{bishop2024}{equation}{4.8-4.11}
+  \src{bishop2024}{figure}{4.5}
+  \src{bishop2024}{section}{4.1.2}
+  \src{bishop2024}{section}{4.1.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.50\textwidth}
       \vspace{0.2em}
@@ -329,6 +355,9 @@
 \end{frame}
 
 \begin{frame}{What is the best possible prediction?}
+  \src{bishop2024}{equation}{4.37}
+  \src{bishop2024}{equation}{4.39}
+  \src{bishop2024}{section}{4.2}
   \begin{theorem}[The optimal predictor is the conditional mean]
     {\small For squared loss, the function minimising
     $\mathbb{E}_{\mathbf{x},y}\big[(f(\mathbf{x})-y)^2\big]$ over all
@@ -360,6 +389,8 @@
 \end{frame}
 
 \begin{frame}{Linear regression is itself a network}
+  \src{bishop2024}{figure}{4.1}
+  \src{bishop2024}{section}{4.1.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.42\textwidth}
       \centering
@@ -405,6 +436,7 @@
 \end{frame}
 
 \begin{frame}{Why shallow networks}
+  \src{prince2023}{chapter}{3}
   A linear model in fixed features is limited. We want a model that
   is:
   \vspace{0.3em}
@@ -426,6 +458,10 @@
 % =====================================================================
 
 \begin{frame}{The model}
+  \src{bishop2024}{equation}{6.7-6.9}
+  \src{bishop2024}{section}{6.2}
+  \src{prince2023}{equation}{3.1}
+  \src{prince2023}{section}{3.1}
   Scalar input $x$, scalar output, $M=3$ hidden units, ten
   parameters (Bishop \& Bishop, 2024, Eqs.~6.1--6.3):
   \[
@@ -450,6 +486,10 @@
 \end{frame}
 
 \begin{frame}{The activation function: ReLU}
+  \src{prince2023}{figure}{3.1}
+  \src{prince2023}{equation}{3.2}
+  \src{bishop2024}{equation}{6.17}
+  \src{prince2023}{section}{3.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.46\textwidth}
       \vspace{0.9em}
@@ -480,6 +520,8 @@
 \end{frame}
 
 \begin{frame}{Hidden units: the model in two stages}
+  \src{prince2023}{equation}{3.3-3.4}
+  \src{prince2023}{section}{3.1.1}
   Stage 1 --- three linear functions, each passed through $h$:
   \[
     z_1=h\big(w^{(1)}_{10}+w^{(1)}_{11}x\big), \quad
@@ -502,6 +544,8 @@
 \end{frame}
 
 \begin{frame}{Computing the function, step by step}
+  \src{prince2023}{figure}{3.3}
+  \src{prince2023}{section}{3.1.1}
   \begin{center}
     \includegraphics[height=0.605\textheight]{buildup}
   \end{center}
@@ -513,6 +557,9 @@
 \end{frame}
 
 \begin{frame}{The function family: piecewise linear}
+  \src{prince2023}{figure}{3.2}
+  \src{prince2023}{section}{3.1}
+  \src{prince2023}{section}{3.1.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.60\textwidth}
       \centering
@@ -540,6 +587,8 @@
 \end{frame}
 
 \begin{frame}{Depicting the network}
+  \src{prince2023}{figure}{3.4}
+  \src{prince2023}{section}{3.1.2}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.8pt,
       scale=0.48, transform shape, font=\normalsize]
@@ -570,6 +619,8 @@
 \end{frame}
 
 \begin{frame}{Hidden units are basis functions that adapt}
+  \src{bishop2024}{figure}{6.10}
+  \src{bishop2024}{section}{6.2.2}
   \begin{center}
     \includegraphics[height=0.335\textheight]{learned_basis}
   \end{center}
@@ -592,6 +643,8 @@
 % =====================================================================
 
 \begin{frame}{Capacity: $M$ hidden units}
+  \src{prince2023}{equation}{3.5-3.6}
+  \src{prince2023}{section}{3.2}
   \[
     z_j=h\big(w^{(1)}_{j0}+w^{(1)}_{j1}x\big),
     \qquad
@@ -610,6 +663,9 @@
 \end{frame}
 
 \begin{frame}{More than one output}
+  \src{prince2023}{figure}{3.6}
+  \src{prince2023}{equation}{3.7-3.8}
+  \src{prince2023}{section}{3.3.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.60\textwidth}
       \centering
@@ -636,6 +692,9 @@
 \end{frame}
 
 \begin{frame}{More than one input}
+  \src{prince2023}{figure}{3.7}
+  \src{prince2023}{equation}{3.9-3.10}
+  \src{prince2023}{section}{3.3.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.46\textwidth}
       \centering
@@ -684,6 +743,8 @@
 \end{frame}
 
 \begin{frame}{Each unit is a hinge over the input plane}
+  \src{prince2023}{figure}{3.8}
+  \src{prince2023}{section}{3.3.2}
   \begin{center}
     \includegraphics[height=0.55\textheight]{two_inputs}
   \end{center}
@@ -695,6 +756,8 @@
 \end{frame}
 
 \begin{frame}{Two inputs, computed step by step}
+  \src{prince2023}{figure}{3.8}
+  \src{prince2023}{section}{3.3.2}
   \begin{center}
     \includegraphics[height=0.50\textheight]{buildup2d}
   \end{center}
@@ -706,6 +769,11 @@
 \end{frame}
 
 \begin{frame}{The general case}
+  \src{prince2023}{figure}{3.11}
+  \src{bishop2024}{equation}{6.7-6.9}
+  \src{bishop2024}{equation}{6.12}
+  \src{prince2023}{section}{3.4}
+  \src{bishop2024}{section}{6.2.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.45\textwidth}
       \centering
@@ -753,6 +821,8 @@
 \end{frame}
 
 \begin{frame}{Terminology}
+  \src{prince2023}{figure}{3.12}
+  \src{prince2023}{section}{3.5}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.52\textwidth}
       \centering
@@ -797,6 +867,9 @@
 \end{frame}
 
 \begin{frame}{How many regions?}
+  \src{prince2023}{figure}{3.9}
+  \src{prince2023}{section}{3.3.2}
+  \src{prince2023}{page}{38}
   \begin{center}
     \includegraphics[height=0.425\textheight]{regions}
   \end{center}
@@ -815,6 +888,8 @@
 \end{frame}
 
 \begin{frame}{Other activation functions}
+  \src{prince2023}{figure}{3.13}
+  \src{prince2023}{page}{37}
   \begin{center}
     \includegraphics[height=0.60\textheight]{activations}
   \end{center}
@@ -829,6 +904,7 @@
 % =====================================================================
 
 \begin{frame}{The question}
+  \src{prince2023}{section}{3.2}
   With enough hidden units, how much can one hidden layer express?
   \vspace{0.5em}
   \begin{itemize}\setlength{\itemsep}{3pt}
@@ -848,6 +924,10 @@
 \end{frame}
 
 \begin{frame}{Universal approximation: the statement}
+  \src{leshno1993}{section}{4}
+  \src{cybenko1989}{section}{3}
+  \src{hornik1991}{section}{2}
+  \src{leshno1993}{section}{6}
   \begin{theorem}[Universal approximation; Cybenko 1989, Hornik 1991]
     Let $h:\mathbb{R}\to\mathbb{R}$ be continuous and
     \alert{not a polynomial}, let $\mathcal{K}\subset\mathbb{R}^{D}$
@@ -877,6 +957,7 @@
 \end{frame}
 
 \begin{frame}{Lemma 1: two ReLUs make a ramp}
+  \nosrc
   \begin{lemmax}[Ramps and steps]
     For $a\in\mathbb{R}$ and $\delta>0$ define
     $g_{\delta}(x)=\frac{1}{\delta}\big[h(x-a)-h(x-a-\delta)\big]$
@@ -902,6 +983,7 @@
 \end{frame}
 
 \begin{frame}{Lemma 2: the interpolant \emph{is} a network}
+  \nosrc
   \begin{lemmax}[Exact representation of a piecewise-linear function]
     {\small Let $x_0<x_1<\dots<x_M$ and let $\hat y$ be the continuous
     function that is linear on each $[x_{j-1},x_j]$ with slope
@@ -924,6 +1006,7 @@
 \end{frame}
 
 \begin{frame}{Proof of the theorem for $D=1$, ReLU}
+  \nosrc
   \vspace{0.15em}
   {\footnotesize
   Let $f$ be continuous on $[0,1]$ and fix $\varepsilon>0$.}
@@ -952,6 +1035,7 @@
 \end{frame}
 
 \begin{frame}{The construction, drawn}
+  \nosrc
   \begin{center}
     \includegraphics[height=0.485\textheight]{ua_construction}
   \end{center}
@@ -963,6 +1047,7 @@
 \end{frame}
 
 \begin{frame}{Using the theorem: how fast does the error fall?}
+  \nosrc
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.50\textwidth}
       \centering
@@ -993,6 +1078,7 @@
 \end{frame}
 
 \begin{frame}{What the theorem does \emph{not} say}
+  \src{cybenko1989}{section}{5}
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item \alert{It is an existence result.} It says good weights
           exist; it does not say gradient descent will find them,
@@ -1018,6 +1104,8 @@
 % =====================================================================
 
 \begin{frame}{Same error, harder landscape}
+  \src{bishop2024}{equation}{6.29}
+  \src{bishop2024}{section}{6.4.1}
   Sum-of-squares error, now with a network inside
   (Bishop \& Bishop, 2024, \S6.1):
   \[
@@ -1040,6 +1128,7 @@
 \end{frame}
 
 \begin{frame}{Why the surface cannot be convex}
+  \src{bishop2024}{section}{6.2.4}
   \begin{propx}[Weight-space symmetries; B\&B \S6.1.1]
     For a network with $M$ hidden units and an odd activation
     ($h(-a)=-h(a)$, e.g.\ $\tanh$), every weight vector
@@ -1067,6 +1156,8 @@
 \end{frame}
 
 \begin{frame}{It works: shallow networks fit real data}
+  \src{bishop2024}{figure}{6.17}
+  \src{bishop2024}{section}{6.5.1}
   \begin{center}
     \includegraphics[height=0.525\textheight]{fits}
   \end{center}
@@ -1077,6 +1168,7 @@
 \end{frame}
 
 \begin{frame}{The dictionary}
+  \nosrc
   \centering
   \renewcommand{\arraystretch}{1.12}
   {\footnotesize
@@ -1114,6 +1206,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{0.1em}
   {\footnotesize
   \begin{enumerate}\setlength{\itemsep}{1pt}
@@ -1140,6 +1233,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \footnotesize
   \begin{itemize}\setlength{\itemsep}{3pt}
     \item C.~M.~Bishop \& H.~Bishop. \textit{Deep Learning:
@@ -1162,6 +1256,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

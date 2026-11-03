@@ -54,11 +54,16 @@
 \footright{Perceptrons and the PLA}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -67,6 +72,7 @@
 % =====================================================================
 
 \begin{frame}{Where Class 2 left us}
+  \nosrc
   \begin{itemize}
     \item A McCulloch--Pitts unit fires when
           $x_1+\cdots+x_n \ge \theta$ --- inputs are summed
@@ -87,6 +93,8 @@
 \end{frame}
 
 \begin{frame}{A little history: Rosenblatt's perceptron}
+  \src{rojas1996}{figure}{3.1}
+  \src{rojas1996}{section}{3.1.1}
   \centering
   \includegraphics[height=0.30\textheight]{classic_perceptron}
   \\[0.1em]
@@ -106,6 +114,7 @@
 \end{frame}
 
 \begin{frame}{The perceptron: a weighted threshold unit}
+  \src{rojas1996}{section}{3.1.1}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.9pt,
       every node/.style={font=\small}]
@@ -135,6 +144,8 @@
 \end{frame}
 
 \begin{frame}{Weights tilt the separating plane}
+  \src{rojas1996}{figure}{3.4}
+  \src{rojas1996}{section}{3.2.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       \centering
@@ -159,6 +170,8 @@
 \end{frame}
 
 \begin{frame}{The bias trick}
+  \src{rojas1996}{figure}{3.5}
+  \src{rojas1996}{section}{3.2.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.52\textwidth}
       \centering
@@ -186,6 +199,8 @@
 \end{frame}
 
 \begin{frame}{Extended input space}
+  \src{rojas1996}{section}{4.1.2}
+  \src{rojas1996}{section}{4.2}
   With the bias folded in, every input becomes an
   \alert{extended vector} and the test is homogeneous:
   \[
@@ -214,6 +229,8 @@
 % =====================================================================
 
 \begin{frame}{Two dual viewpoints}
+  \src{rojas1996}{figure}{3.7}
+  \src{rojas1996}{section}{3.3.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       \centering
@@ -246,6 +263,8 @@
 % =====================================================================
 
 \begin{frame}{What does it mean to `learn'?}
+  \src{rojas1996}{figure}{4.3}
+  \src{rojas1996}{section}{4.1.1}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.8pt,
       lvl/.style={font=\small},
@@ -274,6 +293,7 @@
 \end{frame}
 
 \begin{frame}{Learning as a search for parameters}
+  \src{rojas1996}{section}{4.1}
   \begin{itemize}
     \item A network is a \alert{parametric system}: fix the
           architecture, and the weights are \alert{free
@@ -292,6 +312,8 @@
 \end{frame}
 
 \begin{frame}{The error surface}
+  \src{rojas1996}{figure}{4.5}
+  \src{rojas1996}{section}{4.1.4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       \centering
@@ -318,6 +340,7 @@
 \end{frame}
 
 \begin{frame}{Absolute linear separability}
+  \src{rojas1996}{section}{4.1.3}
   \begin{itemize}
     \item The PLA needs a \alert{strict} separation: every
           positive example on the \emph{open} positive side,
@@ -341,6 +364,8 @@
 % =====================================================================
 
 \begin{frame}{Learning as error correction}
+  \src{rojas1996}{algorithm}{4.2.1}
+  \src{rojas1996}{section}{4.2}
   \begin{itemize}
     \item Start from a random weight vector; present training
           examples one at a time
@@ -357,6 +382,8 @@
 \end{frame}
 
 \begin{frame}{The algorithm}
+  \src{rojas1996}{algorithm}{4.2.1}
+  \src{rojas1996}{section}{4.2}
   Sets $P$ (target $1$) and $N$ (target $0$), extended
   vectors. Seek $\mathbf{w}$ with
   $\mathbf{w}\!\cdot\!\mathbf{x}>0$ on $P$,
@@ -381,6 +408,8 @@
 \end{frame}
 
 \begin{frame}{Why the update works}
+  \src{rojas1996}{figure}{4.8}
+  \src{rojas1996}{section}{4.2.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       \centering
@@ -411,6 +440,9 @@
 \end{frame}
 
 \begin{frame}{The update on the error surface}
+  \src{rojas1996}{figure}{4.11}
+  \src{rojas1996}{section}{4.2.3}
+  \src{rojas1996}{section}{4.1.4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.56\textwidth}
       \centering
@@ -436,6 +468,7 @@
 \end{frame}
 
 \begin{frame}{Fixing the error in one step}
+  \src{rojas1996}{section}{4.2.3}
   The plain rule nudges; we can instead \alert{fully correct}
   a mistake. For $\mathbf{x}\in P$ with
   $\mathbf{w}\!\cdot\!\mathbf{x} = -\delta \le 0$, set
@@ -465,6 +498,7 @@
 % =====================================================================
 
 \begin{frame}{The perceptron convergence theorem}
+  \src{rojas1996}{section}{4.2.2}
   \begin{redhighlight}
     If $P$ and $N$ are \alert{linearly separable}, the
     perceptron learning algorithm makes only a
@@ -486,6 +520,8 @@
 \end{frame}
 
 \begin{frame}{How long can it take? Worst case}
+  \src{rojas1996}{section}{4.2.5}
+  \src{rojas1996}{section}{4.2.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.42\textwidth}
       \centering
@@ -523,6 +559,9 @@
 \end{frame}
 
 \begin{frame}{The limit: XOR and non-separable data}
+  \src{rojas1996}{section}{3.2.2}
+  \src{rojas1996}{section}{3.3.1}
+  \src{rojas1996}{section}{4.2.4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.4\textwidth}
       \centering
@@ -565,6 +604,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \begin{enumerate}\setlength{\itemsep}{2pt}
     \item A \alert{perceptron} is a threshold unit with
           \alert{learnable weights} and a \alert{bias} ---
@@ -586,6 +626,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \footnotesize
   \begin{itemize}
     \item R.~Rojas. \textit{Neural Networks: A Systematic
@@ -603,6 +644,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

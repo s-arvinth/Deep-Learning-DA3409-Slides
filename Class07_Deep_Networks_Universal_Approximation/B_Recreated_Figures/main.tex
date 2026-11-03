@@ -89,11 +89,22 @@
 \footright{Deep Networks}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{arora2018}{R. Arora, A. Basu, P. Mianjy, A. Mukherjee, Understanding deep neural networks with rectified linear units, ICLR 2018; arXiv:1611.01491, 2018}
+\srcdef{cybenko1989}{G. Cybenko, Approximation by superpositions of a sigmoidal function, Mathematics of Control, Signals and Systems 2, 303-314, 1989}
+\srcdef{hornik1991}{K. Hornik, Approximation capabilities of multilayer feedforward networks, Neural Networks 4(2), 251-257, 1991}
+\srcdef{leshno1993}{M. Leshno, V. Y. Lin, A. Pinkus, S. Schocken, Multilayer feedforward networks with a nonpolynomial activation function can approximate any function, Neural Networks 6(6), 861-867, 1993}
+\srcdef{montufar2014}{G. Montufar, R. Pascanu, K. Cho, Y. Bengio, On the number of linear regions of deep neural networks, NeurIPS 2014; arXiv:1402.1869, 2014}
+\srcdef{telgarsky2016}{M. Telgarsky, Benefits of depth in neural networks, COLT 2016 (PMLR 49); arXiv:1602.04485, 2016}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -102,6 +113,7 @@
 % =====================================================================
 
 \begin{frame}{Notation used throughout this course}
+  \nosrc
   \vspace{0.2em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.22}
@@ -136,6 +148,7 @@
 \end{frame}
 
 \begin{frame}{Where the shallow network left us}
+  \nosrc
   \vspace{0.3em}
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item A shallow network is a linear read-out over \alert{learned
@@ -156,6 +169,7 @@
 \end{frame}
 
 \begin{frame}{An intuition: solve a big problem in stages}
+  \nosrc
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item A shallow network must map raw inputs to the answer in
@@ -176,6 +190,9 @@
 \end{frame}
 
 \begin{frame}{Two networks to work with}
+  \src{prince2023}{figure}{4.1}
+  \src{prince2023}{equation}{4.1-4.4}
+  \src{prince2023}{section}{4.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.48\textwidth}
       \centering
@@ -230,6 +247,8 @@
 \end{frame}
 
 \begin{frame}{Composing the two networks}
+  \src{prince2023}{figure}{4.1}
+  \src{prince2023}{section}{4.1}
   \begin{center}
     \includegraphics[height=0.445\textheight]{compose}
   \end{center}
@@ -245,6 +264,7 @@
 \end{frame}
 
 \begin{frame}{Why the pieces multiply}
+  \src{prince2023}{section}{4.1}
   \begin{propx}[Composition of piecewise-linear maps]
     {\small If $f_1:\mathbb{R}\to\mathbb{R}$ is continuous and
     piecewise linear with $p$ pieces, and $f_2$ with $q$ pieces, then
@@ -272,6 +292,8 @@
 \end{frame}
 
 \begin{frame}{Folding: why the pattern repeats}
+  \src{prince2023}{figure}{4.3}
+  \src{prince2023}{section}{4.1}
   \centering
   \begin{tikzpicture}[line width=0.9pt, scale=0.74]
     \draw[shc, fill=shc!8] (-3.4,1.5) rectangle (3.4,2.1);
@@ -313,6 +335,8 @@
 \end{frame}
 
 \begin{frame}{The same thing, in the plots}
+  \src{prince2023}{figure}{4.3}
+  \src{prince2023}{section}{4.1}
   \begin{center}
     \includegraphics[height=0.475\textheight]{fold}
   \end{center}
@@ -324,6 +348,8 @@
 \end{frame}
 
 \begin{frame}{Counting for our two networks}
+  \src{prince2023}{section}{4.5.2}
+  \src{prince2023}{section}{4.1}
   \vspace{0.3em}
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item $f_1$ has $3$ hidden units, so $4$ pieces and
@@ -347,6 +373,8 @@
 \end{frame}
 
 \begin{frame}{Composing in two dimensions}
+  \src{prince2023}{figure}{4.2}
+  \src{prince2023}{section}{4.1}
   \begin{center}
     \includegraphics[height=0.435\textheight]{compose2d}
   \end{center}
@@ -368,6 +396,9 @@
 % =====================================================================
 
 \begin{frame}{Two hidden layers}
+  \src{prince2023}{figure}{4.4}
+  \src{prince2023}{equation}{4.7-4.9}
+  \src{prince2023}{section}{4.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.52\textwidth}
       \centering
@@ -413,6 +444,8 @@
 \end{frame}
 
 \begin{frame}{Computed step by step}
+  \src{prince2023}{figure}{4.5}
+  \src{prince2023}{section}{4.3}
   \begin{center}
     \includegraphics[height=0.565\textheight]{buildup}
   \end{center}
@@ -423,6 +456,11 @@
 \end{frame}
 
 \begin{frame}{The general deep network}
+  \src{prince2023}{figure}{4.6}
+  \src{bishop2024}{equation}{6.19}
+  \src{prince2023}{equation}{4.15}
+  \src{prince2023}{section}{4.4.1}
+  \src{prince2023}{section}{4.3.1}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.6pt, font=\small,
       scale=0.60, transform shape]
@@ -482,6 +520,9 @@
 \end{frame}
 
 \begin{frame}{Building depth recursively}
+  \src{bishop2024}{equation}{6.19}
+  \src{bishop2024}{section}{6.3}
+  \src{bishop2024}{section}{6.2}
   \vspace{0.2em}
   The two-layer construction \alert{extends recursively}
   (Bishop \& Bishop, 2024, \S6.2):
@@ -508,6 +549,7 @@
 \end{frame}
 
 \begin{frame}{A note on counting layers}
+  \src{bishop2024}{section}{6.3}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.6pt, font=\small,
       scale=0.66, transform shape]
@@ -549,6 +591,7 @@
 % =====================================================================
 
 \begin{frame}{What we already proved, and what is missing}
+  \nosrc
   \begin{lemmax}[One dimension, from Class 5]
     {\small For every continuous $f$ on $[a,b]$ and every
     $\varepsilon>0$ there is a \alert{one-hidden-layer} ReLU network
@@ -573,6 +616,7 @@
 \end{frame}
 
 \begin{frame}{Ridge functions}
+  \nosrc
   \vspace{0.2em}
   A \alert{ridge function} is one that depends on $\mathbf{x}$ only
   through a single linear combination:
@@ -600,6 +644,7 @@
 \end{frame}
 
 \begin{frame}{Ridge functions are enough}
+  \src{cybenko1989}{section}{4}
   \begin{lemmax}[Density of trigonometric ridge functions]
     {\small Let $\mathcal{K}\subset\mathbb{R}^{D}$ be compact. The set
     \[
@@ -634,6 +679,9 @@
 \end{frame}
 
 \begin{frame}{Universal approximation in $D$ dimensions}
+  \src{cybenko1989}{section}{3}
+  \src{hornik1991}{section}{2}
+  \src{leshno1993}{section}{6}
   \begin{theorem}[Cybenko 1989; Hornik 1991]
     {\small Let $h$ be continuous and \alert{not a polynomial},
     $\mathcal{K}\subset\mathbb{R}^{D}$ compact and
@@ -672,6 +720,7 @@
 \end{frame}
 
 \begin{frame}{The construction, drawn}
+  \src{cybenko1989}{section}{4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.52\textwidth}
       \centering
@@ -695,6 +744,8 @@
 \end{frame}
 
 \begin{frame}{Which activations work?}
+  \src{leshno1993}{section}{4}
+  \src{leshno1993}{section}{6}
   \begin{theorem}[Leshno, Lin, Pinkus \& Schocken, 1993]
     {\small For continuous $h$, one-hidden-layer networks are dense in
     $C(\mathcal{K})$ for every compact $\mathcal{K}$ \alert{if and
@@ -722,6 +773,7 @@
 \end{frame}
 
 \begin{frame}{What ReLU networks compute, exactly}
+  \src{arora2018}{section}{2}
   \begin{propx}[ReLU networks are the piecewise-linear functions]
     {\small (i) Every ReLU network computes a \alert{continuous
     piecewise-linear} function. (ii) Conversely, every continuous
@@ -749,6 +801,7 @@
 \end{frame}
 
 \begin{frame}{What universality does \emph{not} settle}
+  \nosrc
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item \alert{It is an existence result.} Good weights exist; it
@@ -773,6 +826,7 @@
 % =====================================================================
 
 \begin{frame}{A function that depth computes cheaply}
+  \src{telgarsky2016}{section}{3.3}
   \begin{lemmax}[The sawtooth]
     {\small Let $T(x)=2h(x)-4h(x-\tfrac12)$, a \alert{two-unit} ReLU
     network. Then $T$ maps $[0,1]$ onto $[0,1]$, folding it in half,
@@ -799,6 +853,7 @@
 \end{frame}
 
 \begin{frame}{The sawtooth, drawn}
+  \src{telgarsky2016}{section}{3.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.53\textwidth}
       \centering
@@ -821,6 +876,8 @@
 \end{frame}
 
 \begin{frame}{Depth beats width, provably}
+  \src{telgarsky2016}{section}{1.1}
+  \src{telgarsky2016}{section}{3.3}
   \begin{theorem}[Depth--width separation; after Telgarsky, 2016]
     {\small For every $L\in\mathbb{N}$ the function $T^{\circ L}$ is
     computed by a ReLU network with $L$ hidden layers of width $2$,
@@ -851,6 +908,7 @@
 \end{frame}
 
 \begin{frame}{The same effect in $D$ dimensions}
+  \src{montufar2014}{section}{3.2}
   \begin{theorem}[Region lower bound; Mont\'ufar et al., 2014]
     {\small A ReLU network with $L$ hidden layers of width
     $M\ge D$ on $\mathbb{R}^{D}$ can realise at least
@@ -875,6 +933,8 @@
 \end{frame}
 
 \begin{frame}{Linear regions per parameter}
+  \src{prince2023}{figure}{4.7}
+  \src{prince2023}{section}{4.5.2}
   \begin{center}
     \includegraphics[height=0.435\textheight]{regions}
   \end{center}
@@ -889,6 +949,7 @@
 \end{frame}
 
 \begin{frame}{Shallow vs.\ deep: the trade-off}
+  \nosrc
   \centering
   \vspace{0.3em}
   \renewcommand{\arraystretch}{1.2}
@@ -922,6 +983,7 @@
 % =====================================================================
 
 \begin{frame}{Depth as an inductive bias}
+  \src{bishop2024}{section}{6.3.1}
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item Universality tells us what a network \emph{can} represent;
@@ -940,6 +1002,7 @@
 \end{frame}
 
 \begin{frame}{Hierarchical representations}
+  \src{bishop2024}{section}{6.3.1}
   \centering
   \vspace{0.5em}
   \begin{tikzpicture}[>=Stealth, line width=0.8pt,
@@ -972,6 +1035,8 @@
 \end{frame}
 
 \begin{frame}{Why hierarchy is the right bias for real data}
+  \src{bishop2024}{figure}{6.8}
+  \src{bishop2024}{section}{6.1.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.44\textwidth}
       \centering
@@ -998,6 +1063,7 @@
 \end{frame}
 
 \begin{frame}{A hierarchy, built explicitly}
+  \nosrc
   \begin{center}
     \includegraphics[height=0.485\textheight]{hierarchy}
   \end{center}
@@ -1014,6 +1080,7 @@
 \end{frame}
 
 \begin{frame}{Distributed representations}
+  \src{bishop2024}{section}{6.3.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.42\textwidth}
       \centering
@@ -1050,6 +1117,7 @@
 \end{frame}
 
 \begin{frame}{Representation learning: the set-up}
+  \src{bishop2024}{section}{6.3.3}
   \vspace{0.2em}
   Two interleaved half-moons, $400$ points, Gaussian noise
   $\sigma=0.1$, inputs standardised. Network $2\to 24\to 2\to 1$,
@@ -1081,6 +1149,7 @@
 \end{frame}
 
 \begin{frame}{Representation learning: the result}
+  \src{bishop2024}{section}{6.3.3}
   \begin{center}
     \includegraphics[height=0.48\textheight]{representation}
   \end{center}
@@ -1097,6 +1166,7 @@
 \end{frame}
 
 \begin{frame}{What that experiment shows}
+  \src{bishop2024}{section}{6.3.3}
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item Each layer \alert{transforms} the data to make the task
@@ -1114,6 +1184,8 @@
 \end{frame}
 
 \begin{frame}{Why depth tends to win in practice}
+  \src{prince2023}{section}{4.5.5}
+  \src{bishop2024}{section}{6.3.1}
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item Real data is \alert{compositional}: edges $\to$ shapes
@@ -1131,6 +1203,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{0.1em}
   {\footnotesize
   \begin{enumerate}\setlength{\itemsep}{2pt}
@@ -1158,6 +1231,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \footnotesize
   \begin{itemize}\setlength{\itemsep}{2pt}
     \item C.~M.~Bishop \& H.~Bishop. \textit{Deep Learning:
@@ -1184,6 +1258,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

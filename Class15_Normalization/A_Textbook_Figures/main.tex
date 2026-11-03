@@ -86,11 +86,23 @@
 \footright{Normalization}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{ba2016}{J. L. Ba, J. R. Kiros, G. E. Hinton, Layer normalization, arXiv:1607.06450, 2016}
+\srcdef{glorot2010}{X. Glorot, Y. Bengio, Understanding the difficulty of training deep feedforward neural networks, AISTATS 2010 (PMLR 9), 249-256, 2010}
+\srcdef{he2015}{K. He, X. Zhang, S. Ren, J. Sun, Delving deep into rectifiers: surpassing human-level performance on ImageNet classification, ICCV 2015; arXiv:1502.01852, 2015}
+\srcdef{ioffe2015}{S. Ioffe, C. Szegedy, Batch normalization: accelerating deep network training by reducing internal covariate shift, ICML 2015; arXiv:1502.03167, 2015}
+\srcdef{santurkar2018}{S. Santurkar, D. Tsipras, A. Ilyas, A. Madry, How does batch normalization help optimization?, NeurIPS 2018; arXiv:1805.11604, 2018}
+\srcdef{wu2018}{Y. Wu, K. He, Group normalization, ECCV 2018; arXiv:1803.08494, 2018}
+\srcdef{xiong2020}{R. Xiong, Y. Yang, D. He, K. Zheng, S. Zheng, C. Xing, H. Zhang, Y. Lan, L. Wang, T.-Y. Liu, On layer normalization in the transformer architecture, ICML 2020; arXiv:2002.04745, 2020}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -99,6 +111,7 @@
 % =====================================================================
 
 \begin{frame}{Repairing the problem instead of the iteration}
+  \nosrc
   \bridge{Class 14 spent its whole length working around a large
   condition number. It never asked where that number came from.}
   \vspace{0.35em}
@@ -124,6 +137,7 @@
 \end{frame}
 
 \begin{frame}{Notation added today}
+  \nosrc
   \vspace{0.4em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.34}
@@ -154,6 +168,7 @@
 \end{frame}
 
 \begin{frame}{The Hessian of a linear model is a data matrix}
+  \nosrc
   \vspace{-0.25em}
   For $E(\mathbf{w}) = \sum_n (\mathbf{w}^{\mathsf T}\mathbf{x}_n - y_n)^2$ the curvature
   does not depend on $\mathbf{w}$ at all:
@@ -179,6 +194,7 @@
 \end{frame}
 
 \begin{frame}{The scale of a feature, squared}
+  \src{bishop2024}{section}{7.4.1}
   \vspace{-0.25em}
   \begin{propx}[Feature scale and the condition number]\label{th:scale}
     \small
@@ -211,6 +227,8 @@
 % =====================================================================
 
 \begin{frame}{Data normalization}
+  \src{bishop2024}{equation}{7.48-7.50}
+  \src{bishop2024}{section}{7.4.1}
   \vspace{-0.5em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
@@ -237,6 +255,7 @@
 \end{frame}
 
 \begin{frame}{What normalizing the inputs does}
+  \src{bishop2024}{figure}{7.7}
   \vspace{0.2em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.44\textwidth}
@@ -260,6 +279,7 @@
   \end{columns}
 \end{frame}
 \begin{frame}{What normalizing the inputs does not fix}
+  \nosrc
   \vspace{0.2em}
   \begin{itemize}\itemsep0.35em
     \item It fixes the \alert{diagonal} of $\mathbf{H}$; correlations live off
@@ -282,6 +302,10 @@
 % =====================================================================
 
 \begin{frame}{What one layer does to the variance}
+  \src{prince2023}{equation}{7.28-7.30}
+  \src{prince2023}{section}{7.5.1}
+  \src{bishop2024}{equation}{7.21-7.22}
+  \src{bishop2024}{section}{7.2.5}
   \vspace{-0.25em}
   \begin{propx}[Variance across one ReLU layer]\label{th:var}
     \small
@@ -313,6 +337,9 @@
 \end{frame}
 
 \begin{frame}{One layer is a multiplication, so depth is a power}
+  \src{he2015}{equation}{9}
+  \src{he2015}{section}{2.2}
+  \src{prince2023}{section}{7.5}
   \vspace{-0.25em}
   \begin{corx}[Geometric growth or geometric decay]\label{th:geom}
     \small
@@ -335,6 +362,7 @@
 \end{frame}
 
 \begin{frame}{Fifty layers, five initializations}
+  \src{prince2023}{figure}{7.7}
   \begin{center}
     \includegraphics[height=0.50\textheight]{Train2Exploding}
   \end{center}
@@ -345,6 +373,10 @@
   this variance is written $\sigma^2_\Omega$.}
 \end{frame}
 \begin{frame}{The same problem, seen through the chain rule}
+  \src{bishop2024}{equation}{7.51}
+  \src{bishop2024}{section}{7.4.2}
+  \src{prince2023}{equation}{7.32}
+  \src{prince2023}{section}{7.5.2}
   \vspace{-0.35em}
   \[
     \frac{\partial E}{\partial w_i}
@@ -368,6 +400,12 @@
 \end{frame}
 
 \begin{frame}{He initialization}
+  \src{he2015}{equation}{10}
+  \src{he2015}{section}{2.2}
+  \src{bishop2024}{equation}{7.23}
+  \src{bishop2024}{section}{7.2.5}
+  \src{prince2023}{equation}{7.31}
+  \src{prince2023}{section}{7.5.1}
   \vspace{-0.3em}
   \begin{propx}[The variance that preserves scale]\label{th:he}
     \small
@@ -392,6 +430,11 @@
 \end{frame}
 
 \begin{frame}{When the layer is not square}
+  \src{glorot2010}{equation}{10-12}
+  \src{glorot2010}{section}{4.2.1}
+  \src{prince2023}{equation}{7.33}
+  \src{prince2023}{section}{7.5.3}
+  \src{prince2023}{page}{113}
   \vspace{-0.35em}
   \[
     \underbrace{\sigma_w^2 = \frac{2}{D}}_{\text{forward}}
@@ -414,6 +457,7 @@
 \end{frame}
 
 \begin{frame}{Why the weights cannot all start equal}
+  \src{bishop2024}{section}{7.2.5}
   \vspace{-0.35em}
   \begin{propx}[Symmetry is never broken by gradient descent]\label{th:sym}
     \small
@@ -437,6 +481,7 @@
 \end{frame}
 
 \begin{frame}{Initialization is a statement about the first step}
+  \src{bishop2024}{section}{7.4.2}
   \bridge{The weights are chosen so that every layer starts at unit
   variance. Then training changes the weights.}
   \vspace{0.4em}
@@ -455,6 +500,10 @@
 \end{frame}
 
 \begin{frame}{Batch normalization}
+  \src{bishop2024}{equation}{7.52-7.54}
+  \src{bishop2024}{section}{7.4.2}
+  \src{ioffe2015}{algorithm}{1}
+  \src{ioffe2015}{section}{3}
   \vspace{-0.55em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
@@ -483,6 +532,8 @@
 \end{frame}
 
 \begin{frame}{Giving the scale back, on purpose}
+  \src{bishop2024}{equation}{7.55}
+  \src{bishop2024}{section}{7.4.2}
   \vspace{-0.35em}
   \[
     \tilde{a}_{ni} \;=\; \gamma_i\, \hat{a}_{ni} + \beta_i
@@ -501,6 +552,7 @@
 \end{frame}
 
 \begin{frame}{Which entries share a mean}
+  \src{bishop2024}{figure}{7.8}
   \vspace{0.35em}
   \begin{center}
     \includegraphics[height=0.44\textheight]{Bishop7_8a}\hspace{2.2em}%
@@ -510,6 +562,8 @@
   \figcap[0.97]{Left: in batch normalization the mean and variance are computed across the mini-batch, separately for each hidden unit. Right: in layer normalization they are computed across the hidden units, separately for each data point. Bishop \& Bishop (2024), Fig.~7.8.}
 \end{frame}
 \begin{frame}{Training time and inference time differ}
+  \src{bishop2024}{equation}{7.56-7.57}
+  \src{bishop2024}{section}{7.4.2}
   \vspace{-0.35em}
   \[
     \bar\mu_i^{(\tau)} = \alpha\,\bar\mu_i^{(\tau-1)}
@@ -532,6 +586,7 @@
 \end{frame}
 
 \begin{frame}{A normalized layer does not care how big its weights are}
+  \src{ioffe2015}{section}{3.3}
   \vspace{-0.25em}
   \begin{propx}[Scale invariance]\label{th:scaleinv}
     \small
@@ -558,6 +613,9 @@
 \end{frame}
 
 \begin{frame}{Why it works is not what was first claimed}
+  \src{santurkar2018}{section}{2.1}
+  \src{santurkar2018}{section}{3.1}
+  \src{bishop2024}{section}{7.4.2}
   \vspace{0.3em}
   \begin{itemize}\itemsep0.42em
     \item The original argument was \alert{internal covariate shift}:
@@ -577,6 +635,7 @@
 \end{frame}
 
 \begin{frame}{Three places batch normalization breaks}
+  \src{bishop2024}{section}{7.4.3}
   \vspace{0.25em}
   \begin{itemize}\itemsep0.38em
     \item \alert{Small batches.} The statistics are estimates from $K$
@@ -598,6 +657,10 @@
 \end{frame}
 
 \begin{frame}{Layer normalization}
+  \src{bishop2024}{equation}{7.58-7.60}
+  \src{bishop2024}{section}{7.4.3}
+  \src{ba2016}{equation}{3}
+  \src{ba2016}{section}{3}
   \vspace{-0.55em}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
@@ -628,6 +691,8 @@
 \end{frame}
 
 \begin{frame}{Four normalizers, one formula}
+  \src{wu2018}{figure}{2}
+  \src{wu2018}{section}{3.1}
   \vspace{0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.42}
@@ -655,6 +720,9 @@
 \end{frame}
 
 \begin{frame}{Where the normalizer sits in a residual block}
+  \src{xiong2020}{figure}{1}
+  \src{xiong2020}{section}{3.2}
+  \src{xiong2020}{section}{3.3}
   \vspace{0.1em}
   \begin{center}
   \begin{tikzpicture}[>=Stealth, line width=0.9pt, font=\footnotesize,
@@ -709,6 +777,7 @@
 % =====================================================================
 
 \begin{frame}{A network that trains}
+  \nosrc
   \vspace{0.5em}
   \begin{center}
   \begin{tikzpicture}[>=Stealth, line width=0.9pt, font=\small,
@@ -746,6 +815,7 @@
 \end{frame}
 
 \begin{frame}{What each layer of defence buys}
+  \nosrc
   \vspace{0.3em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.42}
@@ -768,6 +838,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.25em}
   {\footnotesize
   \begin{enumerate}\itemsep0.25em
@@ -793,6 +864,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \begin{itemize}\itemsep0.26em
@@ -821,6 +893,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

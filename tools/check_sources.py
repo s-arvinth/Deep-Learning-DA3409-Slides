@@ -12,6 +12,7 @@ BASE = "03bf6e7"
 FIXED = {"bishop2024", "prince2023", "rojas1996", "goodfellow2016", "jurafsky_slp3"}
 TYPES = {"chapter", "section", "figure", "equation", "table", "algorithm", "page"}
 PRE = [r"\newcommand{\src}[3]{}", r"\newcommand{\nosrc}{}", r"\newcommand{\srcdef}[2]{}"]
+PRE_LINE = re.compile(r"^\s*\\newcommand\{\\(src|nosrc|srcdef)\}(\[[23]\])?\{\}\s*(%.*)?$")
 NUM = re.compile(r"^[0-9A-Za-z]+(\.[0-9A-Za-z]+)*(-[0-9A-Za-z]+(\.[0-9A-Za-z]+)*)?$")
 KEY = re.compile(r"^[a-z]+[0-9]{4}[a-z]?$")
 TAGLINE = re.compile(r"^\s*(\\src\{[^}]*\}\{[^}]*\}\{[^}]*\}\s*)+$|^\s*\\nosrc\s*$|^\s*\\srcdef\{.*$|^\s*$")
@@ -36,7 +37,7 @@ def check(path):
     err, warn = [], []
     raw = open(path, errors="ignore").read()
     for n, l in enumerate(raw.split("\n"), 1):
-        if re.search(r"(?<!\\)%.*\\(src|nosrc|srcdef)\b", l):
+        if re.search(r"(?<!\\)%.*\\(src|nosrc|srcdef)\b", l) and not PRE_LINE.match(l):
             err.append(f"line {n}: tag inside a % comment")
     s = strip_comments(raw)
     pre = s.split(r"\begin{document}")[0]
@@ -56,7 +57,7 @@ def check(path):
         nos = len(re.findall(r"\\nosrc\b", body))
         if not tags and not nos: err.append(f"frame '{title}': no \\src and no \\nosrc")
         if tags and nos: err.append(f"frame '{title}': has both \\src and \\nosrc")
-        if re.search(r"\\src\{[^}]*\}\{[^}]*\}(?!\{)", body) or re.search(r"\\src(?!\{)", body.replace(r"\srcdef", "")):
+        if re.search(r"\\src\{[^}]*\}\{[^}]*\}(?!\{)", body) or re.search(r"\\src(?![{a-zA-Z])", body):
             err.append(f"frame '{title}': malformed \\src (needs three arguments)")
         for k, t, num in tags:
             used.add(k); nsrc += 1
@@ -78,7 +79,7 @@ def check(path):
         if l.startswith("-") and not l.startswith("---"): err.append("removed or changed line: " + l[:90])
         if l.startswith("+") and not l.startswith("+++"):
             t = l[1:]
-            if not (TAGLINE.match(t) or t.strip() in PRE or re.match(r"^\s*%", t) or re.match(r"^\s+\S.*\}\s*$", t)):
+            if not (TAGLINE.match(t) or t.strip() in PRE or PRE_LINE.match(t) or re.match(r"^\s*%", t) or re.match(r"^\s+\S.*\}\s*$", t)):
                 err.append("added line that is not a tag: " + t[:90])
     return len(frames), nsrc, nnos, err, warn
 

@@ -59,11 +59,16 @@
 \footright{Single-layer NN/Shallow NN}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -72,6 +77,7 @@
 % =====================================================================
 
 \begin{frame}{What changes}
+  \nosrc
   \centering
   \renewcommand{\arraystretch}{1.2}
   {\small
@@ -100,6 +106,7 @@
 \end{frame}
 
 \begin{frame}{Recap: the shallow network}
+  \nosrc
   From Class~5 (Bishop \& Bishop, 2024, Eqs.~6.1--6.3):
   \[
     a_j = \sum_{i} w_{ji}^{(1)} x_i + w_{j0}^{(1)},
@@ -130,6 +137,9 @@
 % =====================================================================
 
 \begin{frame}{Discriminant functions}
+  \src{bishop2024}{figure}{5.1}
+  \src{bishop2024}{equation}{5.2}
+  \src{bishop2024}{section}{5.1.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       {\small The simplest classifier
@@ -161,6 +171,8 @@
 \end{frame}
 
 \begin{frame}{Why not just do least squares?}
+  \src{bishop2024}{figure}{5.4}
+  \src{bishop2024}{section}{5.1.4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
       \centering
@@ -189,6 +201,9 @@
 \end{frame}
 
 \begin{frame}{Where the sigmoid comes from}
+  \src{bishop2024}{figure}{5.13}
+  \src{bishop2024}{equation}{5.48}
+  \src{bishop2024}{section}{5.3.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
       \centering
@@ -224,6 +239,9 @@
 % =====================================================================
 
 \begin{frame}{Where the loss function comes from}
+  \src{prince2023}{equation}{5.6}
+  \src{prince2023}{section}{5.2}
+  \src{prince2023}{section}{5.1}
   The network predicts, for each input, the
   \alert{parameters of a probability distribution} over
   the output (Prince, 2023, \S5.1--5.2):
@@ -252,6 +270,9 @@
 \end{frame}
 
 \begin{frame}{You already know one instance}
+  \src{prince2023}{figure}{5.4}
+  \src{prince2023}{equation}{5.11}
+  \src{prince2023}{section}{5.3.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.55\textwidth}
       \centering
@@ -284,6 +305,9 @@
 % =====================================================================
 
 \begin{frame}{Step 1: the Bernoulli distribution}
+  \src{prince2023}{figure}{5.6}
+  \src{prince2023}{equation}{5.17}
+  \src{prince2023}{section}{5.4}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       {\small Domain: $y\in\{0,1\}$. One parameter
@@ -312,6 +336,11 @@
 \end{frame}
 
 \begin{frame}{Step 2: the logistic sigmoid}
+  \src{prince2023}{figure}{5.7}
+  \src{prince2023}{section}{5.4}
+  \src{bishop2024}{equation}{5.42}
+  \src{bishop2024}{equation}{5.43}
+  \src{bishop2024}{equation}{5.72}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.52\textwidth}
       {\small Map the real line to $[0,1]$
@@ -347,6 +376,8 @@
 \end{frame}
 
 \begin{frame}{The binary classification model}
+  \src{prince2023}{figure}{5.8}
+  \src{prince2023}{section}{5.4}
   \centering
   \includegraphics[width=0.76\linewidth]{LossBinaryClassification}
   \\[0.1em]
@@ -356,6 +387,9 @@
 \end{frame}
 
 \begin{frame}{Step 3: binary cross-entropy}
+  \src{bishop2024}{equation}{5.74}
+  \src{bishop2024}{equation}{5.75}
+  \src{bishop2024}{section}{5.4.3}
   Negative log-likelihood of the Bernoulli model, with
   $y_n=\sigma(a_n)$ read as
   $p(t_n{=}1\mid\mathbf{x}_n)$
@@ -381,6 +415,7 @@
 \end{frame}
 
 \begin{frame}{Why not squared error on probabilities?}
+  \nosrc
   With a sigmoid output and squared error:
   \[
     \frac{\partial E_{\mathrm{SSE}}}{\partial a_n}
@@ -412,6 +447,9 @@
 % =====================================================================
 
 \begin{frame}{Step 1: the categorical distribution}
+  \src{prince2023}{figure}{5.9}
+  \src{prince2023}{equation}{5.21}
+  \src{prince2023}{section}{5.5}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       {\small Domain: $y\in\{1,\dots,K\}$. Parameters
@@ -440,6 +478,8 @@
 \end{frame}
 
 \begin{frame}{Step 2: softmax}
+  \src{bishop2024}{equation}{5.76-5.77}
+  \src{bishop2024}{section}{5.4.4}
   Normalise the $K$ pre-activations
   (Bishop \& Bishop, 2024, Eqs.~5.76--5.77):
   \[
@@ -462,6 +502,8 @@
 \end{frame}
 
 \begin{frame}{Softmax posteriors, visualised}
+  \src{bishop2024}{figure}{5.14}
+  \src{bishop2024}{section}{5.3.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
       \centering
@@ -490,6 +532,8 @@
 \end{frame}
 
 \begin{frame}{The multi-class model}
+  \src{prince2023}{figure}{5.10}
+  \src{prince2023}{section}{5.5}
   \centering
   \includegraphics[width=0.88\linewidth]{LossMultiClassClassification}
   \\[0.1em]
@@ -501,6 +545,9 @@
 \end{frame}
 
 \begin{frame}{Step 3: multi-class cross-entropy}
+  \src{bishop2024}{equation}{5.80}
+  \src{bishop2024}{equation}{5.81}
+  \src{bishop2024}{section}{5.4.4}
   One-hot targets $\mathbf{t}_n\in\{0,1\}^K$,
   $\sum_k t_{nk}=1$
   (Bishop \& Bishop, 2024, Eq.~5.80):
@@ -528,6 +575,8 @@
 % =====================================================================
 
 \begin{frame}{One principle, any output type}
+  \src{prince2023}{figure}{5.11}
+  \src{prince2023}{section}{5.5.1}
   \centering
   \includegraphics[height=0.62\textheight]{LossDataTypes}
   \\[0.1em]
@@ -538,6 +587,8 @@
 \end{frame}
 
 \begin{frame}{Cross-entropy: the second view}
+  \src{prince2023}{figure}{5.12}
+  \src{prince2023}{section}{5.7}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.56\textwidth}
       \centering
@@ -564,6 +615,8 @@
 \end{frame}
 
 \begin{frame}{Fixed features vs.\ learned features, again}
+  \src{bishop2024}{figure}{5.15}
+  \src{bishop2024}{section}{5.4.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.47\textwidth}
       \centering
@@ -591,6 +644,7 @@
 \end{frame}
 
 \begin{frame}{Output activations: the complete table}
+  \nosrc
   \centering
   \renewcommand{\arraystretch}{1.2}
   {\small
@@ -621,6 +675,7 @@
 \end{frame}
 
 \begin{frame}{The dictionary (Classes 5--6)}
+  \nosrc
   \centering
   \renewcommand{\arraystretch}{1.12}
   {\footnotesize
@@ -656,6 +711,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \begin{enumerate}\setlength{\itemsep}{2pt}
     \item The loss follows from a \alert{distribution
           over outputs}: pick it to match the domain,
@@ -678,6 +734,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \footnotesize
   \begin{itemize}
     \item C.~M.~Bishop \& H.~Bishop. \textit{Deep
@@ -695,6 +752,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

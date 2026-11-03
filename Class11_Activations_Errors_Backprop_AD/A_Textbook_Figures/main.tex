@@ -98,11 +98,18 @@
 \footright{Backpropagation}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{baur1983}{W. Baur, V. Strassen, The complexity of partial derivatives, Theoretical Computer Science 22(3), 317-330, 1983}
+\srcdef{baydin2018}{A. G. Baydin, B. A. Pearlmutter, A. A. Radul, J. M. Siskind, Automatic differentiation in machine learning: a survey, JMLR 18(153), 1-43, 2018}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -111,6 +118,7 @@
 % =====================================================================
 
 \begin{frame}{Notation used throughout this course}
+  \nosrc
   \vspace{0.2em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.22}
@@ -145,6 +153,7 @@
 \end{frame}
 
 \begin{frame}{Six lectures of \emph{what}; now \emph{how}}
+  \nosrc
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item Classes 5--6: a network is regression on \alert{learned
@@ -163,6 +172,7 @@
 \end{frame}
 
 \begin{frame}{Four questions}
+  \nosrc
   \vspace{0.05em}
   \centering
   \renewcommand{\arraystretch}{1.35}
@@ -196,6 +206,7 @@
 % =====================================================================
 
 \begin{frame}{What the activation is for}
+  \nosrc
   \bridge{We have used ReLU without ever asking what the alternatives
   cost. Training is what settles the question.}
   \vspace{0.3em}
@@ -219,6 +230,8 @@
 \end{frame}
 
 \begin{frame}{The activation zoo: saturating and hard}
+  \src{bishop2024}{figure}{6.12}
+  \src{bishop2024}{section}{6.2.3}
   \vspace{0.35em}
   \begin{center}
     \includegraphics[height=0.425\textheight]{Bishop6_12a}\hspace{0.9em}%
@@ -230,6 +243,8 @@
 \end{frame}
 
 \begin{frame}{The activation zoo: the rectifier family}
+  \src{bishop2024}{figure}{6.12}
+  \src{bishop2024}{section}{6.2.3}
   \vspace{0.35em}
   \begin{center}
     \includegraphics[height=0.425\textheight]{Bishop6_12c}\hspace{0.9em}%
@@ -241,6 +256,8 @@
 \end{frame}
 
 \begin{frame}{What backpropagation actually uses}
+  \src{bishop2024}{equation}{5.72}
+  \src{bishop2024}{section}{6.2.3}
   \begin{center}
     \includegraphics[height=0.50\textheight]{saturation_bound}
   \end{center}
@@ -251,6 +268,8 @@
 \end{frame}
 
 \begin{frame}{Why the logistic sigmoid fails at depth}
+  \src{bishop2024}{equation}{5.72}
+  \src{bishop2024}{section}{6.2.3}
   \vspace{0.2em}
   \begin{propx}[The sigmoid derivative is bounded by $1/4$]
     {\small For all $a$, $\ \sigma'(a)=\sigma(a)\big(1-\sigma(a)\big)
@@ -275,6 +294,7 @@
 \end{frame}
 
 \begin{frame}{The rectifier and its derivative}
+  \src{bishop2024}{section}{6.2.3}
   \begin{center}
     \includegraphics[height=0.50\textheight]{dying_relu}
   \end{center}
@@ -285,6 +305,7 @@
 \end{frame}
 
 \begin{frame}{The rectifier's own failure mode}
+  \src{bishop2024}{section}{6.2.3}
   \vspace{0.2em}
   \begin{propx}[Dead units are permanent]
     {\small If a ReLU unit has $a_j(\mathbf{x}_n)\leq 0$ for
@@ -309,6 +330,7 @@
 \end{frame}
 
 \begin{frame}{Choosing an activation}
+  \nosrc
   \vspace{0.05em}
   \centering
   \renewcommand{\arraystretch}{1.25}
@@ -342,6 +364,7 @@
 % =====================================================================
 
 \begin{frame}{What Class 6 established}
+  \nosrc
   \bridge{The output end of the network was settled in Class 6. One
   slide to recall it, then the cases it did not cover.}
   \vspace{0.3em}
@@ -370,6 +393,8 @@
 \end{frame}
 
 \begin{frame}{Why the output gradient is always $\hat y - y$}
+  \src{bishop2024}{equation}{5.95}
+  \src{bishop2024}{section}{5.4.6}
   \vspace{0.05em}
   \begin{theorem}[Canonical link]
     {\small Let the output distribution be an exponential family
@@ -398,6 +423,7 @@
 \end{frame}
 
 \begin{frame}{Why this matters for training}
+  \nosrc
   \vspace{0.3em}
   {\small
   \begin{itemize}\setlength{\itemsep}{5pt}
@@ -420,6 +446,9 @@
 \end{frame}
 
 \begin{frame}{When one number per input is not enough}
+  \src{prince2023}{figure}{5.5}
+  \src{prince2023}{equation}{5.15}
+  \src{prince2023}{section}{5.3.4}
   \bridge{The three standard cases all assume the noise is the same
   everywhere. Two common situations where it is not.}
   \begin{center}
@@ -433,6 +462,10 @@
 \end{frame}
 
 \begin{frame}{When the target is genuinely multi-valued}
+  \src{bishop2024}{figure}{6.17}
+  \src{bishop2024}{figure}{6.18}
+  \src{bishop2024}{equation}{6.38}
+  \src{bishop2024}{section}{6.5}
   \begin{center}
     \includegraphics[height=0.30\textheight]{Bishop6_17a}\hspace{1.2em}
     \includegraphics[height=0.30\textheight]{Bishop6_17b}\hspace{1.2em}
@@ -455,6 +488,8 @@
 \end{frame}
 
 \begin{frame}{What the mixture learns}
+  \src{bishop2024}{figure}{6.19}
+  \src{bishop2024}{section}{6.5}
   \begin{center}
     \includegraphics[height=0.245\textheight]{Bishop6_19a}\hspace{0.5em}
     \includegraphics[height=0.245\textheight]{Bishop6_19b}\hspace{0.5em}
@@ -473,6 +508,7 @@
 % =====================================================================
 
 \begin{frame}{The problem, stated}
+  \nosrc
   \bridge{We have an error function and an architecture. Gradient
   descent needs one number per parameter, and there are $W$ of them.}
   \vspace{0.3em}
@@ -496,6 +532,8 @@
 \end{frame}
 
 \begin{frame}{Why not just perturb each weight?}
+  \src{bishop2024}{figure}{8.2}
+  \src{bishop2024}{section}{8.1.4}
   \begin{center}
     \includegraphics[height=0.44\textheight]{Bishop8_2}
   \end{center}
@@ -509,6 +547,8 @@
 \end{frame}
 
 \begin{frame}{The one idea}
+  \src{bishop2024}{equation}{8.7-8.10}
+  \src{bishop2024}{section}{8.1.2}
   \vspace{0.0em}
   {\small A weight $w^{(l)}_{ji}$ affects $E$ \alert{only through} the
   pre-activation $a^{(l)}_j$ it feeds. So the chain rule splits every
@@ -539,6 +579,8 @@
 \end{frame}
 
 \begin{frame}{The backpropagation equations}
+  \src{bishop2024}{equation}{8.10-8.13}
+  \src{bishop2024}{section}{8.1.2}
   \vspace{0.05em}
   \begin{theorem}[Backpropagation]
     {\small For a feed-forward network with error $E_n$ and
@@ -573,6 +615,9 @@
 \end{frame}
 
 \begin{frame}{The algorithm}
+  \src{bishop2024}{algorithm}{8.1}
+  \src{bishop2024}{equation}{8.14}
+  \src{prince2023}{section}{7.4.1}
   \vspace{0.2em}
   \begin{algox}[Backpropagation for one example]
     {\small
@@ -599,6 +644,7 @@
 \end{frame}
 
 \begin{frame}{A worked pass, by hand}
+  \src{bishop2024}{section}{8.1.3}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.8pt, font=\small,
       scale=0.665, transform shape]
@@ -640,6 +686,7 @@
 \end{frame}
 
 \begin{frame}{What it costs}
+  \src{bishop2024}{section}{8.1.4}
   \vspace{0.2em}
   \begin{propx}[Backpropagation is $O(W)$]
     {\small For a network with $W$ weights, one forward pass costs
@@ -665,6 +712,7 @@
 \end{frame}
 
 \begin{frame}{The recursion has a price: vanishing and exploding}
+  \src{prince2023}{section}{7.5}
   \bridge{The backward pass multiplies by $h'$ and by $\mathbf{W}^\top$
   once per layer. Repeated multiplication is unstable in both
   directions.}
@@ -692,6 +740,8 @@
 \end{frame}
 
 \begin{frame}{Measured, over twenty layers}
+  \src{prince2023}{figure}{7.7}
+  \src{prince2023}{section}{7.5}
   \begin{center}
     \includegraphics[height=0.47\textheight]{PrinceExploding}
   \end{center}
@@ -706,6 +756,7 @@
 % =====================================================================
 
 \begin{frame}{Three ways to differentiate a program}
+  \src{bishop2024}{section}{8.2}
   \bridge{Backpropagation was derived for one architecture. Real
   networks branch, share weights and change shape --- so we want the
   general version.}
@@ -734,6 +785,8 @@
 \end{frame}
 
 \begin{frame}{The computational graph}
+  \src{prince2023}{figure}{7.9}
+  \src{prince2023}{section}{7.4.3}
   \begin{center}
     \includegraphics[width=0.94\linewidth]{PrinceCompGraph}
   \end{center}
@@ -746,6 +799,8 @@
 \end{frame}
 
 \begin{frame}{Forward mode}
+  \src{bishop2024}{section}{8.2.1}
+  \src{baydin2018}{section}{3.1.1}
   \vspace{0.2em}
   Carry a \alert{tangent} $\dot v = \partial v/\partial x_d$ alongside
   every value, for one chosen input $x_d$:
@@ -770,6 +825,7 @@
 \end{frame}
 
 \begin{frame}{Reverse mode}
+  \src{bishop2024}{section}{8.2.2}
   \vspace{0.05em}
   Carry an \alert{adjoint} $\bar v = \partial E/\partial v$ instead, and
   sweep the other way:
@@ -796,6 +852,10 @@
 \end{frame}
 
 \begin{frame}{Which mode, and why}
+  \src{bishop2024}{figure}{8.4}
+  \src{bishop2024}{figure}{8.5}
+  \src{bishop2024}{section}{8.2.2}
+  \src{bishop2024}{section}{8.2.1}
   \begin{center}
     \includegraphics[width=0.47\linewidth]{Bishop8_4}\hspace{0.6em}
     \includegraphics[width=0.47\linewidth]{Bishop8_5}
@@ -808,6 +868,8 @@
 \end{frame}
 
 \begin{frame}{The cheap gradient principle}
+  \src{baur1983}{section}{4}
+  \src{baydin2018}{section}{3.2}
   \vspace{0.3em}
   \begin{theorem}[Baur \& Strassen, 1983]
     {\small Let $f:\mathbb{R}^{D}\to\mathbb{R}$ be computed by a
@@ -828,6 +890,7 @@
 \end{frame}
 
 \begin{frame}{What it costs in memory, and how to pay less}
+  \src{prince2023}{page}{114}
   \vspace{0.3em}
   {\small
   \begin{itemize}\setlength{\itemsep}{5pt}
@@ -849,6 +912,8 @@
 \end{frame}
 
 \begin{frame}{How the frameworks do it}
+  \src{prince2023}{section}{7.4.2}
+  \src{baydin2018}{section}{5}
   \vspace{0.3em}
   {\small
   \begin{itemize}\setlength{\itemsep}{4pt}
@@ -877,6 +942,7 @@
 % =====================================================================
 
 \begin{frame}{One training step, end to end}
+  \nosrc
   \vspace{0.3em}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.9pt, font=\small,
@@ -912,6 +978,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.05em}
   {\footnotesize
   \begin{enumerate}\setlength{\itemsep}{0pt}
@@ -942,6 +1009,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \scriptsize
   \begin{itemize}\setlength{\itemsep}{2pt}
     \item C.~M.~Bishop \& H.~Bishop. \textit{Deep Learning: Foundations
@@ -973,6 +1041,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

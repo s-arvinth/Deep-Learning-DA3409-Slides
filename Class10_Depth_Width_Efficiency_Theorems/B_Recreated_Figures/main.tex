@@ -91,11 +91,27 @@
 \footright{Depth and Width Efficiency}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{bartlett2019}{P. L. Bartlett, N. Harvey, C. Liaw, A. Mehrabian, Nearly-tight VC-dimension and pseudodimension bounds for piecewise linear neural networks, JMLR 20(63), 1-17; arXiv:1703.02930, 2019}
+\srcdef{cohen2016b}{N. Cohen, O. Sharir, A. Shashua, On the expressive power of deep learning: a tensor analysis, COLT 2016 (PMLR 49); arXiv:1509.05009, 2016}
+\srcdef{eldan2016}{R. Eldan, O. Shamir, The power of depth for feedforward neural networks, COLT 2016 (PMLR 49); arXiv:1512.03965, 2016}
+\srcdef{liang2017}{S. Liang, R. Srikant, Why deep neural networks for function approximation?, ICLR 2017; arXiv:1610.04161, 2017}
+\srcdef{lu2017}{Z. Lu, H. Pu, F. Wang, Z. Hu, L. Wang, The expressive power of neural networks: a view from the width, NeurIPS 2017; arXiv:1709.02540, 2017}
+\srcdef{montufar2014}{G. Montufar, R. Pascanu, K. Cho, Y. Bengio, On the number of linear regions of deep neural networks, NeurIPS 2014; arXiv:1402.1869, 2014}
+\srcdef{poggio2017}{T. Poggio, H. Mhaskar, L. Rosasco, B. Miranda, Q. Liao, Why and when can deep-but not shallow-networks avoid the curse of dimensionality: a review, International Journal of Automation and Computing 14:503; arXiv:1611.00740, 2017}
+\srcdef{safran2017}{I. Safran, O. Shamir, Depth-width tradeoffs in approximating natural functions with neural networks, ICML 2017 (PMLR 70); arXiv:1610.09887, 2017}
+\srcdef{serra2018}{T. Serra, C. Tjandraatmadja, S. Ramalingam, Bounding and counting linear regions of deep neural networks, ICML 2018 (PMLR 80); arXiv:1711.02114, 2018}
+\srcdef{telgarsky2016}{M. Telgarsky, Benefits of depth in neural networks, COLT 2016 (PMLR 49); arXiv:1602.04485, 2016}
+\srcdef{vardi2022}{G. Vardi, G. Yehudai, O. Shamir, Width is less important than depth in ReLU neural networks, COLT 2022 (PMLR 178); arXiv:2202.03841, 2022}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -104,6 +120,7 @@
 % =====================================================================
 
 \begin{frame}{Where Class 9 left us}
+  \nosrc
   \vspace{0.2em}
   \begin{itemize}\setlength{\itemsep}{4pt}
     \item A tiling of fixed features costs $S^{D}$ parameters --- the
@@ -124,6 +141,7 @@
 \end{frame}
 
 \begin{frame}{Today's question, in one line}
+  \nosrc
   \vspace{-0.05em}
   \begin{center}
     {\large Given $W$ parameters, is it better to spend them on
@@ -156,6 +174,7 @@
 % =====================================================================
 
 \begin{frame}{A function built for the purpose}
+  \src{telgarsky2016}{section}{3.3}
   \bridge{To compare depth against width we need a target on which they
   can be told apart. One function does the whole job.}
   \vspace{0.3em}
@@ -183,6 +202,8 @@
 \end{frame}
 
 \begin{frame}{Depth beats width, provably}
+  \src{telgarsky2016}{section}{1.1}
+  \src{prince2023}{page}{53}
   \bridge{Every layer doubles the pieces. A single layer can only add
   them --- and that is already the whole separation.}
   \vspace{0.3em}
@@ -203,6 +224,8 @@
 \end{frame}
 
 \begin{frame}{The separation, measured}
+  \src{telgarsky2016}{section}{1.1}
+  \src{telgarsky2016}{section}{3.3}
   \vspace{-0.6em}
   \begin{center}
     \includegraphics[height=0.735\textheight]{depth_width}
@@ -210,6 +233,9 @@
 \end{frame}
 
 \begin{frame}{The cost of flattening}
+  \src{telgarsky2016}{section}{1.1}
+  \src{lu2017}{section}{4}
+  \src{vardi2022}{section}{3}
   \bridge{The same two numbers, plotted against each other.}
   \vspace{-0.2em}
   \begin{center}
@@ -222,6 +248,9 @@
 \end{frame}
 
 \begin{frame}{Not just one contrived function}
+  \src{liang2017}{section}{4}
+  \src{liang2017}{section}{3.1}
+  \src{prince2023}{page}{53}
   \bridge{A sceptic will say the sawtooth was built to be hard. Three
   results say the phenomenon is generic.}
   \vspace{0.3em}
@@ -243,6 +272,7 @@
 \end{frame}
 
 \begin{frame}{A separation that grows with the dimension}
+  \src{eldan2016}{section}{1}
   \bridge{The sawtooth lives on a line. In many dimensions the gap
   appears for a different, and very natural, reason.}
   \vspace{0.3em}
@@ -267,6 +297,7 @@
 \end{frame}
 
 \begin{frame}{And for almost every function}
+  \src{cohen2016b}{section}{4}
   \bridge{Eldan--Shamir exhibits one hard function. The next result says
   the hard ones are the rule, not the exception.}
   \vspace{0.3em}
@@ -291,6 +322,7 @@
 \end{frame}
 
 \begin{frame}{Even for a function you could draw}
+  \src{safran2017}{section}{3}
   \bridge{One last witness, and the simplest of the four.}
   \vspace{0.4em}
   \begin{theorem}[Safran \& Shamir, 2017]
@@ -313,6 +345,7 @@
 % =====================================================================
 
 \begin{frame}{The question, turned around}
+  \src{prince2023}{page}{53}
   \bridge{We have only asked one of the two directions. The mirror
   question has a strikingly different answer.}
   \vspace{0.5em}
@@ -333,6 +366,9 @@
 \end{frame}
 
 \begin{frame}{Width efficiency}
+  \src{lu2017}{section}{4}
+  \src{vardi2022}{section}{3}
+  \src{prince2023}{page}{53}
   \vspace{0.3em}
   \begin{theorem}[Width efficiency; Lu, Pu, Wang, Hu \& Wang, 2017]
     {\small There exist classes of wide, shallow networks that can only
@@ -353,6 +389,7 @@
 \end{frame}
 
 \begin{frame}{The asymmetry, and what it decides}
+  \src{prince2023}{page}{53}
   \vspace{0.05em}
   \centering
   \renewcommand{\arraystretch}{1.4}
@@ -382,6 +419,7 @@
 % =====================================================================
 
 \begin{frame}{Counting linear regions}
+  \src{montufar2014}{section}{3.2}
   \bridge{Separations compare two architectures on one function. A
   region count measures an architecture on its own.}
   \vspace{0.3em}
@@ -401,6 +439,8 @@
 \end{frame}
 
 \begin{frame}{Counting linear regions: the ceiling}
+  \src{serra2018}{section}{3.1}
+  \src{serra2018}{section}{5}
   \vspace{0.3em}
   \begin{theorem}[Upper bound; Serra, Tjandraatmadja \& Ramalingam, 2018]
     {\small The number of regions is at most
@@ -421,6 +461,9 @@
 \end{frame}
 
 \begin{frame}{Regions against parameters}
+  \src{montufar2014}{section}{3.2}
+  \src{serra2018}{section}{3.1}
+  \src{prince2023}{section}{4.5.2}
   \begin{center}
     \includegraphics[height=0.505\textheight]{regions_bounds}
   \end{center}
@@ -432,6 +475,8 @@
 \end{frame}
 
 \begin{frame}{Capacity has a price}
+  \src{bartlett2019}{equation}{2}
+  \src{bartlett2019}{section}{1.1}
   \bridge{Every result so far has been an argument for depth. Here is
   the bill.}
   \vspace{0.3em}
@@ -456,6 +501,8 @@
 \end{frame}
 
 \begin{frame}{VC dimension, drawn}
+  \src{bartlett2019}{equation}{2}
+  \src{bartlett2019}{section}{1.1}
   \begin{center}
     \includegraphics[height=0.505\textheight]{vc_growth}
   \end{center}
@@ -470,6 +517,7 @@
 % =====================================================================
 
 \begin{frame}{The tension to resolve}
+  \nosrc
   \vspace{0.3em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item Class 9: on a smoothness ball, $W^{-s/D}$ is
@@ -489,6 +537,8 @@
 \end{frame}
 
 \begin{frame}{Compositional functions escape the curse}
+  \src{poggio2017}{section}{3.4}
+  \src{poggio2017}{section}{3.3}
   \vspace{0.2em}
   \begin{theorem}[Poggio, Mhaskar, Rosasco, Miranda \& Liao, 2017]
     {\small Let $f$ be \alert{compositional}: built from a binary tree
@@ -511,6 +561,8 @@
 \end{frame}
 
 \begin{frame}{The size of the effect}
+  \src{poggio2017}{section}{3.4}
+  \src{poggio2017}{section}{3.3}
   \begin{center}
     \includegraphics[height=0.50\textheight]{compositional}
   \end{center}
@@ -522,6 +574,7 @@
 \end{frame}
 
 \begin{frame}{Why real data is compositional}
+  \src{bishop2024}{section}{6.3.1}
   \vspace{0.3em}
   \begin{itemize}\setlength{\itemsep}{5pt}
     \item An image label depends on \alert{local} structure first:
@@ -542,6 +595,7 @@
 % =====================================================================
 
 \begin{frame}{What each result actually gives}
+  \nosrc
   \bridge{Nine results in one lecture. What each one is really
   claiming:}
   \vspace{-0.05em}
@@ -581,6 +635,7 @@
 \end{frame}
 
 \begin{frame}{What none of them say}
+  \nosrc
   \bridge{And the gap between all this and a working network:}
   \vspace{0.3em}
   \begin{itemize}\setlength{\itemsep}{5pt}
@@ -598,6 +653,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{0.1em}
   {\footnotesize
   \begin{enumerate}\setlength{\itemsep}{2pt}
@@ -627,6 +683,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \scriptsize
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item S.~J.~D.~Prince. \textit{Understanding Deep Learning.}
@@ -650,6 +707,7 @@
 \end{frame}
 
 \begin{frame}{References (continued)}
+  \nosrc
   \scriptsize
   \begin{itemize}\setlength{\itemsep}{1pt}
     \item Z.~Lu, H.~Pu, F.~Wang, Z.~Hu \& L.~Wang, \textit{NeurIPS}
@@ -670,6 +728,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

@@ -74,11 +74,19 @@
 \footright{Convolution Filters}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{cohen2016a}{T. S. Cohen, M. Welling, Group Equivariant Convolutional Networks, ICML 2016, 2016}
+\srcdef{dumoulin2016}{V. Dumoulin, F. Visin, A guide to convolution arithmetic for deep learning, arXiv:1603.07285, 2016}
+\srcdef{luo2016}{W. Luo, Y. Li, R. Urtasun, R. Zemel, Understanding the Effective Receptive Field in Deep Convolutional Neural Networks, NIPS 2016, 2016}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -87,6 +95,7 @@
 % =====================================================================
 
 \begin{frame}{Building the symmetry in, rather than learning it}
+  \nosrc
   \bridge{Class 18 listed four ways to obtain an invariance and said the
   fourth was to build it into the architecture. This class carries that
   out.}
@@ -111,6 +120,7 @@
 \end{frame}
 
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.35em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.30}
@@ -148,6 +158,9 @@
 
 
 \begin{frame}{Images as Data}
+  \src{bishop2024}{section}{10.2}
+  \src{bishop2024}{section}{10.1.1}
+  \src{prince2023}{section}{10.2.4}
   \vspace{-0.15em}
   \begin{block}{The cost of a dense first layer}
     \small
@@ -173,6 +186,8 @@
 \end{frame}
 
 \begin{frame}{Images as Data}
+  \src{prince2023}{figure}{10.4}
+  \src{prince2023}{section}{10.2.4}
   \vspace{-0.5em}
   \begin{center}
     \includegraphics[width=0.69\linewidth]{dense_vs_conv}
@@ -190,6 +205,8 @@
 \section{Invariance and Equivariance}
 % =====================================================================
 \begin{frame}{Images}
+  \src{prince2023}{figure}{10.1}
+  \src{prince2023}{section}{10.1}
   \begin{center}
     \includegraphics[height=0.505\textheight]{P_ConvEquiInv}
   \end{center}
@@ -200,6 +217,10 @@
 \end{frame}
 
 \begin{frame}{Some Definitions}
+  \src{prince2023}{equation}{10.1-10.2}
+  \src{prince2023}{figure}{10.1}
+  \src{prince2023}{section}{10.1}
+  \src{bishop2024}{section}{10.2.2}
   \vspace{-0.2em}
   \begin{defx}[Invariance and equivariance]\label{th:inv}
     \small
@@ -231,6 +252,8 @@
 \section{The Operation}
 % =====================================================================
 \begin{frame}{One dimension, one kernel}
+  \src{prince2023}{figure}{10.3}
+  \src{prince2023}{section}{10.2.3}
   \vspace{-0.5em}
   \begin{center}
     \includegraphics[width=0.86\linewidth]{conv_knobs}
@@ -245,6 +268,12 @@
   \hfill Prince (2023), Fig.~10.3.\par}
 \end{frame}
 \begin{frame}{Three knobs, and one formula}
+  \src{dumoulin2016}{section}{5.1}
+  \src{prince2023}{figure}{10.3}
+  \src{prince2023}{section}{10.2.2}
+  \src{prince2023}{section}{10.2.3}
+  \src{bishop2024}{section}{10.2.3}
+  \src{bishop2024}{section}{10.2.4}
   \vspace{-0.15em}
   \begin{propx}[Output length]\label{th:size}
     \small
@@ -269,6 +298,11 @@
   Bishop \& Bishop (2024), \S10.2.3--10.2.4; Dumoulin \& Visin (2016).}
 \end{frame}
 \begin{frame}{One dimension, one kernel}
+  \src{prince2023}{equation}{10.3-10.5}
+  \src{prince2023}{figure}{10.2}
+  \src{prince2023}{figure}{10.4}
+  \src{prince2023}{section}{10.2.1}
+  \src{prince2023}{section}{10.2.4}
   \vspace{-0.35em}
   \[
     z_i \;=\; \sum_{j=1}^{k} w_j\, x_{\,i + j - \lceil k/2 \rceil},
@@ -292,6 +326,8 @@
 \end{frame}
 
 \begin{frame}{A convolution is a dense layer with most of it deleted}
+  \src{prince2023}{figure}{10.4}
+  \src{prince2023}{section}{10.2.4}
   \begin{center}
     \includegraphics[width=0.94\linewidth]{weight_matrix}
   \end{center}
@@ -307,6 +343,8 @@
 
 
 \begin{frame}{What one kernel responds to}
+  \src{bishop2024}{equation}{10.1}
+  \src{bishop2024}{section}{10.2.1}
   \vspace{-0.2em}
   \begin{propx}[The kernel is what it detects]\label{th:matched}
     \small
@@ -329,6 +367,8 @@
   \srcline{Bishop \& Bishop (2024), \S10.2.1, Eq.~10.1, Exercise 10.1.}
 \end{frame}
 \begin{frame}{Convolution is the equivariant linear map}
+  \src{bishop2024}{section}{10.2.2}
+  \src{cohen2016a}{section}{5}
   \vspace{-0.25em}
   \begin{thmx}[Equivariance, and its converse]\label{th:equi}
     \small
@@ -353,6 +393,7 @@
 \end{frame}
 
 \begin{frame}{Proof, in both directions}
+  \nosrc
   \vspace{-0.25em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -385,6 +426,8 @@
 % =====================================================================
 
 \begin{frame}{One kernel is not enough}
+  \src{prince2023}{figure}{10.5}
+  \src{prince2023}{section}{10.2.5}
   \vspace{-0.3em}
   \[
     h^{c'}_{i}
@@ -410,6 +453,9 @@
 \end{frame}
 
 \begin{frame}{How far back a unit can see}
+  \src{prince2023}{figure}{10.6}
+  \src{prince2023}{section}{10.2.6}
+  \src{luo2016}{section}{1}
   \vspace{-0.2em}
   \begin{thmx}[Receptive field]\label{th:rf}
     \small
@@ -435,6 +481,8 @@
 \end{frame}
 
 \begin{frame}{The recursion, checked}
+  \src{prince2023}{section}{10.2.6}
+  \src{luo2016}{section}{1}
   \begin{center}
     \includegraphics[width=0.70\linewidth]{receptive_field}
   \end{center}
@@ -446,6 +494,8 @@
 \end{frame}
 
 \begin{frame}{How far back a unit can see, drawn}
+  \src{prince2023}{figure}{10.6}
+  \src{prince2023}{section}{10.2.6}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.65\linewidth]{rf_spot_ab}
@@ -461,6 +511,8 @@
 \end{frame}
 
 \begin{frame}{How far back a unit can see, drawn}
+  \src{prince2023}{figure}{10.6}
+  \src{prince2023}{section}{10.2.6}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.53\linewidth]{rf_spot_c}
@@ -474,6 +526,8 @@
 \end{frame}
 
 \begin{frame}{How far back a unit can see, drawn}
+  \src{prince2023}{figure}{10.6}
+  \src{prince2023}{section}{10.2.6}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.66\linewidth]{rf_spot_d}
@@ -494,6 +548,9 @@
 % =====================================================================
 
 \begin{frame}{2D data: Images}
+  \src{prince2023}{equation}{10.6}
+  \src{prince2023}{section}{10.3}
+  \src{bishop2024}{section}{10.2.5}
   \vspace{-0.35em}
   \[
     h^{c'}_{i,j}
@@ -518,6 +575,10 @@
 \end{frame}
 
 \begin{frame}{2D Convolution}
+  \src{prince2023}{figure}{10.9}
+  \src{prince2023}{equation}{10.6}
+  \src{prince2023}{section}{10.3}
+  \src{bishop2024}{section}{10.2.5}
  \vspace{-0.5cm}
  \begin{center}
  \includegraphics[scale=0.55]{Class23_Convolution_Filters/B_Recreated_Figures/figs/Deep Learning.JPG}  \vspace{-0.5cm}
@@ -527,6 +588,10 @@
 \end{frame}
 
 \begin{frame}{2D Convolution with Color Images}
+  \src{prince2023}{figure}{10.10}
+  \src{prince2023}{equation}{10.6}
+  \src{prince2023}{section}{10.3}
+  \src{bishop2024}{section}{10.2.5}
  \vspace{-0.5cm}
  \begin{center}
  \includegraphics[scale=0.65]{Class23_Convolution_Filters/B_Recreated_Figures/figs/3D_color.JPG}  \vspace{-0.5cm}
@@ -542,6 +607,8 @@
 \end{frame}
 
 \begin{frame}{What a $3 \times 3$ kernel does}
+  \src{bishop2024}{figure}{10.4}
+  \src{bishop2024}{section}{10.2.2}
   \begin{center}
     \includegraphics[width=0.96\linewidth]{kernels_2d}
   \end{center}
@@ -553,6 +620,8 @@
 \end{frame}
 
 \begin{frame}{What a $3 \times 3$ kernel does, on an image}
+  \src{bishop2024}{figure}{10.4}
+  \src{bishop2024}{section}{10.2.2}
   \begin{center}
     \includegraphics[width=0.90\linewidth]{Bishop10_4}
   \end{center}
@@ -567,6 +636,9 @@
 % =====================================================================
 
 \begin{frame}{Down, and back up}
+  \src{prince2023}{section}{10.4.1}
+  \src{prince2023}{section}{10.4.2}
+  \src{bishop2024}{section}{10.2.6}
   \vspace{-0.15em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.22}
@@ -595,6 +667,10 @@
 \end{frame}
 
 \begin{frame}{Resolution, drawn}
+  \src{prince2023}{figure}{10.11}
+  \src{prince2023}{figure}{10.12}
+  \src{prince2023}{section}{10.4.1}
+  \src{prince2023}{section}{10.4.2}
   \vspace{-0.5em}
   \begin{center}
     \includegraphics[width=0.92\linewidth]{resolution_circles}
@@ -611,6 +687,9 @@
 \end{frame}
 
 \begin{frame}{Resolution, measured}
+  \src{bishop2024}{section}{10.2.6}
+  \src{prince2023}{section}{10.4.1}
+  \src{prince2023}{section}{10.4.2}
   \begin{center}
     \includegraphics[width=0.96\linewidth]{resolution}
   \end{center}
@@ -626,6 +705,7 @@
 % =====================================================================
 
 \begin{frame}{The layer, in one table}
+  \nosrc
   \vspace{-0.05em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.24}
@@ -656,6 +736,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.05em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -688,6 +769,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -719,6 +801,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

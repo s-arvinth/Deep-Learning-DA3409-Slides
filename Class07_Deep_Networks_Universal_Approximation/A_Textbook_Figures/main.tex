@@ -55,11 +55,16 @@
 \footright{Deep Networks}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -68,6 +73,7 @@
 % =====================================================================
 
 \begin{frame}{Where the shallow network left us}
+  \nosrc
   \begin{itemize}
     \item A shallow network is a linear read-out over
           \alert{learned features} $h_d=\mathrm{a}[\theta_{d0}
@@ -87,6 +93,7 @@
 \end{frame}
 
 \begin{frame}{An intuition: solve a big problem in stages}
+  \nosrc
   \begin{itemize}
     \item A shallow network must map raw inputs to the answer
           in \alert{one leap} --- every hidden unit works
@@ -107,6 +114,8 @@
 \end{frame}
 
 \begin{frame}{Composing two networks}
+  \src{prince2023}{figure}{4.1}
+  \src{prince2023}{section}{4.1}
   \centering
   \includegraphics[height=0.60\textheight]{DeepConcat}
   \\[0.1em]
@@ -116,6 +125,8 @@
 \end{frame}
 
 \begin{frame}{The folding analogy}
+  \src{prince2023}{figure}{4.3}
+  \src{prince2023}{section}{4.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.52\textwidth}
       \centering
@@ -142,6 +153,8 @@
 \end{frame}
 
 \begin{frame}{Composing in two dimensions}
+  \src{prince2023}{figure}{4.2}
+  \src{prince2023}{section}{4.1}
   \centering
   \includegraphics[height=0.62\textheight]{DeepTwoLayer2D}
   \\[0.1em]
@@ -155,6 +168,10 @@
 % =====================================================================
 
 \begin{frame}{Two hidden layers, one equation}
+  \src{prince2023}{figure}{4.4}
+  \src{prince2023}{equation}{4.7-4.9}
+  \src{prince2023}{equation}{4.14}
+  \src{prince2023}{section}{4.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       \centering
@@ -181,6 +198,8 @@
 \end{frame}
 
 \begin{frame}{Computed step by step}
+  \src{prince2023}{figure}{4.5}
+  \src{prince2023}{section}{4.3}
   \centering
   \includegraphics[height=0.65\textheight]{DeepBuildUp}
   \\[0.1em]
@@ -189,6 +208,10 @@
 \end{frame}
 
 \begin{frame}{The general deep network}
+  \src{prince2023}{figure}{4.6}
+  \src{prince2023}{equation}{4.15-4.16}
+  \src{prince2023}{section}{4.4.1}
+  \src{prince2023}{section}{4.3.1}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.55\textwidth}
       \centering
@@ -218,6 +241,10 @@
 \end{frame}
 
 \begin{frame}{The same object in Bishop's notation}
+  \src{bishop2024}{figure}{6.15}
+  \src{bishop2024}{equation}{6.19}
+  \src{bishop2024}{section}{6.3.6}
+  \src{bishop2024}{section}{6.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.5\textwidth}
       \centering
@@ -245,6 +272,9 @@
 \end{frame}
 
 \begin{frame}{Building depth recursively}
+  \src{bishop2024}{equation}{6.19}
+  \src{bishop2024}{section}{6.3}
+  \src{bishop2024}{section}{6.2}
   The two-layer construction \alert{extends recursively}
   (Bishop \& Bishop, 2024, \S6.2):
   \[
@@ -270,6 +300,8 @@
 \end{frame}
 
 \begin{frame}{A note on counting layers}
+  \src{bishop2024}{figure}{6.15}
+  \src{bishop2024}{section}{6.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.44\textwidth}
       \centering
@@ -302,6 +334,7 @@
 % =====================================================================
 
 \begin{frame}{Depth as an inductive bias}
+  \src{bishop2024}{section}{6.3.1}
   \begin{itemize}
     \item Universality tells us \emph{what} a network
           \emph{can} represent; it says nothing about what it
@@ -321,6 +354,7 @@
 \end{frame}
 
 \begin{frame}{Hierarchical representations}
+  \src{bishop2024}{section}{6.3.1}
   \centering
   \begin{tikzpicture}[>=Stealth, line width=0.8pt,
       node distance=3mm,
@@ -356,6 +390,8 @@
 \end{frame}
 
 \begin{frame}{Why hierarchy is the right bias for real data}
+  \src{bishop2024}{figure}{6.8}
+  \src{bishop2024}{section}{6.1.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.46\textwidth}
       \centering
@@ -382,6 +418,7 @@
 \end{frame}
 
 \begin{frame}{Distributed representations}
+  \src{bishop2024}{section}{6.3.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.44\textwidth}
       \centering
@@ -417,6 +454,8 @@
 \end{frame}
 
 \begin{frame}{Representation learning}
+  \src{bishop2024}{figure}{6.11}
+  \src{bishop2024}{section}{6.3.3}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.46\textwidth}
       \centering
@@ -450,6 +489,9 @@
 % =====================================================================
 
 \begin{frame}{Universal approximation, revisited}
+  \src{prince2023}{section}{4.5.3}
+  \src{prince2023}{section}{4.5.1}
+  \src{bishop2024}{section}{6.3}
   \begin{itemize}
     \item A shallow network is \alert{already} a universal
           approximator (Class~5) --- so why go deep?
@@ -468,6 +510,8 @@
 \end{frame}
 
 \begin{frame}{Linear regions per parameter}
+  \src{prince2023}{figure}{4.7}
+  \src{prince2023}{section}{4.5.2}
   \begin{columns}[T, onlytextwidth]
     \begin{column}{0.58\textwidth}
       \centering
@@ -492,6 +536,7 @@
 \end{frame}
 
 \begin{frame}{Shallow vs.\ deep: the trade-off}
+  \nosrc
   \centering
   \renewcommand{\arraystretch}{1.2}
   {\small
@@ -518,6 +563,8 @@
 \end{frame}
 
 \begin{frame}{Why depth tends to win in practice}
+  \src{prince2023}{section}{4.5.5}
+  \src{bishop2024}{section}{6.3.1}
   \begin{itemize}
     \item Real data is \alert{compositional}: edges $\to$
           shapes $\to$ objects; phonemes $\to$ words $\to$
@@ -536,6 +583,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \begin{enumerate}\setlength{\itemsep}{2pt}
     \item A \alert{deep network} is shallow networks
           \alert{composed}: each layer is a linear map
@@ -557,6 +605,7 @@
 \end{frame}
 
 \begin{frame}{References}
+  \nosrc
   \footnotesize
   \begin{itemize}
     \item S.~J.~D.~Prince. \textit{Understanding Deep
@@ -574,6 +623,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

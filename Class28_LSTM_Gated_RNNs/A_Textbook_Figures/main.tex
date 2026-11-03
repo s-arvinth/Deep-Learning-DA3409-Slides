@@ -77,11 +77,26 @@
 \footright{LSTM and Gated RNNs}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{cho2014}{Cho, K., van Merrienboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H. \& Bengio, Y., Learning phrase representations using RNN encoder-decoder for statistical machine translation, EMNLP 2014, 2014}
+\srcdef{chung2014}{Chung, J., Gulcehre, C., Cho, K. \& Bengio, Y., Empirical evaluation of gated recurrent neural networks on sequence modeling, arXiv preprint (NeurIPS 2014 DL Workshop), 2014}
+\srcdef{graves2014}{Graves, A., Wayne, G. \& Danihelka, I., Neural Turing machines, arXiv:1410.5401, 2014}
+\srcdef{greff2017}{Greff, K., Srivastava, R. K., Koutnik, J., Steunebrink, B. R. \& Schmidhuber, J., LSTM: a search space odyssey, IEEE TNNLS 28(10), 2017}
+\srcdef{hochreiter1997}{Hochreiter, S. \& Schmidhuber, J., Long short-term memory, Neural Computation 9(8), 1735-1780, 1997}
+\srcdef{jozefowicz2015}{Jozefowicz, R., Zaremba, W. \& Sutskever, I., An empirical exploration of recurrent network architectures, ICML 2015, 2015}
+\srcdef{jurafsky_slp3}{Jurafsky \& Martin, Speech and Language Processing, 3rd edition draft of August 19, 2026, https://web.stanford.edu/~jurafsky/slp3/}
+\srcdef{mikolov2012}{Mikolov, T., Statistical Language Models Based on Neural Networks (PhD thesis), Brno University of Technology, 2012}
+\srcdef{mozer1992}{Mozer, M. C., Induction of multiscale temporal structure, NeurIPS (NIPS 4), 1991 proceedings, publ. 1992, 1992}
+\srcdef{pascanu2013}{Pascanu, R., Mikolov, T. \& Bengio, Y., On the difficulty of training recurrent neural networks, ICML 2013, 2013}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -90,6 +105,8 @@
 % =====================================================================
 
 \begin{frame}{Where we are coming from}
+  \src{jurafsky_slp3}{section}{14.5}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.3em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -116,6 +133,8 @@
 \end{frame}
 
 \begin{frame}{The problem: a fact that must survive a long wait}
+  \src{jurafsky_slp3}{section}{14.5}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.2em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -140,6 +159,8 @@
 \end{frame}
 
 \begin{frame}{Why the simple cell is not enough}
+  \src{goodfellow2016}{section}{10.7}
+  \src{jurafsky_slp3}{section}{14.5}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -165,6 +186,9 @@
 \end{frame}
 
 \begin{frame}{The idea: a separate memory, with gates}
+  \src{jurafsky_slp3}{section}{14.5}
+  \src{goodfellow2016}{section}{10.10}
+  \src{hochreiter1997}{section}{4.1}
   \vspace{-0.3em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -186,6 +210,7 @@
   \srcline{Hochreiter \& Schmidhuber (1997); Gers et al.\ (2000); Jurafsky \& Martin (2026), \S14.5; Goodfellow et al.\ (2016), \S10.10.}
 \end{frame}
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.2em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.28}
@@ -223,6 +248,8 @@
 % =====================================================================
 
 \begin{frame}{The linear case: a power iteration}
+  \src{goodfellow2016}{equation}{10.36-10.39}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.45em}
   \begin{thmx}[Vanishing and exploding, without a nonlinearity]\label{th:power}
     \small
@@ -252,6 +279,8 @@
 \end{frame}
 
 \begin{frame}{The power method: the experiment}
+  \src{goodfellow2016}{equation}{10.36-10.39}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.15em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -281,6 +310,8 @@
 
 
 \begin{frame}{The composition, drawn}
+  \src{goodfellow2016}{figure}{10.15}
+  \src{goodfellow2016}{section}{10.7}
   \begin{center}
     \includegraphics[width=0.76\linewidth]{G10_15}
   \end{center}
@@ -295,6 +326,8 @@
   \hfill Goodfellow et al.\ (2016), Fig.~10.15, \S10.7.\par}
 \end{frame}
 \begin{frame}{With the nonlinearity: a bound on the gradient}
+  \src{pascanu2013}{section}{2.1}
+  \src{goodfellow2016}{section}{10.7}
   \vspace{-0.45em}
   \begin{propx}[Sufficient condition for vanishing]\label{th:bound}
     \small
@@ -330,6 +363,11 @@
 % =====================================================================
 
 \begin{frame}{Three ways to a path the gradient survives}
+  \src{goodfellow2016}{section}{10.9.1}
+  \src{goodfellow2016}{section}{10.9.2}
+  \src{goodfellow2016}{section}{10.10}
+  \src{goodfellow2016}{section}{10.8}
+  \src{mozer1992}{section}{1}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -353,6 +391,10 @@
 \end{frame}
 
 \begin{frame}{The three paths, drawn}
+  \src{goodfellow2016}{section}{10.9.1}
+  \src{goodfellow2016}{section}{10.9.2}
+  \src{goodfellow2016}{section}{10.10}
+  \src{mozer1992}{section}{1}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.98\linewidth]{gradient_paths}
@@ -372,6 +414,8 @@
   \hfill Goodfellow et al.\ (2016), \S10.8, \S10.9.2, \S10.10; Lin et al.\ (1996); Mozer (1992).\par}
 \end{frame}
 \begin{frame}{The leaky unit is a running average}
+  \src{goodfellow2016}{section}{10.9.2}
+  \src{mozer1992}{section}{1}
   \vspace{-0.45em}
   \begin{propx}[Time constant of a leaky unit]\label{th:leaky}
     \small
@@ -400,6 +444,8 @@
 % =====================================================================
 
 \begin{frame}{What the LSTM has to do}
+  \src{jurafsky_slp3}{section}{14.5}
+  \src{hochreiter1997}{section}{4.1}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -422,6 +468,8 @@
 \end{frame}
 
 \begin{frame}{The LSTM cell, drawn}
+  \src{jurafsky_slp3}{figure}{14.13}
+  \src{jurafsky_slp3}{section}{14.5}
   \begin{center}
     \includegraphics[width=0.90\linewidth]{J14_13}
   \end{center}
@@ -436,6 +484,10 @@
   \hfill Jurafsky \& Martin (2026), Fig.~14.13.\par}
 \end{frame}
 \begin{frame}{The LSTM cell, in equations}
+  \src{jurafsky_slp3}{equation}{14.20-14.27}
+  \src{jurafsky_slp3}{section}{14.5}
+  \src{goodfellow2016}{equation}{10.40-10.44}
+  \src{jozefowicz2015}{section}{2.2}
   \vspace{-0.3em}
   \begin{defx}[LSTM]\label{th:lstm}
     \small
@@ -466,6 +518,8 @@
 \end{frame}
 
 \begin{frame}{The LSTM cell, as a block diagram}
+  \src{goodfellow2016}{figure}{10.16}
+  \src{goodfellow2016}{section}{10.10.1}
   \begin{center}
     \includegraphics[height=0.60\textheight]{G10_16}
   \end{center}
@@ -479,6 +533,8 @@
   \hfill Goodfellow et al.\ (2016), Fig.~10.16, \S10.10.1.\par}
 \end{frame}
 \begin{frame}{Why the cell remembers}
+  \src{hochreiter1997}{section}{3.2.2}
+  \src{goodfellow2016}{section}{10.10.1}
   \vspace{-0.45em}
   \begin{propx}[The cell's gradient is a product of forget gates]\label{th:carousel}
     \small
@@ -509,6 +565,8 @@
 
 
 \begin{frame}{Gated units are drop-in modules}
+  \src{jurafsky_slp3}{figure}{14.14}
+  \src{jurafsky_slp3}{section}{14.5.1}
   \begin{center}
     \includegraphics[height=0.44\textheight]{J14_14}
   \end{center}
@@ -527,6 +585,11 @@
 % =====================================================================
 
 \begin{frame}{The gated recurrent unit}
+  \src{goodfellow2016}{equation}{10.45-10.47}
+  \src{goodfellow2016}{section}{10.10.2}
+  \src{cho2014}{equation}{5-8}
+  \src{cho2014}{section}{2.3}
+  \src{chung2014}{section}{3.2}
   \vspace{-0.45em}
   \begin{defx}[GRU]\label{th:gru}
     \small
@@ -554,6 +617,9 @@
 \end{frame}
 
 \begin{frame}{The GRU's state stays between old and new}
+  \src{goodfellow2016}{section}{10.10.2}
+  \src{greff2017}{section}{V.A}
+  \src{jozefowicz2015}{section}{4}
   \vspace{-0.3em}
   \begin{propx}[Convex update]\label{th:convex}
     \small
@@ -584,6 +650,11 @@
 % =====================================================================
 
 \begin{frame}{Clipping the gradient}
+  \src{goodfellow2016}{equation}{10.48-10.49}
+  \src{goodfellow2016}{section}{10.11.1}
+  \src{pascanu2013}{section}{3.2}
+  \src{pascanu2013}{section}{2.3}
+  \src{mikolov2012}{section}{3.3.2}
   \vspace{-0.45em}
   \begin{propx}[Norm clipping keeps the direction]\label{th:clip}
     \small
@@ -610,6 +681,8 @@
 \end{frame}
 
 \begin{frame}{Clipping at a cliff, drawn}
+  \src{goodfellow2016}{figure}{10.17}
+  \src{goodfellow2016}{section}{10.11.1}
   \begin{center}
     \includegraphics[width=0.82\linewidth]{G10_17}
   \end{center}
@@ -624,6 +697,9 @@
   \hfill Goodfellow et al.\ (2016), Fig.~10.17, after Pascanu et al.\ (2013).\par}
 \end{frame}
 \begin{frame}{Encouraging the gradient to flow}
+  \src{goodfellow2016}{equation}{10.50-10.52}
+  \src{goodfellow2016}{section}{10.11.2}
+  \src{pascanu2013}{section}{3.3}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -647,6 +723,8 @@
 \end{frame}
 
 \begin{frame}{Where the gate leads: explicit memory, drawn}
+  \src{goodfellow2016}{figure}{10.18}
+  \src{goodfellow2016}{section}{10.12}
   \begin{center}
     \includegraphics[height=0.62\textheight]{G10_18}
   \end{center}
@@ -658,6 +736,9 @@
 \end{frame}
 
 \begin{frame}{Where the gate leads: explicit memory, explained}
+  \src{goodfellow2016}{section}{10.12}
+  \src{graves2014}{section}{3.1}
+  \src{graves2014}{section}{3.2}
   \vspace{-0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -687,6 +768,7 @@
 % =====================================================================
 
 \begin{frame}{The cell, opened}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.36}
@@ -707,6 +789,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.24em
@@ -738,6 +821,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -783,6 +867,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

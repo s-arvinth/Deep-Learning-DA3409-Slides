@@ -79,11 +79,25 @@
 \footright{Encoder--Decoder}
 \titlelogos{}
 
+\newcommand{\src}[3]{}      % \src{source}{type}{number}: what the slide is based on
+\newcommand{\nosrc}{}       % this slide is not based on any external source
+\newcommand{\srcdef}[2]{}   % \srcdef{source}{full reference}: defines a source key
+\srcdef{bahdanau2015}{Bahdanau, D., Cho, K. \& Bengio, Y., Neural machine translation by jointly learning to align and translate, ICLR 2015, 2015}
+\srcdef{bengio2015}{Bengio, S., Vinyals, O., Jaitly, N. \& Shazeer, N., Scheduled sampling for sequence prediction with recurrent neural networks, NeurIPS 2015, 2015}
+\srcdef{cho2014}{Cho, K., van Merrienboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H. \& Bengio, Y., Learning phrase representations using RNN encoder-decoder for statistical machine translation, EMNLP 2014, 2014}
+\srcdef{jurafsky_slp3}{Jurafsky \& Martin, Speech and Language Processing, 3rd edition draft of August 19, 2026, https://web.stanford.edu/~jurafsky/slp3/}
+\srcdef{luong2015}{Luong, M.-T., Pham, H. \& Manning, C. D., Effective approaches to attention-based neural machine translation, EMNLP 2015, 2015}
+\srcdef{mikolov2010}{Mikolov, T., Karafiat, M., Burget, L., Cernocky, J. \& Khudanpur, S., Recurrent neural network based language model, Interspeech 2010, 1045-1048, 2010}
+\srcdef{ranzato2016}{Ranzato, M., Chopra, S., Auli, M. \& Zaremba, W., Sequence level training with recurrent neural networks, ICLR 2016, 2016}
+\srcdef{sutskever2014}{Sutskever, I., Vinyals, O. \& Le, Q. V., Sequence to sequence learning with neural networks, NeurIPS 2014, 2014}
+\srcdef{williams1989}{Williams, R. J. \& Zipser, D., A learning algorithm for continually running fully recurrent neural networks, Neural Computation 1(2), 270-280, 1989}
+
 \begin{document}
 
 \maketitle
 
 \begin{frame}{Outline}
+  \nosrc
   \tableofcontents
 \end{frame}
 
@@ -92,6 +106,8 @@
 % =====================================================================
 
 \begin{frame}{Where we are coming from}
+  \src{jurafsky_slp3}{section}{14.7}
+  \src{goodfellow2016}{section}{10.4}
   \vspace{-0.3em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -120,6 +136,9 @@
 \end{frame}
 
 \begin{frame}{The problem: one sequence into another}
+  \src{jurafsky_slp3}{section}{14.7}
+  \src{jurafsky_slp3}{section}{13.1.1}
+  \src{goodfellow2016}{section}{10.4}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.25em
@@ -142,6 +161,8 @@
 \end{frame}
 
 \begin{frame}{Why the tools we have fall short}
+  \src{jurafsky_slp3}{section}{14.3}
+  \src{jurafsky_slp3}{section}{14.7}
   \vspace{-0.1em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.3}
@@ -168,6 +189,10 @@
 \end{frame}
 
 \begin{frame}{The idea: read everything, then write}
+  \src{jurafsky_slp3}{section}{14.7}
+  \src{goodfellow2016}{section}{10.4}
+  \src{cho2014}{section}{2.2}
+  \src{sutskever2014}{section}{2}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.28em
@@ -194,6 +219,7 @@
 \end{frame}
 
 \begin{frame}{Notation for today}
+  \nosrc
   \vspace{0.2em}
   {\footnotesize
   \renewcommand{\arraystretch}{1.28}
@@ -233,6 +259,10 @@
 % =====================================================================
 
 \begin{frame}{The recurrent language model, in three lines}
+  \src{jurafsky_slp3}{equation}{14.4-14.7}
+  \src{jurafsky_slp3}{figure}{14.5}
+  \src{jurafsky_slp3}{section}{14.2.1}
+  \src{mikolov2010}{section}{2}
   \vspace{-0.45em}
   \begin{defx}[RNN language model]\label{th:lm}
     \small
@@ -260,6 +290,8 @@
 \end{frame}
 
 \begin{frame}{Generating, one token at a time}
+  \src{jurafsky_slp3}{figure}{14.9}
+  \src{jurafsky_slp3}{section}{14.3.3}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.48\textheight]{generation}
@@ -275,6 +307,10 @@
   \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.9; \S14.3.3; Shannon (1951).\par}
 \end{frame}
 \begin{frame}{The probability of a whole sequence}
+  \src{jurafsky_slp3}{equation}{14.31}
+  \src{jurafsky_slp3}{equation}{14.28}
+  \src{jurafsky_slp3}{equation}{14.8-14.9}
+  \src{goodfellow2016}{equation}{10.31}
   \vspace{-0.45em}
   \begin{thmx}[Chain rule of sequences]\label{th:chain}
     \small
@@ -306,6 +342,9 @@
 % =====================================================================
 
 \begin{frame}{One change turns a language model into a translator}
+  \src{jurafsky_slp3}{equation}{14.31}
+  \src{jurafsky_slp3}{figure}{14.17}
+  \src{jurafsky_slp3}{section}{14.7}
   \vspace{-0.1em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -331,6 +370,11 @@
   \srcline{Jurafsky \& Martin (2026), \S14.7, Eq.~14.31, Fig.~14.17.}
 \end{frame}
 \begin{frame}{The three parts}
+  \src{jurafsky_slp3}{figure}{14.16}
+  \src{jurafsky_slp3}{section}{14.7}
+  \src{goodfellow2016}{section}{10.4}
+  \src{cho2014}{section}{2.2}
+  \src{sutskever2014}{section}{2}
   \vspace{-0.45em}
   \begin{defx}[Encoder--decoder network]\label{th:encdec}
     \small
@@ -366,6 +410,8 @@
 \end{frame}
 
 \begin{frame}{Two ways to hand over a vector: as an extra input}
+  \src{goodfellow2016}{figure}{10.9}
+  \src{goodfellow2016}{section}{10.2.4}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[width=0.74\linewidth]{condition_input}
@@ -382,6 +428,8 @@
 \end{frame}
 
 \begin{frame}{Two ways to hand over a vector: as the first state}
+  \src{goodfellow2016}{figure}{10.12}
+  \src{goodfellow2016}{section}{10.4}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.56\textheight]{condition_encdec}
@@ -398,6 +446,10 @@
   \hfill Layout of Goodfellow et al.\ (2016), Fig.~10.12; \S10.4.\par}
 \end{frame}
 \begin{frame}{The equations}
+  \src{jurafsky_slp3}{equation}{14.32-14.33}
+  \src{jurafsky_slp3}{figure}{14.18}
+  \src{jurafsky_slp3}{section}{14.7}
+  \src{goodfellow2016}{section}{10.2.4}
   \vspace{-0.3em}
   \begin{propx}[The basic RNN encoder--decoder]\label{th:eqs}
     \small
@@ -428,6 +480,8 @@
 \end{frame}
 
 \begin{frame}{The whole model on the example}
+  \src{jurafsky_slp3}{figure}{14.17}
+  \src{jurafsky_slp3}{section}{14.7}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.50\textheight]{seq2seq_full}
@@ -444,6 +498,9 @@
 \end{frame}
 
 \begin{frame}{The encoder--decoder, unrolled}
+  \src{jurafsky_slp3}{figure}{14.18}
+  \src{jurafsky_slp3}{equation}{14.32-14.33}
+  \src{jurafsky_slp3}{section}{14.7}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.52\textheight]{seq2seq_unrolled}
@@ -464,6 +521,11 @@
 % =====================================================================
 
 \begin{frame}{Teacher forcing}
+  \src{jurafsky_slp3}{figure}{14.19}
+  \src{jurafsky_slp3}{section}{14.7.1}
+  \src{goodfellow2016}{equation}{10.15-10.16}
+  \src{goodfellow2016}{section}{10.2.1}
+  \src{williams1989}{section}{2.3}
   \vspace{-0.55em}
   \begin{thmx}[Teacher forcing is maximum likelihood]\label{th:tf}
     \small
@@ -490,6 +552,8 @@
 \end{frame}
 
 \begin{frame}{Teacher forcing, on the example}
+  \src{jurafsky_slp3}{figure}{14.19}
+  \src{jurafsky_slp3}{section}{14.7.1}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.52\textheight]{teacher_forcing_book}
@@ -506,6 +570,9 @@
 \end{frame}
 
 \begin{frame}{Training against inference, on the trained model}
+  \src{jurafsky_slp3}{figure}{14.19}
+  \src{jurafsky_slp3}{figure}{14.17}
+  \src{jurafsky_slp3}{section}{14.7.1}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.76\linewidth]{teacher_forcing}
@@ -521,6 +588,10 @@
   \hfill Jurafsky \& Martin (2026), Figs.~14.17 and 14.19.\par}
 \end{frame}
 \begin{frame}{What teacher forcing leaves out}
+  \src{goodfellow2016}{section}{10.2.1}
+  \src{bengio2015}{section}{2.3}
+  \src{bengio2015}{section}{2.4}
+  \src{ranzato2016}{section}{3.1.1}
   \vspace{-0.3em}
   \begin{propx}[Exposure bias]\label{th:exposure}
     \small
@@ -544,6 +615,9 @@
 \end{frame}
 
 \begin{frame}{Knowing when to stop}
+  \src{goodfellow2016}{equation}{10.34}
+  \src{goodfellow2016}{section}{10.2.3}
+  \src{jurafsky_slp3}{section}{13.2.2}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -567,6 +641,9 @@
 % =====================================================================
 
 \begin{frame}{Everything through one vector}
+  \src{jurafsky_slp3}{figure}{14.20}
+  \src{jurafsky_slp3}{section}{14.8}
+  \src{goodfellow2016}{section}{10.4}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.52\textheight]{bottleneck_book}
@@ -583,6 +660,7 @@
 \end{frame}
 
 \begin{frame}{The bottleneck, measured: the experiment}
+  \src{jurafsky_slp3}{section}{14.8}
   \vspace{-0.3em}
   {\footnotesize
   \begin{itemize}\itemsep0.26em
@@ -608,6 +686,7 @@
 \end{frame}
 
 \begin{frame}{The bottleneck, measured: the result}
+  \src{jurafsky_slp3}{section}{14.8}
   \begin{center}
     \includegraphics[width=0.84\linewidth]{bottleneck}
   \end{center}
@@ -624,6 +703,10 @@
   \hfill Jurafsky \& Martin (2026), \S14.8.\par}
 \end{frame}
 \begin{frame}{Attention, defined}
+  \src{jurafsky_slp3}{equation}{14.34-14.38}
+  \src{jurafsky_slp3}{section}{14.8}
+  \src{bahdanau2015}{section}{3.1}
+  \src{luong2015}{section}{3.1}
   \vspace{-0.45em}
   \begin{defx}[Dot-product attention]\label{th:attention}
     \small
@@ -652,6 +735,9 @@
 \end{frame}
 
 \begin{frame}{Attention, drawn: a context per step}
+  \src{jurafsky_slp3}{figure}{14.21}
+  \src{jurafsky_slp3}{equation}{14.34}
+  \src{jurafsky_slp3}{section}{14.8}
   \vspace{-0.3em}
   \begin{center}
     \includegraphics[width=0.80\linewidth]{attention_top}
@@ -668,6 +754,9 @@
 \end{frame}
 
 \begin{frame}{Attention, drawn: one decoder step in full}
+  \src{jurafsky_slp3}{figure}{14.22}
+  \src{jurafsky_slp3}{equation}{14.35-14.37}
+  \src{jurafsky_slp3}{section}{14.8}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.50\textheight]{attention_full}
@@ -684,6 +773,7 @@
   \hfill Layout of Jurafsky \& Martin (2026), Fig.~14.22; Eqs.~14.34--14.37.\par}
 \end{frame}
 \begin{frame}{Where the context can be}
+  \nosrc
   \vspace{-0.45em}
   \begin{propx}[The context is a convex combination]\label{th:hull}
     \small
@@ -719,6 +809,9 @@
 \end{frame}
 
 \begin{frame}{What attention is, and is not, today}
+  \src{jurafsky_slp3}{section}{14.8}
+  \src{bahdanau2015}{section}{3.1}
+  \src{bahdanau2015}{section}{5.2.1}
   \vspace{0.05em}
   {\footnotesize
   \begin{itemize}\itemsep0.30em
@@ -747,6 +840,9 @@
 % =====================================================================
 
 \begin{frame}{Choosing the output}
+  \src{jurafsky_slp3}{equation}{13.14-13.15}
+  \src{jurafsky_slp3}{section}{13.4}
+  \src{sutskever2014}{section}{3.2}
   \vspace{-0.3em}
   \begin{defx}[Greedy and beam decoding]\label{th:beam}
     \small
@@ -771,6 +867,8 @@
 \end{frame}
 
 \begin{frame}{Greedy against beam, on a toy vocabulary}
+  \src{jurafsky_slp3}{figure}{13.7}
+  \src{jurafsky_slp3}{section}{13.4}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.52\textheight]{beam_toy}
@@ -788,6 +886,8 @@
 \end{frame}
 
 \begin{frame}{Beam search, run on the trained model}
+  \src{jurafsky_slp3}{figure}{13.7}
+  \src{jurafsky_slp3}{section}{13.4}
   \vspace{-0.4em}
   \begin{center}
     \includegraphics[height=0.52\textheight]{beam_search}
@@ -804,6 +904,9 @@
   \hfill Jurafsky \& Martin (2026), \S13.4, Fig.~13.7.\par}
 \end{frame}
 \begin{frame}{What the beam costs, and what it does not buy}
+  \src{jurafsky_slp3}{equation}{13.16}
+  \src{jurafsky_slp3}{section}{13.4}
+  \src{jurafsky_slp3}{section}{13.4.1}
   \vspace{-0.3em}
   \begin{propx}[Cost and optimality of beam search]\label{th:beamcost}
     \small
@@ -835,6 +938,7 @@
 % =====================================================================
 
 \begin{frame}{One model, four settings}
+  \nosrc
   \vspace{0.2em}
   {\scriptsize
   \renewcommand{\arraystretch}{1.36}
@@ -855,6 +959,7 @@
 \end{frame}
 
 \begin{frame}{Takeaways}
+  \nosrc
   \vspace{-0.1em}
   {\scriptsize
   \begin{enumerate}\itemsep0.24em
@@ -885,6 +990,7 @@
 \end{frame}
 
 \begin{frame}[allowframebreaks]{References}
+  \nosrc
   \vspace{0.3em}
   {\scriptsize
   \begin{enumerate}\itemsep0.30em
@@ -926,6 +1032,7 @@
 \end{frame}
 
 \begin{frame}[standout]
+  \nosrc
   Questions?
 \end{frame}
 

@@ -1,4 +1,4 @@
-# How to add source tags (read with tools/SOURCE_REQUIREMENTS.txt)
+# How to add source tags (read with source_tags/SOURCE_REQUIREMENTS.txt)
 
 The brief is `SOURCE_REQUIREMENTS.txt`. This guide settles what it leaves open, so
 every class is tagged the same way. Bash paths below; the repo is

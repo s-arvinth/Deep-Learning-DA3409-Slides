@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Check that every number cited from the five fixed books with \\src exists in the
-book PDF named in tools/SOURCES_GUIDE.md (figure caption, equation tag, section
+book PDF named in source_tags/SOURCES_GUIDE.md (figure caption, equation tag, section
 heading, table, algorithm, chapter).  Prints each tag that is not found.
 
     python3 tools/verify_book_numbers.py            # all decks

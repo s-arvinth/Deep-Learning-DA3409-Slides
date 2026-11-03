@@ -712,6 +712,8 @@
 \end{frame}
 
 \begin{frame}{The recursion has a price: vanishing and exploding}
+  \src{bishop2024}{equation}{7.51}
+  \src{bishop2024}{section}{7.4.2}
   \src{prince2023}{section}{7.5}
   \bridge{The backward pass multiplies by $h'$ and by $\mathbf{W}^\top$
   once per layer. Repeated multiplication is unstable in both
@@ -825,6 +827,7 @@
 \end{frame}
 
 \begin{frame}{Reverse mode}
+  \src{bishop2024}{equation}{8.68-8.69}
   \src{bishop2024}{section}{8.2.2}
   \vspace{0.05em}
   Carry an \alert{adjoint} $\bar v = \partial E/\partial v$ instead, and

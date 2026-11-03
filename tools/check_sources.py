@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Lint the \\src / \\nosrc / \\srcdef tags of one or more decks against
-tools/SOURCE_REQUIREMENTS.txt, and check that the only changes since the base
+source_tags/SOURCE_REQUIREMENTS.txt, and check that the only changes since the base
 commit are added tag lines.
 
     python3 tools/check_sources.py Class05_*/A_*/main.tex Class05_*/B_*/main.tex
